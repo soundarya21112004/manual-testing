@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 28 Nov, 2020 7:00:26 PM by Hibernate Tools 4.3.5.Final -->
+<hibernate-mapping>
+    <class name="com.eagle.mas.model.RegisterManualVerification" table="register_manual_verification" optimistic-lock="version">
+        <id name="sno" type="int">
+            <column name="sno"/>
+            <generator class="assigned"/>
+        </id>
+        <property name="op1userId" type="java.lang.String">
+            <column name="operator1_user_id" length="256"/>
+        </property>
+
+        <property name="op2userId" type="java.lang.String">
+            <column name="operator2_user_id" length="256"/>
+        </property>
+
+        <property name="userId" type="java.lang.String">
+            <column name="user_id" length="256"/>
+        </property>
+
+        <property name="regId" type="java.lang.String">
+            <column name="reg_id" length="39"/>
+        </property>
+        <property name="matchedRefId" type="java.lang.String">
+            <column name="matched_ref_id" length="39"/>
+        </property>
+
+        <property name="statusCode" type="java.lang.String">
+            <column name="status_code" length="40"/>
+        </property>
+
+
+        <property name="proStatus" type="java.lang.String">
+            <column name="process_code" length="50"/>
+        </property>
+
+        <property name="matchingScore" type="java.lang.String">
+            <column name="matched_score" />
+        </property>
+
+        <property name="op1Comment" type="java.lang.String">
+            <column name="operator1_comment" length="256"/>
+        </property>
+        <property name="op1verifyStatus" type="java.lang.String">
+            <column name="operator1_verify_status" length="36"/>
+        </property>
+        <property name="op1UpdBy" type="java.lang.String">
+            <column name="operator1_upd_by" length="256"/>
+        </property>
+        <property name="op1updDate" type="java.util.Date">
+            <column name="operator1_upd_date" length="36"/>
+        </property>
+        <property name="createdBy" type="java.lang.String">
+            <column name="cr_by" length="256"/>
+        </property>
+        <property name="createdDate" type="java.util.Date">
+            <column name="cr_dtimes" length="36"/>
+        </property>
+        <property name="trntypcode" type="java.lang.String">
+            <column name="trntyp_code" length="256"/>
+        </property>
+        <property name="op2Comment" type="java.lang.String">
+            <column name="operator2_comment" length="256"/>
+        </property>
+        <property name="op2UpdatedDate" type="java.util.Date">
+            <column name="operator2_upd_date" length="36"/>
+        </property>
+        <property name="op2UpdBy" type="java.lang.String">
+            <column name="operator2_upd_by" length="256"/>
+        </property>
+
+        <property name="op2verifyStatus" type="java.lang.String">
+            <column name="operator2_verify_status" length="36"/>
+        </property>
+
+
+        <property name="supervisorComment" type="java.lang.String">
+            <column name="supervisor_comment" length="256"/>
+        </property>
+        <property name="supervisorUpdatedDate" type="java.util.Date">
+            <column name="supervisor_upd_date" length="36"/>
+        </property>
+        <property name="supervisorUpdBy" type="java.lang.String">
+            <column name="supervisor_upd_by" length="256"/>
+        </property>
+
+        <property name="supervisorVerifyStatus" type="java.lang.String">
+            <column name="supervisor_verify_status" length="36"/>
+        </property>
+                <property name="reqid" type="java.lang.String">
+                    <column name="req_id" length="40"/>
+                </property>
+                <property name="finindi" type="java.lang.String">
+                    <column name="Fin_indi" length="40"/>
+                </property>
+        <!--        <property name="fileDatas" type="java.lang.String">-->
+        <!--            <column name="fileString" length="256"/>-->
+        <!--        </property>-->
+        <!--        <property name="probeString" type="java.lang.String">-->
+        <!--            <column name="probeString" length="256"/>-->
+        <!--        </property>-->
+    </class>
+</hibernate-mapping>

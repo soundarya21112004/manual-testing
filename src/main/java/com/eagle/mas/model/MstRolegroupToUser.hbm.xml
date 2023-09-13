@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 28 Nov, 2020 7:00:26 PM by Hibernate Tools 4.3.5.Final -->
+<hibernate-mapping>
+    <class name="com.eagle.mas.model.MstRolegroupToUser" table="mst_rolegroup_to_user" optimistic-lock="version">
+        <id name="sno" type="int">
+            <column name="sno" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="userdetails" class="com.eagle.mas.model.Userdetails" fetch="select">
+            <column name="user_id" length="12" />
+        </many-to-one>
+        <property name="roleGroupId" type="java.lang.Integer">
+            <column name="role_group_id" />
+        </property>
+        <property name="activestatus" type="java.lang.Character">
+            <column name="activestatus" length="1" />
+        </property>
+    </class>
+</hibernate-mapping>

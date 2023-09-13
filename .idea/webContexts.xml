@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebContextManager">
+    <option name="state">
+      <map>
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/jsp/mas/levelone/levelOneDetailTest.jsp" value="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/jsp/mas/levelone" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/jsp/mas/levelone/levelOneDetailTestCopy.jsp" value="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/jsp/mas/levelone" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/jsp/mas/levelthree/levelThreeDetails.jsp" value="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/jsp/mas/levelthree" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/jsp/mas/levelthree/levelThreeSearch.jsp" value="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/jsp/mas/levelthree" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/pages_base/base/admin_menu.jsp" value="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/pages_base/base" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/pages_base/user/login.jsp" value="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/pages_base/user" />
+      </map>
+    </option>
+  </component>
+</project>

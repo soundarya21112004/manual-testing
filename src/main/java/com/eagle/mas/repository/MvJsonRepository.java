@@ -1,0 +1,19 @@
+package com.eagle.mas.repository;
+
+import com.eagle.mas.model.MvJson;
+import com.eagle.mas.model.RegisterManualVerification;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.math.BigInteger;
+@Repository
+public interface MvJsonRepository  extends CrudRepository<MvJson, BigInteger> {
+    @Query(value = "SELECT t1 from MvJson t1 where t1.regId=:probe and t1.matchedRefId=:candidate and t1.reqId=:requestId")
+    public MvJson getJson(@Param("probe") String probe,@Param("candidate") String candidate,@Param("requestId")String requestId);
+
+    @Query(value = "SELECT t1 from MvJson t1 where t1.regId=:probe and t1.matchedRefId=:probe and t1.reqId=:requestId")
+    public MvJson getProbJson(@Param("probe") String probe,@Param("requestId")String requestId);
+}
+

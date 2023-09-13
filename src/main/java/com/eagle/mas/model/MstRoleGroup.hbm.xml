@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 28 Nov, 2020 7:00:26 PM by Hibernate Tools 4.3.5.Final -->
+<hibernate-mapping>
+    <class name="com.eagle.mas.model.MstRoleGroup" table="mst_role_group" optimistic-lock="version">
+        <id name="groupId" type="int">
+            <column name="group_id" />
+            <generator class="assigned" />
+        </id>
+        <property name="groupName" type="string">
+            <column name="group_name" length="300" />
+        </property>
+        <property name="description" type="string">
+            <column name="description" length="300" />
+        </property>
+        <property name="activestatus" type="java.lang.Character">
+            <column name="activestatus" length="1" />
+        </property>
+        <property name="enteredBy" type="string">
+            <column name="entered_by" length="12" />
+        </property>
+        <property name="enteredDate" type="timestamp">
+            <column name="entered_date" length="29" />
+        </property>
+        <property name="modifiedBy" type="string">
+            <column name="modified_by" length="12" />
+        </property>
+        <property name="modifiedDate" type="timestamp">
+            <column name="modified_date" length="29" />
+        </property>
+        <property name="sno" type="int">
+            <column name="sno" not-null="true" />
+        </property>
+        <set name="mstRoleToGroups" table="mst_role_to_group" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="group_id" />
+            </key>
+            <one-to-many class="com.eagle.mas.model.MstRoleToGroup" />
+        </set>
+    </class>
+</hibernate-mapping>

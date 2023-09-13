@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 28 Nov, 2020 7:00:26 PM by Hibernate Tools 4.3.5.Final -->
+<hibernate-mapping>
+    <class name="com.eagle.mas.model.RegManualVerification" table="reg_manual_verification" optimistic-lock="version">
+        <id name="sno" type="int">
+            <column name="sno"/>
+            <generator class="assigned"/>
+        </id>
+
+        <property name="regId" type="java.lang.String">
+            <column name="reg_id" length="39"/>
+        </property>
+        <property name="matchedRefId" type="java.lang.String">
+            <column name="matched_ref_id" length="39"/>
+        </property>
+        <property name="matchedRefType" type="java.lang.String">
+            <column name="matched_ref_type" length="40"/>
+        </property>
+        <property name="statusCode" type="java.lang.String">
+            <column name="status_code" length="40"/>
+        </property>
+        <property name="statusComment" type="java.lang.String">
+            <column name="status_comment" length="256"/>
+        </property>
+
+        <property name="proStatus" type="java.lang.String">
+            <column name="process_status" length="50"/>
+        </property>
+
+        <property name="matchingScore" type="java.lang.String">
+            <column name="matched_score" />
+        </property>
+        <property name="reasonCode" type="java.lang.String">
+            <column name="reason_code" length="100"/>
+        </property>
+        <property name="verifyStatus" type="java.lang.String">
+            <column name="verify_status" length="36"/>
+        </property>
+        <property name="updatedBy" type="java.lang.String">
+            <column name="upd_by" length="256"/>
+        </property>
+        <property name="updatedDate" type="java.util.Date">
+            <column name="upd_dtimes" length="36"/>
+        </property>
+        <property name="createdBy" type="java.lang.String">
+            <column name="cr_by" length="256"/>
+        </property>
+        <property name="createdDate" type="java.util.Date">
+            <column name="cr_dtimes" length="36"/>
+        </property>
+        <property name="trntypcode" type="java.lang.String">
+            <column name="trntyp_code" length="256"/>
+        </property>
+        <property name="statusCommTwo" type="java.lang.String">
+            <column name="status_comment_two" length="256"/>
+        </property>
+        <property name="updatedDateTwo" type="java.util.Date">
+            <column name="upd_dt_two" length="36"/>
+        </property>
+        <property name="updatedByTwo" type="java.lang.String">
+            <column name="upd_by_two" length="256"/>
+        </property>
+<!--        <property name="oper1Comm" type="java.lang.String">-->
+<!--            <column name="oper1_comm" length="256"/>-->
+<!--        </property>-->
+        <!--        <property name="oper2Comm" type="java.lang.String">-->
+        <!--            <column name="oper1_comm" length="256"/>-->
+        <!--        </property>-->
+<!--        <property name="fileDatas" type="java.lang.String">-->
+<!--            <column name="fileString" length="256"/>-->
+<!--        </property>-->
+<!--        <property name="probeString" type="java.lang.String">-->
+<!--            <column name="probeString" length="256"/>-->
+<!--        </property>-->
+    </class>
+</hibernate-mapping>

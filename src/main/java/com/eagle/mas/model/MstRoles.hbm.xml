@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 28 Nov, 2020 7:00:26 PM by Hibernate Tools 4.3.5.Final -->
+<hibernate-mapping>
+    <class name="com.eagle.mas.model.MstRoles" table="mst_roles" optimistic-lock="version">
+        <id name="roleid" type="string">
+            <column name="roleid" length="10" />
+            <generator class="assigned" />
+        </id>
+        <property name="sno" type="int">
+            <column name="sno" not-null="true" />
+        </property>
+        <property name="roleDetails" type="string">
+            <column name="role_details" length="100" />
+        </property>
+        <property name="enteredBy" type="string">
+            <column name="entered_by" length="100" />
+        </property>
+        <property name="enteredDate" type="timestamp">
+            <column name="entered_date" length="29" />
+        </property>
+        <property name="groupName" type="string">
+            <column name="group_name" length="50" />
+        </property>
+        <property name="roleName" type="string">
+            <column name="role_name" length="100" />
+        </property>
+        <property name="displayOrder" type="java.lang.Integer">
+            <column name="display_order" />
+        </property>
+        <property name="url" type="string">
+            <column name="url" length="50" />
+        </property>
+        <property name="active" type="java.lang.Character">
+            <column name="active" length="1" />
+        </property>
+        <property name="icon" type="string">
+            <column name="icon" length="50" />
+        </property>
+        <property name="subRoleName" type="string">
+            <column name="sub_role_name" length="100" />
+        </property>
+        <set name="mstRoleToGroups" table="mst_role_to_group" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="role_id" length="10" />
+            </key>
+            <one-to-many class="com.eagle.mas.model.MstRoleToGroup" />
+        </set>
+    </class>
+</hibernate-mapping>

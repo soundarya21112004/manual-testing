@@ -1,0 +1,177 @@
+{
+  "id": "mosip.id.read",
+  "version": "v1",
+  "responsetime": "2021-02-18T13:05:35.614Z",
+  "metadata": null,
+  "response": {
+    "status": "ACTIVATED",
+    "identity": {
+      "presentProvince": [
+        {
+          "language": "eng",
+          "value": "Davao Del Sur"
+        }
+      ],
+      "presentAddressLine1": [
+        {
+          "language": "eng",
+          "value": "Taal Street, Central Park Subdivision, Bangkal"
+        }
+      ],
+      "presentZipcode": [
+        {
+          "language": "eng",
+          "value": "8000"
+        }
+      ],
+      "lastName": [
+        {
+          "language": "eng",
+          "value": "Duterte"
+        }
+      ],
+       "firstName": [
+        {
+          "language": "eng",
+          "value": "phosiso"
+        }
+      ],
+      "pobCountry": [
+        {
+          "language": "eng",
+          "value": "Philippines"
+        }
+      ],
+      "proofOfAddress": {
+        "format": "PDF",
+        "type": "DOC002",
+        "value": "proofOfAddress"
+      },
+      "pobProvince": [
+        {
+          "language": "eng",
+          "value": "Davao Del Sur"
+        }
+      ],
+      "gender": [
+        {
+          "language": "eng",
+          "value": "Male"
+        }
+      ],
+      "modeOfClaim": [
+        {
+          "language": "eng",
+          "value": "Delivery to permanent address"
+        }
+      ],
+      "permanentBarangay": [
+        {
+          "language": "eng",
+          "value": "Talomo (Pob.)"
+        }
+      ],
+      "bloodType": [
+        {
+          "language": "eng",
+          "value": "B+"
+        }
+      ],
+      "individualBiometrics": {
+        "format": "cbeff",
+        "version": 1,
+        "value": "individualBiometrics_bio_CBEFF"
+      },
+      "presentBarangay": [
+        {
+          "language": "eng",
+          "value": "Talomo (Pob.)"
+        }
+      ],
+      "residenceStatus": [
+        {
+          "language": "eng",
+          "value": "Filipino"
+        }
+      ],
+      "permanentZipcode": [
+        {
+          "language": "eng",
+          "value": "8000"
+        }
+      ],
+      "pobCity": [
+        {
+          "language": "eng",
+          "value": "City of Davao"
+        }
+      ],
+      "addressCopy": "Y",
+      "dateOfBirth": "1945/03/28",
+      "presentCity": [
+        {
+          "language": "eng",
+          "value": "City of Davao"
+        }
+      ],
+      "firstName": [
+        {
+          "language": "eng",
+          "value": "Rodrigo"
+        }
+      ],
+      "IDSchemaVersion": 0.1,
+      "permanentAddressLine1": [
+        {
+          "language": "eng",
+          "value": "Taal Street, Central Park Subdivision, Bangkal"
+        }
+      ],
+      "registrationType": [
+        {
+          "language": "eng",
+          "value": "Document-based"
+        }
+      ],
+      "permanentCountry": [
+        {
+          "language": "eng",
+          "value": "Philippines"
+        }
+      ],
+      "presentCountry": [
+        {
+          "language": "eng",
+          "value": "Philippines"
+        }
+      ],
+      "permanentProvince": [
+        {
+          "language": "eng",
+          "value": "Davao Del Sur"
+        }
+      ],
+      "middleName": [
+        {
+          "language": "eng",
+          "value": "Roa"
+        }
+      ],
+      "permanentCity": [
+        {
+          "language": "eng",
+          "value": "City of Davao"
+        }
+      ],
+      "UIN": "429579647205",
+      "maritalStatus": [
+        {
+          "language": "eng",
+          "value": "Single"
+        }
+      ]
+    },
+    "documents": null
+  },
+  "errors": []
+}

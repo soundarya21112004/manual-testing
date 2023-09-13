@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 28 Nov, 2020 7:00:26 PM by Hibernate Tools 4.3.5.Final -->
+<hibernate-mapping>
+    <class name="com.eagle.mas.model.Userdetails" table="userdetails" optimistic-lock="version">
+        <id name="userid" type="string">
+            <column name="userid" length="12" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="licenseissueoffice" class="com.eagle.mas.model.Licenseissueoffice" fetch="select">
+            <column name="licenseoffice_id" />
+        </many-to-one>
+        <property name="sno" type="int">
+            <column name="sno" not-null="true" />
+        </property>
+        <property name="UserApproval" type="string">
+            <column name="user_approval" />
+        </property>
+        <property name="password" type="string">
+            <column name="password" />
+        </property>
+        <property name="firstnameEn" type="string">
+            <column name="firstname_en" length="100" />
+        </property>
+        <property name="middleName" type="string">
+            <column name="middle_name" length="100" />
+        </property>
+        <property name="lastnameEn" type="string">
+            <column name="lastname_en" length="100" />
+        </property>
+        <property name="contactnumber" type="string">
+            <column name="contactnumber" length="20" />
+        </property>
+        <property name="activestatus" type="char">
+            <column name="activestatus" length="1" not-null="true" />
+        </property>
+        <property name="belongsTo" type="string">
+            <column name="belongs_to" length="50" />
+        </property>
+        <property name="enteredBy" type="string">
+            <column name="entered_by" length="12" />
+        </property>
+        <property name="enteredDate" type="timestamp">
+            <column name="entered_date" length="29" />
+        </property>
+        <property name="locationId" type="string">
+            <column name="location_id" length="2" />
+        </property>
+        <property name="manufacturerId" type="string">
+            <column name="manufacturer_id" length="12" />
+        </property>
+        <property name="mfgtypeId" type="java.lang.Integer">
+            <column name="mfgtype_id" />
+        </property>
+        <property name="email" type="string">
+            <column name="email" length="50" />
+        </property>
+        <property name="nationalIdNo" type="string">
+            <column name="national_id_no" length="100" />
+        </property>
+        <property name="ipAddress" type="string">
+            <column name="ip_address" length="50" />
+        </property>
+        <property name="macId" type="string">
+            <column name="mac_id" length="50" />
+        </property>
+        <property name="tinNo" type="string">
+            <column name="tin_no" length="200" />
+        </property>
+
+
+        <property name="loginStatus" type="string">
+            <column name="login_status" length="50" />
+        </property>
+        <property name="designation" type="string">
+            <column name="designation" length="100" />
+        </property>
+
+        <property name="organisation" type="string">
+            <column name="organisation" length="300" />
+        </property>
+
+        <property name="verifycodePwd" type="string">
+            <column name="verifycode_pwd" length="100" />
+        </property>
+
+        <property name="isloggedin" type="java.lang.Character">
+            <column name="isloggedin" length="1" />
+        </property>
+        <property name="loginTime" type="timestamp">
+            <column name="login_time" length="29" />
+        </property>
+        <property name="logoutTime" type="timestamp">
+            <column name="logout_time" length="29" />
+        </property>
+        <property name="loginFrom" type="string">
+            <column name="login_from" length="100" />
+        </property>
+        <property name="nationalIdDocument" type="binary">
+            <column name="national_id_document" />
+        </property>
+        <property name="leftthumb" type="binary">
+            <column name="leftthumb" />
+        </property>
+        <property name="leftthumb_raw" type="binary">
+            <column name="leftthumb_raw" />
+        </property>
+         <property name="leftthumb_minituae" type="binary">
+            <column name="leftthumb_minituae" />
+        </property>
+        <set name="exams" table="exam" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="enteredby" length="12" />
+            </key>
+            <one-to-many class="com.eagle.mas.model.Exam" />
+        </set>
+        <set name="examstatusesForEnteredby" table="examstatus" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="enteredby" length="12" />
+            </key>
+            <one-to-many class="com.eagle.mas.model.Examstatus" />
+        </set>
+        <set name="examstatusesForResultUpdateBy" table="examstatus" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="result_update_by" length="12" />
+            </key>
+            <one-to-many class="com.eagle.mas.model.Examstatus" />
+        </set>
+        <set name="mstRolegroupToUsers" table="mst_rolegroup_to_user" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="user_id" length="12" />
+            </key>
+            <one-to-many class="com.eagle.mas.model.MstRolegroupToUser" />
+        </set>
+    </class>
+</hibernate-mapping>

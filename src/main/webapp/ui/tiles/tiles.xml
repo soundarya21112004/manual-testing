@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<tiles-definitions>
+
+<definition name="baseLayout"
+		template="/WEB-INF/pages_base/base/baseLayout.jsp">
+
+		<put-attribute name="sidemenu"
+			value="/WEB-INF/pages_base/base/admin_menu.jsp" />
+		<put-attribute name="body" value="" />
+		<put-attribute name="footer"
+			value="/WEB-INF/pages_base/base/footer.jsp" />
+
+	</definition>
+
+	<definition name="onlineLayout"
+		template="/WEB-INF/pages_base/base/onlineLayout.jsp">
+		<put-attribute name="header"
+			value="/WEB-INF/pages_base/base/onlineHeader.jsp" />
+		<put-attribute name="body" value="" />
+		<put-attribute name="footer"
+			value="/WEB-INF/pages_base/base/footer.jsp" />
+	</definition>
+
+	<definition name="loginLayout"
+		template="/WEB-INF/pages_base/base/loginLayout.jsp">
+
+		<put-attribute name="body"
+			value="/WEB-INF/pages_base/user/login.jsp" />
+
+	</definition>
+
+	<definition name="supervisorReport" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/reports/supervisorReport.jsp" />
+	</definition>
+
+	 <definition name="login" extends="loginLayout">
+
+	</definition> 
+	
+	<definition name="dashboard" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/dashboard.jsp" />
+	</definition>
+
+	<definition name="errorPage" extends="loginLayout">
+		<put-attribute name="body"  	value="/WEB-INF/pages_base/errorpage/errorPage.jsp"/>
+	</definition>
+
+	<!-- created by paramu     template="/WEB-INF/pages_base/base/loginLayout.jsp"-->
+ 	 <definition name="firstLogin_changePwd" extends="loginLayout">
+        <put-attribute name="body" value="/WEB-INF/pages_base/user/firstLoginChangePwd.jsp" />
+    </definition>
+	<definition name="forgotPassword" extends="loginLayout">
+		<put-attribute name="body" value="/WEB-INF/pages_base/user/forgotPassword.jsp" />
+	</definition>
+
+    
+    <definition name="changePassword" extends="baseLayout">
+        <put-attribute name="body" value="/WEB-INF/jsp/mas/userCreation/changePassword.jsp" />
+    </definition>
+	
+	
+	<definition name="loadRoleGroup" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/userCreation/searchRoleToGroup.jsp" />
+	</definition>
+	<definition name="loadRoleGroupForEdit" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/mas/userCreation/searchRoleToGroupForEdit.jsp" />
+	</definition>
+
+	<definition name="userCreation" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/mas/userCreation/userCreation.jsp" />
+	</definition>
+
+
+	
+	<definition name="userGroupCreation" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/mas/userCreation/userGroupCreation.jsp" />
+	</definition>
+	
+	<definition name="editUserGroup" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/mas/userCreation/editUserGroup.jsp" />
+	</definition>
+	
+	<definition name="editUserGroupForRoles" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/mas/userCreation/editUserGroupForRoles.jsp" />
+	</definition>
+
+	<definition name="editUserView" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/mas/userCreation/editUserView.jsp" />
+	</definition>
+
+	<definition name="editUserViewList" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/userCreation/editUserViewList.jsp" />
+	</definition>
+	
+	<definition name="editUserManagement" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/mas/userCreation/editUserManagement.jsp" />
+	</definition>
+	
+	<!-- created by paramu -->
+	<definition name="dashboard" extends="baseLayout">
+		<put-attribute name="body"		
+			value="/WEB-INF/jsp/dashboard.jsp" />
+	</definition>
+
+	<definition name="userApproval" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/userDetailsApproval/userApproval.jsp" />
+	</definition>
+	
+	<definition name="levelOneSearch" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/mas/levelone/levelOneSearch.jsp" />
+	</definition>	
+		<!-- <definition name="levelonedetails" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/mas/levelone/levelOneDetail.jsp" />
+	</definition> -->
+	<definition name="levelTwoSearch" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/leveltwo/levelTwoSearch.jsp" />
+	</definition>
+	<definition name="mvsLevelTwoDetail" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/mas/leveltwo/levelTwoDetails.jsp" />
+	</definition>
+
+	<definition name="levelThreeSearch" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/mas/levelthree/levelthreeSearch.jsp" />
+	</definition>
+
+	<definition name="mvsLevelThreeDetail" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/levelthree/levelThreeDetails.jsp" />
+	</definition>
+	
+	<definition name="levelfourdetails" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/mas/levelfour/levelFourDetails.jsp" />
+	</definition>
+
+<definition name="levelfivedetails" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/mas/levelfive/levelFiveDetails.jsp" />
+	</definition>
+		
+	<definition name="levelOneDetailTest" extends="baseLayout">
+		<put-attribute name="body"
+			value="/WEB-INF/jsp/mas/levelone/levelOneDetailTest.jsp" />
+	</definition>
+
+	<definition name="levelOneDetailTestCopy" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/levelone/levelOneDetailTestCopy.jsp" />
+	</definition>
+	<definition name="mvsLevelOneDetail" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/levelone/mvsLevelOneDetail.jsp" />
+	</definition>
+
+	<definition name="reportsCommon" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/reports/reportsCommon.jsp" />
+	</definition>
+
+	<definition name="reportsOperator" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/reports/reportsOperator.jsp" />
+	</definition>
+
+	<definition name="allReports" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/reports/allReports.jsp" />
+	</definition>
+
+	<definition name="verifiedReports" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/reports/verifiedReports.jsp" />
+	</definition>
+
+	<definition name="deadlockReports" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/reports/deadlockReports.jsp" />
+	</definition>
+
+	<definition name="supervisorReports" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/reports/supervisorReports.jsp" />
+	</definition>
+
+	<definition name="hitCasesReports" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/reports/hitCasesReports.jsp" />
+	</definition>
+
+	<definition name="fraudReports" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/reports/fraudReports.jsp" />
+	</definition>
+
+	<definition name="noHitReports" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/reports/noHitReports.jsp" />
+	</definition>
+
+	<definition name="hitReports" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/reports/hitReports.jsp" />
+	</definition>
+
+	<definition name="demographicReports" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/reports/demographicReports.jsp" />
+	</definition>
+
+	<definition name="biographicReports" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/reports/biographicReports.jsp" />
+	</definition>
+	
+	
+	
+
+	<!-- Change Vehicle -->
+
+</tiles-definitions>

@@ -1,0 +1,162 @@
+{
+  "presentProvince": [
+    {
+      "language": "eng",
+      "value": "NCR, SECOND DISTRICT"
+    }
+  ],
+  "presentAddressLine1": [
+    {
+      "language": "eng",
+      "value": "87 acacia street"
+    }
+  ],
+  "presentZipcode": [
+    {
+      "language": "eng",
+      "value": "1805"
+    }
+  ],
+  "lastName": [
+    {
+      "language": "eng",
+      "value": "milk"
+    }
+  ],
+  "pobCountry": [
+    {
+      "language": "eng",
+      "value": "Philippines"
+    }
+  ],
+  "proofOfAddress": {
+    "format": "PDF",
+    "type": "DOC018",
+    "value": "proofOfAddress"
+  },
+  "pobProvince": [
+    {
+      "language": "eng",
+      "value": "NCR, THIRD DISTRICT"
+    }
+  ],
+  "gender": [
+    {
+      "language": "eng",
+      "value": "Male"
+    }
+  ],
+  "modeOfClaim": [
+    {
+      "language": "eng",
+      "value": "Delivery to permanent address"
+    }
+  ],
+  "permanentBarangay": [
+    {
+      "language": "eng",
+      "value": "Malanday"
+    }
+  ],
+  "mobileno": "639185847991",
+  "bloodType": [
+    {
+      "language": "eng",
+      "value": "O"
+    }
+  ],
+  "individualBiometrics": {
+    "format": "cbeff",
+    "version": 1,
+    "value": "individualBiometrics_bio_CBEFF"
+  },
+  "presentBarangay": [
+    {
+      "language": "eng",
+      "value": "Malanday"
+    }
+  ],
+  "residenceStatus": [
+    {
+      "language": "eng",
+      "value": "Filipino"
+    }
+  ],
+  "email": "cowsmilk@gmail.com",
+  "permanentZipcode": [
+    {
+      "language": "eng",
+      "value": "1805"
+    }
+  ],
+  "pobCity": [
+    {
+      "language": "eng",
+      "value": "City of Caloocan"
+    }
+  ],
+  "addressCopy": "Y",
+  "dateOfBirth": "1983/09/10",
+  "presentCity": [
+    {
+      "language": "eng",
+      "value": "City of Marikina"
+    }
+  ],
+  "firstName": [
+    {
+      "language": "eng",
+      "value": "cows"
+    }
+  ],
+  "IDSchemaVersion": 0.1,
+  "permanentAddressLine1": [
+    {
+      "language": "eng",
+      "value": "87 acacia street"
+    }
+  ],
+  "registrationType": [
+    {
+      "language": "eng",
+      "value": "Document-based"
+    }
+  ],
+  "permanentCountry": [
+    {
+      "language": "eng",
+      "value": "Philippines"
+    }
+  ],
+  "presentCountry": [
+    {
+      "language": "eng",
+      "value": "Philippines"
+    }
+  ],
+  "permanentProvince": [
+    {
+      "language": "eng",
+      "value": "NCR, SECOND DISTRICT"
+    }
+  ],
+  "middleName": [
+    {
+      "language": "eng",
+      "value": "c"
+    }
+  ],
+  "permanentCity": [
+    {
+      "language": "eng",
+      "value": "City of Marikina"
+    }
+  ],
+  "UIN": "267150478354",
+  "maritalStatus": [
+    {
+      "language": "eng",
+      "value": "Undisclosed"
+    }
+  ]
+}

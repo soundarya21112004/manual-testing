@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 28 Nov, 2020 7:00:26 PM by Hibernate Tools 4.3.5.Final -->
+<hibernate-mapping>
+    <class name="com.eagle.mas.model.MvJson" table="mv_json" optimistic-lock="version">
+        <id name="id" type="int">
+            <column name="id"/>
+            <generator class="assigned"/>
+        </id>
+        <property name="reqId" type="java.lang.String">
+            <column name="req_id" length="40"/>
+        </property>
+        <property name="regId" type="java.lang.String">
+            <column name="o_rid" length="40"/>
+        </property>
+        <property name="matchedRefId" type="java.lang.String">
+            <column name="m_rid" length="40"/>
+        </property>
+
+        <property name="mvReqJson" type="java.lang.String">
+            <column name="mv_req_json" length="256"/>
+        </property>
+        <property name="url" type="java.lang.String">
+            <column name="url" length="256"/>
+        </property>
+
+        <property name="reqTime" type="java.lang.String">
+            <column name="req_time" length="50"/>
+        </property>
+
+        <property name="currentTime" type="java.util.Date">
+            <column name="curr_time" />
+        </property>
+
+
+    </class>
+</hibernate-mapping>

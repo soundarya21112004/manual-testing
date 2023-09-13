@@ -1,0 +1,150 @@
+{
+  "presentProvince": [
+    {
+      "language": "eng",
+      "value": "Abra"
+    }
+  ],
+  "presentAddressLine1": [
+    {
+      "language": "eng",
+      "value": "test"
+    }
+  ],
+  "presentZipcode": [
+    {
+      "language": "eng",
+      "value": "2800"
+    }
+  ],
+  "pobCountry": [
+    {
+      "language": "eng",
+      "value": "Philippines"
+    }
+  ],
+  "proofOfAddress": {
+    "format": "PDF",
+    "type": "DOC018",
+    "value": "proofOfAddress"
+  },
+  "pobProvince": [
+    {
+      "language": "eng",
+      "value": "Abra"
+    }
+  ],
+  "gender": [
+    {
+      "language": "eng",
+      "value": "Male"
+    }
+  ],
+  "modeOfClaim": [
+    {
+      "language": "eng",
+      "value": "Delivery to permanent address"
+    }
+  ],
+  "permanentBarangay": [
+    {
+      "language": "eng",
+      "value": "Angad"
+    }
+  ],
+  "mobileno": "639672574490",
+  "bloodType": [
+    {
+      "language": "eng",
+      "value": "A"
+    }
+  ],
+  "individualBiometrics": {
+    "format": "cbeff",
+    "version": 1,
+    "value": "individualBiometrics_bio_CBEFF"
+  },
+  "presentBarangay": [
+    {
+      "language": "eng",
+      "value": "Angad"
+    }
+  ],
+  "residenceStatus": [
+    {
+      "language": "eng",
+      "value": "Filipino"
+    }
+  ],
+  "email": "philsysdevmsp@gmail.com",
+  "permanentZipcode": [
+    {
+      "language": "eng",
+      "value": "2800"
+    }
+  ],
+  "pobCity": [
+    {
+      "language": "eng",
+      "value": "Bangued"
+    }
+  ],
+  "addressCopy": "Y",
+  "dateOfBirth": "1995/09/20",
+  "presentCity": [
+    {
+      "language": "eng",
+      "value": "Bangued"
+    }
+  ],
+  "firstName": [
+    {
+      "language": "eng",
+      "value": "test"
+    }
+  ],
+  "IDSchemaVersion": 0.1,
+  "permanentAddressLine1": [
+    {
+      "language": "eng",
+      "value": "test"
+    }
+  ],
+  "registrationType": [
+    {
+      "language": "eng",
+      "value": "Document-based"
+    }
+  ],
+  "permanentCountry": [
+    {
+      "language": "eng",
+      "value": "Philippines"
+    }
+  ],
+  "presentCountry": [
+    {
+      "language": "eng",
+      "value": "Philippines"
+    }
+  ],
+  "permanentProvince": [
+    {
+      "language": "eng",
+      "value": "Abra"
+    }
+  ],
+  "permanentCity": [
+    {
+      "language": "eng",
+      "value": "Bangued"
+    }
+  ],
+  "UIN": "571351650769",
+  "maritalStatus": [
+    {
+      "language": "eng",
+      "value": "Single"
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "presentProvince": [
+    {
+      "language": "eng",
+      "value": "NCR, SECOND DISTRICT"
+    }
+  ],
+  "presentAddressLine1": [
+    {
+      "language": "eng",
+      "value": "#341 St."
+    }
+  ],
+  "presentZipcode": [
+    {
+      "language": "eng",
+      "value": "1106"
+    }
+  ],
+  "pobCountry": [
+    {
+      "language": "eng",
+      "value": "Philippines"
+    }
+  ],
+  "proofOfAddress": {
+    "format": "PDF",
+    "type": "DOC021",
+    "value": "proofOfAddress"
+  },
+  "pobProvince": [
+    {
+      "language": "eng",
+      "value": "Agusan del Sur"
+    }
+  ],
+  "gender": [
+    {
+      "language": "eng",
+      "value": "Male"
+    }
+  ],
+  "modeOfClaim": [
+    {
+      "language": "eng",
+      "value": "Delivery to present address"
+    }
+  ],
+  "permanentBarangay": [
+    {
+      "language": "eng",
+      "value": "Sayon"
+    }
+  ],
+  "bloodType": [
+    {
+      "language": "eng",
+      "value": "O"
+    }
+  ],
+  "individualBiometrics": {
+    "format": "cbeff",
+    "version": 1,
+    "value": "individualBiometrics_bio_CBEFF"
+  },
+  "presentBarangay": [
+    {
+      "language": "eng",
+      "value": "Apolonio Samson"
+    }
+  ],
+  "residenceStatus": [
+    {
+      "language": "eng",
+      "value": "Filipino"
+    }
+  ],
+  "permanentZipcode": [
+    {
+      "language": "eng",
+      "value": "8512"
+    }
+  ],
+  "pobCity": [
+    {
+      "language": "eng",
+      "value": "Santa Josefa"
+    }
+  ],
+  "addressCopy": "N",
+  "dateOfBirth": "1980/12/12",
+  "presentCity": [
+    {
+      "language": "eng",
+      "value": "Quezon City"
+    }
+  ],
+  "firstName": [
+    {
+      "language": "eng",
+      "value": "Andres"
+    }
+  ],
+  "IDSchemaVersion": 0.1,
+  "permanentAddressLine1": [
+    {
+      "language": "eng",
+      "value": "#143 Ave."
+    }
+  ],
+  "registrationType": [
+    {
+      "language": "eng",
+      "value": "Document-based"
+    }
+  ],
+  "permanentCountry": [
+    {
+      "language": "eng",
+      "value": "Philippines"
+    }
+  ],
+  "presentCountry": [
+    {
+      "language": "eng",
+      "value": "Philippines"
+    }
+  ],
+  "permanentProvince": [
+    {
+      "language": "eng",
+      "value": "Agusan del Sur"
+    }
+  ],
+  "permanentCity": [
+    {
+      "language": "eng",
+      "value": "Santa Josefa"
+    }
+  ],
+  "UIN": "760437596739",
+  "maritalStatus": [
+    {
+      "language": "eng",
+      "value": "Divorced"
+    }
+  ]
+}
