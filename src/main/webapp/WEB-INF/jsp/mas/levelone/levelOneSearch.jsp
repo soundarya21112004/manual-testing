@@ -129,14 +129,25 @@
                                                     <fmt:formatDate value="${emp.createdDate}" type="date"
                                                                     pattern="dd-MMM-yyyy"/></td>
                                                 <td>
-                                                    <a href="<c:url value="leveloneSearchByName">
-                                                    <c:param name="id" value="${emp.sno}"></c:param>
-                                                    <c:param name="probe" value="${emp.regId}"></c:param>
-                                                    <c:param name="candidate" value="${emp.matchedRefId}"></c:param>
-                                                    <c:param name="requestId" value="${emp.reqid}"></c:param>
-                                                    </c:url>">
-                                                    <i class="nav-icon fas fa-edit" aria-hidden="true"></i>
-                                                    </a>
+                                                    <c:choose>
+                                                        <c:when test="${emp.op1verifyStatus == 'nohit'}">
+                                                            <button type="submit" class="btn btn-danger" >No Hit</button>
+                                                        </c:when>
+                                                        <c:when test="${emp.op1verifyStatus == 'hit'}">
+                                                            <button type="submit" class="btn btn-success" >Hit</button>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <a href="<c:url value="leveloneSearchByName">
+                                                         <c:param name="id" value="${emp.sno}"></c:param>
+                                                         <c:param name="probe" value="${emp.regId}"></c:param>
+                                                         <c:param name="candidate" value="${emp.matchedRefId}"></c:param>
+                                                        <c:param name="requestId" value="${emp.reqid}"></c:param>
+                                                          </c:url>">
+                                                                <i class="nav-icon fas fa-edit" aria-hidden="true"></i>
+                                                            </a>
+                                                        </c:otherwise>
+                                                    </c:choose>
+
                                                 </td>
                                             </tr>
                                         </c:forEach>

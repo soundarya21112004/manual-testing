@@ -120,6 +120,7 @@ public class JwtFilter  extends OncePerRequestFilter {
                             if (tokenManager.validateJwtToken(token, userdetails)) {
                                 filterChain.doFilter(request, response);
                                 System.out.println("Token valid");
+                                return;
                             }
                             else {
                                   response.sendRedirect("/redirectlogin");
@@ -136,6 +137,7 @@ public class JwtFilter  extends OncePerRequestFilter {
                             response.sendRedirect("/redirectlogin");
                              e.printStackTrace();
                             System.out.println("JWT Token has expired");
+                            return;
                         }
                     }
                     else

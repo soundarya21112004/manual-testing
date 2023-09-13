@@ -118,7 +118,7 @@ public class LevelOneController {
 //
 //        List<RegisterManualVerification> processList = mvs.getListforDeactivation(false, "ACTIVATED",
 //                LocalDateTime.now(ZoneId.of("UTC")).minusHours(ConstantValue.elapseTime),page);
-        session.getAttribute(candidate);
+//        session.getAttribute(candidate);
         try{
             if(session.getAttribute("userID")==null){
                 return "redirect:errorPage";
@@ -127,14 +127,14 @@ public class LevelOneController {
            e.printStackTrace();
         }
         String nextPage ="mvsLevelOneDetail";
-        try {
-             processStatusExist = mvs.proStatus(probe, candidate,requestId);
-        }catch(Exception e){
-            logger.error(logger("LevelOneController","leveloneSearchByName",getUtcTime(), e.toString()));
-            return "redirect:errorPage";
-        }
-        if(processStatusExist==null || processStatusExist.equalsIgnoreCase("0"))
-        {
+//        try {
+//             processStatusExist = mvs.proStatus(probe, candidate,requestId);
+//        }catch(Exception e){
+//            logger.error(logger("LevelOneController","leveloneSearchByName",getUtcTime(), e.toString()));
+//            return "redirect:errorPage";
+//        }
+//        if(processStatusExist==null || processStatusExist.equalsIgnoreCase("0"))
+//        {
             int string_id = Integer.parseInt(id);
             int modify_process_status =mvs.modify_process_status(string_id); // can omit return
 //            HttpSession session = request.getSession();
@@ -964,12 +964,12 @@ public class LevelOneController {
                 }
             }
             nextPage="mvsLevelOneDetail";
-        } else {
-            System.out.println("Processing ");
-            // redirectAttributes.addFlashAttribute("faliureMessage", "ERROR WHILE UPDATING.");
-            redirectAttributes.addFlashAttribute("errorMessage", "this record is being processed by another operator....");
-            nextPage="redirect:levelOneSearch";
-        }
+//        } else {
+//            System.out.println("Processing ");
+//            // redirectAttributes.addFlashAttribute("faliureMessage", "ERROR WHILE UPDATING.");
+//            redirectAttributes.addFlashAttribute("errorMessage", "this record is being processed by another operator....");
+//            nextPage="redirect:levelOneSearch";
+//        }
 
         return nextPage;
     }
