@@ -136,7 +136,9 @@ package com.eagle.mas.service;
 
 
 import com.eagle.mas.model.RegisterManualVerification;
+import com.eagle.mas.model.UserCaseAssignment;
 import com.eagle.mas.repository.RegManualVerificationRepository;
+import com.eagle.mas.repository.UserCaseAssignmentRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -147,6 +149,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -159,6 +162,9 @@ public class ManualVerificationService {
 
 	@Autowired
 	RegManualVerificationRepository repo;
+
+	@Autowired
+	UserCaseAssignmentRepo caseRepo;
 
 
 	public int countAllByRegId(String regid) {
@@ -292,24 +298,64 @@ public int totalResponseCases(String regid){
 
 	public synchronized List<RegisterManualVerification> listOfRids(String userid) {
 		List<RegisterManualVerification> list = repo.clusterOfRids(repo.getRequestIdOperator(userid));
-		list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
-		repo.saveAll(list);
+		if(!list.isEmpty()){
+			list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
+			repo.saveAll(list);
+			setCaseForUser(list.get(0).getReqid(),userid);
+		}
 		return list;
 //		return repo.listOfRids(userid);
 	}
 
-//	@Override
-//	public List listOfRids(String userid, Pageable page) {
-//		System.out.println(userid);
-//
-//		return repo.listOfRids(userid,page);
-//	}
+	public void resetProcessStatus(String reqId){
+		List<RegisterManualVerification> list = repo.clusterOfRids(reqId);
+		if(!list.isEmpty()){
+			list.replaceAll(ad-> {ad.setProStatus("0"); return ad;});
+			repo.saveAll(list);
+		}
+	}
+
+	public void setCaseForUser(String reqId,String userId){
+		UserCaseAssignment caseAssignment = new UserCaseAssignment();
+		caseAssignment.setRequestId(reqId);
+		caseAssignment.setUserId(userId);
+		caseAssignment.setPickupDtimes(LocalDateTime.now(ZoneId.of("UTC")));
+		caseRepo.save(caseAssignment);
+	}
+
+	public void removeProcessedCaseForUser(String userId){
+
+		caseRepo.deleteById(userId);
+
+	}
+
+	public  List<RegisterManualVerification> retreiveCaseForUser(String reqId){
+
+		System.out.println("retrieve case for user : ");
+		return repo.clusterOfRids(reqId);
+	}
 
 
-	public synchronized List listOfRidsPriority(String userid) {
-		System.out.println(userid);
+	public synchronized List<RegisterManualVerification>  listOfRidsPriority(String userid) {
+		List<RegisterManualVerification> list = repo.clusterOfRids(repo.getRequestIdPriority(userid));
 
-		return repo.listOfRidsPriority(userid);
+		if(!list.isEmpty()){
+			list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
+			repo.saveAll(list);
+			setCaseForUser(list.get(0).getReqid(),userid);
+		}
+		return list;
+	}
+
+	@Transactional()
+	public synchronized UserCaseAssignment userCaseDetails(String userId){
+		if(caseRepo.existsById(userId)){
+			System.out.println("usercaseassign exist true");
+			return	caseRepo.findByUserId(userId);
+		}else {
+			System.out.println("usercaseassign exist false");
+			return null;
+		}
 	}
 
 

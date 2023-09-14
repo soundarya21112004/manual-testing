@@ -167,7 +167,7 @@ public interface RegManualVerificationRepository extends CrudRepository<Register
 //            lockMode = WRITE)
 
     @Query(value = "SELECT t1 FROM RegisterManualVerification t1 where t1.reqid = :reqId and t1.regId <> t1.matchedRefId")
-    List clusterOfRids(@Param("reqId") String reqId);
+    List<RegisterManualVerification> clusterOfRids(@Param("reqId") String reqId);
 
 //@Query(value = "SELECT t1 FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null ) and (t1.regId <> t1.matchedRefId) order by t1.createdDate asc ")
 //List listOfRids(@Param("userid") String userid, Pageable page);
@@ -176,6 +176,11 @@ public interface RegManualVerificationRepository extends CrudRepository<Register
             "where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null )" +
             " and (t1.regId <> t1.matchedRefId) and t1.priority= '1'  )")
     List listOfRidsPriority(@Param("userid") String userid);
+
+    @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 " +
+            "where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null )" +
+            " and (t1.regId <> t1.matchedRefId) and t1.priority= '1'  )")
+    String getRequestIdPriority(@Param("userid") String userid);
 
 //    @Query(value = "SELECT t1 FROM RegManualVerification t1 where t1.statusCode='1'")
 @Query(value="select t1 from RegisterManualVerification t1 where (t1.statusCode='1')" +

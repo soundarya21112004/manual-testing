@@ -2,10 +2,7 @@ package com.eagle.mas.controller;
 
 import com.eagle.mas.bean.GalleryBean;
 import com.eagle.mas.common.ReadImage;
-import com.eagle.mas.model.BioScore;
-import com.eagle.mas.model.RegisterManualVerification;
-import com.eagle.mas.model.ResponseMvs;
-import com.eagle.mas.model.Userdetails;
+import com.eagle.mas.model.*;
 import com.eagle.mas.repository.BioScoreRepository;
 import com.eagle.mas.service.ManualVerificationService;
 import com.eagle.mas.service.MvJsonService;
@@ -71,6 +68,24 @@ public class LevelOneController {
         return convertDate;
     }
 
+    @RequestMapping(value = "/refreshNewCase",method = RequestMethod.GET)
+    public String refreshNewCase(ModelMap model, HttpServletRequest request){
+        try {
+            HttpSession session = request.getSession();
+            if (session.getAttribute("userID") == null) {
+                return "redirect:loginPage";
+            }
+            Userdetails user = (Userdetails) session.getAttribute("userdetails");
+            System.out.println("UserID :" + user.getUserid());
+            UserCaseAssignment userCaseRequest = mvs.userCaseDetails(user.getUserid());
+            mvs.resetProcessStatus(userCaseRequest.getRequestId());
+            mvs.removeProcessedCaseForUser(user.getUserid());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return "redirect:levelOneSearch";
+    }
+
     @RequestMapping(value = "/levelOneSearch", method = RequestMethod.GET)
     public String showHomePage(ModelMap model, HttpServletRequest request) {
         try {
@@ -81,14 +96,22 @@ public class LevelOneController {
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
             System.out.println("UserID :" + user.getUserid());
             Pageable page = PageRequest.of(0, 1);
-            ArrayList<RegisterManualVerification> roles = (ArrayList<RegisterManualVerification>) mvs.listOfRidsPriority(user.getUserid());
-            if (roles == null || roles.isEmpty())
-            {
-                // in this step first load operator 2 list, for this we need new query . if it is null then run this below query
-                roles = (ArrayList<RegisterManualVerification>) mvs.listOfRids(user.getUserid());
+            UserCaseAssignment userCaseRequest = mvs.userCaseDetails(user.getUserid());
+            ArrayList<RegisterManualVerification> roles = new ArrayList<>();
+            if(userCaseRequest == null) {
+                roles= (ArrayList<RegisterManualVerification>) mvs.listOfRidsPriority(user.getUserid());
+                if (roles == null || roles.isEmpty()) {
+                    // in this step first load operator 2 list, for this we need new query . if it is null then run this below query
+                    roles = (ArrayList<RegisterManualVerification>) mvs.listOfRids(user.getUserid());
+                }
+
+
+            }else{
+                roles = (ArrayList<RegisterManualVerification>) mvs.retreiveCaseForUser(userCaseRequest.getRequestId());
             }
             model.addAttribute("galleryList", roles);
-                logger.info(logger("LevelOneController", "showHomePage", getUtcTime(), "UserId :" + user.getUserid()));
+            model.addAttribute("userid",user.getUserid());
+            logger.info(logger("LevelOneController", "showHomePage", getUtcTime(), "UserId :" + user.getUserid()));
         }
         catch (Exception e){
             System.out.println("Error occured in LevelOneController.showHomePage()....");
@@ -136,7 +159,7 @@ public class LevelOneController {
 //        if(processStatusExist==null || processStatusExist.equalsIgnoreCase("0"))
 //        {
             int string_id = Integer.parseInt(id);
-            int modify_process_status =mvs.modify_process_status(string_id); // can omit return
+//            int modify_process_status =mvs.modify_process_status(string_id); // can omit return
 //            HttpSession session = request.getSession();
             model.addAttribute("probefilename", probe);
             model.addAttribute("originalfilename", probe);
@@ -1089,7 +1112,8 @@ public class LevelOneController {
             else if(Statuscoment!=null){
                 out = mvs.updateRIDstatus2(Integer.parseInt(id), status, comment, user.getUserid(),user.getFirstnameEn(), requestId,"1");
             }
-            mvs.modifyProcessStatus(Integer.parseInt(id));
+//            mvs.modifyProcessStatus(Integer.parseInt(id));
+// need to comment and implement while submitting
             int nhCase = mvs.operatorVerifiedNohit(Integer.parseInt(id));
             int hCase = mvs.operatorVerifiedHit(Integer.parseInt(id));
             System.out.println("check for boolean value"+nhCase);

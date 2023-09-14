@@ -7,6 +7,30 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <script>
+    function submitCase() {
+
+            document.getElementById('submitcase').action = "/refreshNewCase";
+            document.getElementById('submitcase').submit();
+
+    }
+    function alertSubmit(){
+        swal.fire({
+            title: "Submit all cases?",
+            // text: "Once deleted, you will not be able to recover this imaginary file!",
+            icon: "warning",
+            showCancelButton: true,
+            // dangerMode: true,
+        })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    submitCase();
+                } else {
+                    swal.fire({icon: "warning", title: "cancelled"});
+                }
+            });
+    }
+</script>
+<script>
     function validate() {
 
         $('#quickForm').validate({
@@ -96,7 +120,7 @@
 
 <section class="content">
     <div class="container-fluid">
-        <form method="post" action="/levelOneSearch">
+        <form id="submitcase" method="get" action="/levelOneSearch">
             <div class="row">
                 <div class="col-md-12">
                     <div class="card card-primary">
@@ -129,14 +153,9 @@
                                                     <fmt:formatDate value="${emp.createdDate}" type="date"
                                                                     pattern="dd-MMM-yyyy"/></td>
                                                 <td>
+                                                   
                                                     <c:choose>
-                                                        <c:when test="${emp.op1verifyStatus == 'nohit'}">
-                                                            <button type="submit" class="btn btn-danger" >No Hit</button>
-                                                        </c:when>
-                                                        <c:when test="${emp.op1verifyStatus == 'hit'}">
-                                                            <button type="submit" class="btn btn-success" >Hit</button>
-                                                        </c:when>
-                                                        <c:otherwise>
+                                                        <c:when test="${emp.op1userId != userid && emp.op2userId != userid}">
                                                             <a href="<c:url value="leveloneSearchByName">
                                                          <c:param name="id" value="${emp.sno}"></c:param>
                                                          <c:param name="probe" value="${emp.regId}"></c:param>
@@ -145,7 +164,20 @@
                                                           </c:url>">
                                                                 <i class="nav-icon fas fa-edit" aria-hidden="true"></i>
                                                             </a>
-                                                        </c:otherwise>
+
+                                                        </c:when>
+                                                        <c:when test="${emp.op2verifyStatus == 'nohit'}">
+                                                            <button type="submit" class="btn btn-success" >No Hit</button>
+                                                        </c:when>
+                                                        <c:when test="${emp.op2verifyStatus == 'hit'}">
+                                                            <button type="submit" class="btn btn-danger" >Hit</button>
+                                                        </c:when>
+                                                        <c:when test="${emp.op1verifyStatus == 'nohit'}">
+                                                            <button type="submit" class="btn btn-success" >No Hit</button>
+                                                        </c:when>
+                                                        <c:when test="${emp.op1verifyStatus == 'hit'}">
+                                                            <button type="submit" class="btn btn-danger" >Hit</button>
+                                                        </c:when>
                                                     </c:choose>
 
                                                 </td>
@@ -153,6 +185,10 @@
                                         </c:forEach>
                                     </tbody>
                                 </table>
+                                <br>
+                                <div class="col-md-12">
+                                    <button type="button" class="btn btn-primary float-right" onclick="alertSubmit()">SUBMIT</button>
+                                </div>
 
                             </div>
                         </div>

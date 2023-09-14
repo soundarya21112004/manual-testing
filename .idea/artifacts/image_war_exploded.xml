@@ -71,6 +71,7 @@
           <element id="library" level="project" name="Maven: org.springframework:spring-orm:5.2.8.RELEASE" />
           <element id="library" level="project" name="Maven: org.springframework:spring-tx:5.2.8.RELEASE" />
           <element id="library" level="project" name="Maven: org.springframework:spring-aspects:5.2.8.RELEASE" />
+          <element id="library" level="project" name="Maven: org.projectlombok:lombok:1.18.22" />
           <element id="library" level="project" name="Maven: javax.servlet:jstl:1.2" />
           <element id="library" level="project" name="Maven: org.apache.tiles:tiles-jsp:3.0.7" />
           <element id="library" level="project" name="Maven: org.apache.tiles:tiles-servlet:3.0.7" />

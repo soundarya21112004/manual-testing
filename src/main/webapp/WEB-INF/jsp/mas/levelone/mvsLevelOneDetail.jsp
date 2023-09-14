@@ -470,20 +470,22 @@
         }
     }
 
-
-    var onBeforeUnLoadEvent = false;
-
-    window.onunload = window.onbeforeunload = function(){
-        if(!onBeforeUnLoadEvent){
-            onBeforeUnLoadEvent = true;
-            //your code here
-            var id = document.getElementById('pkID').value;
-            $.ajax({
-                type: "GET",
-                url: "/MVS/resetProcrssStatus?sno="+id // the URL of the controller action method
-            });
-        }
-    };
+    // commented this script reset process to 0
+    // -------------------------
+    // var onBeforeUnLoadEvent = false;
+    //
+    // window.onunload = window.onbeforeunload = function(){
+    //     if(!onBeforeUnLoadEvent){
+    //         onBeforeUnLoadEvent = true;
+    //         //your code here
+    //         var id = document.getElementById('pkID').value;
+    //         $.ajax({
+    //             type: "GET",
+    //             url: "/MVS/resetProcrssStatus?sno="+id // the URL of the controller action method
+    //         });
+    //     }
+    // };
+    // ---------------------------------
 
     // window.onbeforeunload = function() {
     //     resetProcessStatusCode();
