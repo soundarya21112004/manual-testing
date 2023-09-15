@@ -48,6 +48,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.stream.Collectors;
+
 @Controller
 @Scope("session")
 public class LevelOneController {
@@ -69,7 +71,7 @@ public class LevelOneController {
     }
 
     @RequestMapping(value = "/refreshNewCase",method = RequestMethod.GET)
-    public String refreshNewCase(ModelMap model, HttpServletRequest request){
+    public String refreshNewCase(RedirectAttributes redirectAttributes, HttpServletRequest request){
         try {
             HttpSession session = request.getSession();
             if (session.getAttribute("userID") == null) {
@@ -78,8 +80,29 @@ public class LevelOneController {
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
             System.out.println("UserID :" + user.getUserid());
             UserCaseAssignment userCaseRequest = mvs.userCaseDetails(user.getUserid());
-            mvs.resetProcessStatus(userCaseRequest.getRequestId());
-            mvs.removeProcessedCaseForUser(user.getUserid());
+            if(userCaseRequest != null) {
+                List<RegisterManualVerification> list = mvs.retreiveCaseForUser(userCaseRequest.getRequestId());
+                List<RegisterManualVerification> result = list.stream().filter(e -> {
+                    if (user.getUserid().equals(e.getOp1userId())) {
+                        return e.getOp1verifyStatus() != null;
+                    } else if (user.getUserid().equals(e.getOp2userId())) {
+                        return e.getOp2verifyStatus() != null;
+                    } else {
+                        return false;
+                    }
+                }).collect(Collectors.toList());
+
+                System.out.println("result size : " + result.size());
+                if (result.size() == list.size()) {
+                    mvs.resetProcessStatus(userCaseRequest.getRequestId());
+                    mvs.removeProcessedCaseForUser(user.getUserid());
+                    redirectAttributes.addFlashAttribute("successMessage", "case is submitted");
+                } else {
+                    redirectAttributes.addFlashAttribute("faliureMessage", "please process all the cases before submission");
+                }
+            }else{
+                redirectAttributes.addFlashAttribute("faliureMessage","late subimission is not allowed");
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -126,7 +149,8 @@ public class LevelOneController {
                                        @RequestParam("id") String id,
                                        @RequestParam("probe") String probe,
                                        @RequestParam("candidate") String candidate,
-                                       @RequestParam("requestId") String requestId
+                                       @RequestParam("requestId") String requestId,
+                                       @RequestParam("caseListNo") String caseListNo
     ) throws URISyntaxException {
         System.out.println("LevelOneController.leveloneSearchByName().id="+id);
         System.out.println("LevelOneController.leveloneSearchByName().probe="+probe);
@@ -145,6 +169,13 @@ public class LevelOneController {
         try{
             if(session.getAttribute("userID")==null){
                 return "redirect:errorPage";
+            }
+            Userdetails user = (Userdetails) session.getAttribute("userdetails");
+            System.out.println("UserID :" + user.getUserid());
+            UserCaseAssignment userCase= mvs.userCaseDetails(user.getUserid());
+            if(userCase == null){
+                redirectAttributes.addFlashAttribute("faliureMessage","case processing time has expired for this request id");
+                return "redirect:levelOneSearch";
             }
         }catch(Exception e){
            e.printStackTrace();
@@ -167,8 +198,9 @@ public class LevelOneController {
             model.addAttribute("requestId",requestId);
             String pathname = new FileSystemResource("").getFile().getAbsolutePath();
             if (probe != null) {
-                int count = mvs.countAllByRegId(probe);
-                model.addAttribute("count",count-1);
+//                int count = mvs.countAllByRegId(probe);
+//                int count = Integer.parseInt(caseListNo);
+                model.addAttribute("count",caseListNo);
                 List<GalleryBean> leftfingerProb = new ArrayList<GalleryBean>();
                 List<GalleryBean> rightfingerProb = new ArrayList<GalleryBean>();
                 List<GalleryBean> irisProbScore = new ArrayList<GalleryBean>();
@@ -1082,6 +1114,13 @@ public class LevelOneController {
             HttpSession session = request.getSession();
             if(session.getAttribute("userID")==null){
                 return "redirect:loginPage";
+            }
+            Userdetails user = (Userdetails) session.getAttribute("userdetails");
+            System.out.println("UserID :" + user.getUserid());
+            UserCaseAssignment userCase= mvs.userCaseDetails(user.getUserid());
+            if(userCase == null){
+                redirectAttributes.addFlashAttribute("faliureMessage","case processing time has expired for this request id");
+                return "redirect:levelOneSearch";
             }
           String probe= (String) session.getAttribute("regId");
             System.out.println("  :"+probe);

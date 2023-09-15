@@ -604,7 +604,7 @@
 <div class="row">
     <div class="col-sm-10"></div>
     <div class="col-sm-2">
-        <h6 style="text-align: center">No of Candidate :<span style="padding-left: 10px">${count}</span></h6>
+        <h6 style="text-align: center"><span style="padding-left: 10px">${count}</span> candidates </h6>
     </div>
 </div>
 <!-- Main content -->

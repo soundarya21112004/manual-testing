@@ -5,6 +5,30 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<%--<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">--%>
+
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+
+
+<script>
+    $(document).ready(function() {
+        $('#caseAssign').DataTable({
+            // "buttons": true,
+            "searching": false,
+            "bSort": false,
+            "paging": true,
+            "lengthMenu": [ 20, 30, 40 ,50 ],
+            "pagingType": "simple",
+            "language": {
+                "info": "Showing page _PAGE_ of _PAGES_"
+            },
+            "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6 '<'float-right'i>>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-5'<'float-left'p>><'col-sm-12 col-md-7'f>>"
+        });
+    } );
+</script>
 
 <script>
     function submitCase() {
@@ -17,7 +41,7 @@
         swal.fire({
             title: "Submit all cases?",
             // text: "Once deleted, you will not be able to recover this imaginary file!",
-            icon: "warning",
+            icon: "question",
             showCancelButton: true,
             // dangerMode: true,
         })
@@ -92,6 +116,7 @@
 <c:if test="${successMessage != null}">
 <script>
     Swal.fire({
+        icon: "success",
         title: 'Success!',
         text: '${successMessage}',
         confirmButtonText: 'OK'
@@ -101,6 +126,7 @@
 <c:if test="${faliureMessage != null}">
 <script>
     Swal.fire({
+        icon: "error",
         title: 'Faliure!',
         text: '${faliureMessage}',
         confirmButtonText: 'OK'
@@ -111,6 +137,7 @@
 <script>
 
     Swal.fire({
+        icon: "warning",
         title: 'Processing!',
         text: '${errorMessage}',
         confirmButtonText: 'OK'
@@ -126,11 +153,12 @@
                     <div class="card card-primary">
                         <div class="card-header">
                             <h3 class="card-title">List Of Subject</h3>
+                            <span class="float-right" >No of Candidates : ${galleryList.size()}</span>
                         </div>
-                                    <br>
+<%--                                    <br>--%>
                         <div modelAttribute="galleryList">
                             <div class="card-body">
-                                <table class="table table-bordered table-hover">
+                                <table id="caseAssign" class="table table-bordered table-hover">
                                     <thead>
                                         <tr>
                                             <th>Sno</th>
@@ -153,6 +181,7 @@
                                                     <fmt:formatDate value="${emp.createdDate}" type="date"
                                                                     pattern="dd-MMM-yyyy"/></td>
                                                 <td>
+                                                    <c:out value="${galleryList.size()}"></c:out>
                                                    
                                                     <c:choose>
                                                         <c:when test="${emp.op1userId != userid && emp.op2userId != userid}">
@@ -161,6 +190,7 @@
                                                          <c:param name="probe" value="${emp.regId}"></c:param>
                                                          <c:param name="candidate" value="${emp.matchedRefId}"></c:param>
                                                         <c:param name="requestId" value="${emp.reqid}"></c:param>
+                                                        <c:param name="caseListNo" value="${counter.count} of ${galleryList.size()}"></c:param>
                                                           </c:url>">
                                                                 <i class="nav-icon fas fa-edit" aria-hidden="true"></i>
                                                             </a>
