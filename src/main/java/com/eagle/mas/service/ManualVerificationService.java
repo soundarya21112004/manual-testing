@@ -142,6 +142,7 @@ import com.eagle.mas.repository.UserCaseAssignmentRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -150,10 +151,8 @@ import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.TimeZone;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -358,6 +357,85 @@ public int totalResponseCases(String regid){
 		}
 	}
 
+	@Scheduled(initialDelay = 10000, fixedDelay = 10000)
+	public void checkTimelpseAndUnassign(){
+		List<UserCaseAssignment> userCaseAssignment = caseRepo.findAll();
+		List<UserCaseAssignment> result = userCaseAssignment.stream().filter(e->
+			 LocalDateTime.now(ZoneId.of("UTC")).isAfter(e.getPickupDtimes().plusHours(72))
+		).collect(Collectors.toList());
+
+
+//		result.forEach(e-> {
+//			List<RegisterManualVerification> cases = repo.clusterOfRids(e.getRequestId());
+//			cases.stream().filter(t->
+//				t.getOp1userId().equals(e.getUserId())
+//			).forEach(this::resetOp1Decisions);
+//			cases.stream().filter(t->
+//					t.getOp2userId().equals(e.getUserId())
+//			).forEach(this::resetOp2Decisions);
+//			cases.stream().filter(t->
+//					t.getUserId().equals(e.getUserId())
+//			).forEach(this::resetOp1Decisions);
+//		});
+		for (UserCaseAssignment s :result
+			 ) {
+			System.out.println("req id : "+ s.getRequestId());
+			System.out.println("user id : "+ s.getUserId());
+			List<RegisterManualVerification> ca = repo.clusterOfRids(s.getRequestId());
+
+			for (RegisterManualVerification reg : ca
+				 ) {
+				System.out.println("operator user id : "+reg.getOp1userId());
+				System.out.println("operator user id : "+reg.getOp2userId());
+				System.out.println("operator user id : "+reg.getUserId());
+				System.out.println("operator s user id : "+s.getUserId());
+				if(reg.getOp1userId().equals(s.getUserId())) {
+					System.out.println("operator 1 user id : "+reg.getOp1userId());
+				}else if(reg.getOp2userId().equals(s.getUserId())) {
+					System.out.println("operator 2 user id : "+reg.getOp2userId());
+				}else if(reg.getUserId().equals(s.getUserId())) {
+					System.out.println("supervisor user id : "+reg.getUserId());
+				}
+			}
+		}
+		result.forEach(e-> {
+			List<RegisterManualVerification> cases = repo.clusterOfRids(e.getRequestId());
+			cases.stream().filter(t->{
+				if(t.getOp1userId().equals(e.getUserId())){
+					resetOp1Decisions(t);
+				}else if(t.getOp2userId().equals(e.getUserId())){
+					resetOp2Decisions(t);
+				}else if(t.getUserId().equals(e.getUserId())){
+					resetSupervisorDecisions(t);
+				}
+				return false;
+			});
+		});
+
+
+
+
+
+	}
+
+	public void resetOp1Decisions(RegisterManualVerification cases){
+
+		if (cases != null){
+			System.out.println("op1  method");
+		}
+	}
+
+	public void resetOp2Decisions(RegisterManualVerification cases){
+		if (cases != null){
+			System.out.println("op2  method");
+		}
+	}
+
+	public void resetSupervisorDecisions(RegisterManualVerification cases){
+		if (cases != null){
+			System.out.println("supervisor  method");
+		}
+	}
 
 
 

@@ -1126,7 +1126,7 @@ public class LevelOneController {
             System.out.println("  :"+probe);
           String candidate= (String) session.getAttribute("matchRegId");
             System.out.println(candidate);
-            Userdetails user = (Userdetails) session.getAttribute("userdetails");
+//            Userdetails user = (Userdetails) session.getAttribute("userdetails");
             System.out.println("user*********"+session);
             System.out.println("user"+user);
             System.out.println("status"+status);

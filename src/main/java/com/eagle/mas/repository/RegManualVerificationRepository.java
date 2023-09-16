@@ -166,6 +166,10 @@ public interface RegManualVerificationRepository extends CrudRepository<Register
 //            query="SELECT s FROM Student s WHERE s.id LIKE :id",
 //            lockMode = WRITE)
 
+//    @Modifying
+//    @Query()
+//    public void resetCaseDecisions();
+
     @Query(value = "SELECT t1 FROM RegisterManualVerification t1 where t1.reqid = :reqId and t1.regId <> t1.matchedRefId")
     List<RegisterManualVerification> clusterOfRids(@Param("reqId") String reqId);
 

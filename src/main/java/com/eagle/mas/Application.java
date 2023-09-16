@@ -8,13 +8,14 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(exclude = HibernateJpaAutoConfiguration.class)
 @EntityScan(basePackages = {"com.eagle.mvs.model"})
 @EnableJpaRepositories(basePackages = "com")
 
 @ComponentScan(basePackages = { "com" })
-
+@EnableScheduling
 public class Application extends SpringBootServletInitializer {
 
     private static Class<Application> applicationClass = Application.class;
