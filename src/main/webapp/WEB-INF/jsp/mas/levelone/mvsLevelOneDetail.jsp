@@ -381,7 +381,7 @@
     function alertHit(){
         // Swal.fire("Our First Alert");
         swal.fire({
-            title: "Are you sure?",
+            title: "<div>You are about to tag this case as <span style='color:red; font-style: italic; text-decoration: underline;'>HIT</span></div>",
             // text: "Once deleted, you will not be able to recover this imaginary file!",
             icon: "warning",
             // buttons: true,
@@ -401,7 +401,7 @@
 
     function alertNoHit(){
         swal.fire({
-            title: "Are you sure?",
+            title: "<div>You are about to tag this case as <span style='color:green; font-style: italic; text-decoration: underline;'>NO HIT</span></div>",
             // text: "Once deleted, you will not be able to recover this imaginary file!",
             icon: "warning",
             showCancelButton: true,
@@ -602,8 +602,23 @@
 </section>
 
 <div class="row">
-    <div class="col-sm-10"></div>
-    <div class="col-sm-2">
+<%--    <div class="col-sm-10"></div>--%>
+    <div class="col-md-6">
+        <span style="padding-left: 10px; margin-left: 15px;margin-bottom: 5px">PROBE ID : </span>
+<%--        <span style="border: 1px solid black">${probeid}</span>--%>
+        <input type="text" class="form-control-sm" style="width: 250px;margin-bottom: 5px" readonly value="${probeid}">
+        <span><i class="far fa-square fa-2x"></i></span>
+    </div>
+    <div class="col-md-4">
+        <span style="padding-left: 10px; margin-left: 20px;margin-bottom: 5px">CANDIDATE ID : </span>
+<%--        <span style="border: 1px solid black">${canid}</span>--%>
+        <input type="text" class="form-control-sm"  style="width: 250px;margin-bottom: 5px" readonly value="${canid}">
+        <c:choose>
+            <c:when test="${psnGenerated  == true}"><span><i class="far fa-check-square fa-2x"></i></span></c:when>
+            <c:when test="${psnGenerated  == false}"><span><i class="far fa-square fa-2x"></i></span></c:when>
+        </c:choose>
+    </div>
+    <div class="col-md-2">
         <h6 style="text-align: center"><span style="padding-left: 10px">${count}</span> candidates </h6>
     </div>
 </div>
@@ -841,7 +856,7 @@
 
                     <div class="card card-primary">
                         <div class="card-header p-2">
-                            <h3 class="card-title">(CANDIDATE) OTHER DEMOGRAPHIC DETAILS</h3>
+                            <h3 class="card-title">CANDIDATE DEMOGRAPHIC DETAILS</h3>
                         </div>
                         <div class="card-body box-profile">
 
@@ -1116,7 +1131,7 @@
 
                         <div class="card card-primary">
                             <div class="card-header p-2">
-                                <h3 class="card-title"><b>ABIS Operator 1 Remarks</b></h3>
+                                <h3 class="card-title"><b>MANUAL ADJUDICATION DECISION AND REMARKS OPERATOR 1</b></h3>
                                 <div class="col-md-8 float-right">${commentABIS}</div>
                             </div>
                            </div>
@@ -1130,7 +1145,7 @@
 
                         <div class="card card-primary">
                             <div class="card-header p-2">
-                                <h3 class="card-title"><b>ABIS Operator 2 Remarks</b></h3>
+                                <h3 class="card-title"><b>MANUAL ADJUDICATION DECISION AND REMARKS OPERATOR 2</b></h3>
                                 <div class="col-md-8 float-right">${comment1ABIS}</div>
                             </div>
                              </div>

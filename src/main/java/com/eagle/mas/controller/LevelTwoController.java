@@ -4,6 +4,7 @@ import com.eagle.mas.bean.GalleryBean;
 import com.eagle.mas.common.ReadImage;
 import com.eagle.mas.model.BioScore;
 import com.eagle.mas.model.RegisterManualVerification;
+import com.eagle.mas.model.UserCaseAssignment;
 import com.eagle.mas.model.Userdetails;
 import com.eagle.mas.repository.BioScoreRepository;
 import com.eagle.mas.service.ManualVerificationService;
@@ -45,6 +46,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @Scope("session")
@@ -76,10 +78,83 @@ public class LevelTwoController {
 
     }
 
+
+    @RequestMapping(value = "/refreshClusterCaseL2",method = RequestMethod.GET)
+    public String refreshNewCase(RedirectAttributes redirectAttributes, HttpServletRequest request){
+        try {
+            HttpSession session = request.getSession();
+            if (session.getAttribute("userID") == null) {
+                return "redirect:loginPage";
+            }
+            Userdetails user = (Userdetails) session.getAttribute("userdetails");
+            System.out.println("UserID :" + user.getUserid());
+            UserCaseAssignment userCaseRequest = mvs.userCaseDetails(user.getUserid());
+            if(userCaseRequest != null) {
+                List<RegisterManualVerification> list = mvs.retreiveCaseForUser(userCaseRequest.getRequestId());
+                List<RegisterManualVerification> result = list.stream().filter(e -> {
+                    if (user.getUserid().equals(e.getUserId())) {
+                        return e.getSupervisorVerifyStatus() != null;
+                    } else {
+                        return false;
+                    }
+                }).collect(Collectors.toList());
+
+                System.out.println("result size : " + result.size());
+                if (result.size() == list.size()) {
+                    mvs.resetProcessStatus(userCaseRequest.getRequestId());
+                    mvs.removeProcessedCaseForUser(user.getUserid());
+                    redirectAttributes.addFlashAttribute("successMessage", "case is submitted");
+                } else {
+                    redirectAttributes.addFlashAttribute("faliureMessage", "please process all the cases before submission");
+                }
+            }else{
+                redirectAttributes.addFlashAttribute("faliureMessage","late subimission is not allowed");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return "redirect:levelTwoCluster";
+    }
+
+
+
+    @RequestMapping(value = "/levelTwoCluster", method = RequestMethod.GET)
+    public String getSupervisorCluster(ModelMap model, HttpServletRequest request) {
+        try {
+            HttpSession session = request.getSession();
+            session.setAttribute("viewType","cluster");
+            if(session.getAttribute("userID")==null){
+                return "redirect:loginPage";
+            }
+            Userdetails user = (Userdetails) session.getAttribute("userdetails");
+            System.out.println("user" + user.getUserid());
+            ArrayList<RegisterManualVerification> roles = new ArrayList<>();
+            UserCaseAssignment supervisorCases = mvs.userCaseDetails(user.getUserid());
+            if(supervisorCases ==null) {
+                roles = (ArrayList<RegisterManualVerification>) mvs.getClusterForL2(user.getUserid());
+            }else{
+                roles = (ArrayList<RegisterManualVerification>) mvs.retreiveCaseForUser(supervisorCases.getRequestId());
+            }
+            model.addAttribute("galleryList", roles);
+            model.addAttribute("userid",user.getUserid());
+            model.addAttribute("typeofview","cluster");
+
+            logger.info(logger("LevelTwoController", "showHomePage", getUtcTime(), "userId " + user.getUserid()));
+        }catch (Exception e){
+            logger.error(logger("LevelTwoController","showHomePage",getUtcTime(), e.toString()));
+            return "redirect:errorPage";
+
+        }
+
+        return "levelTwoSearch";
+
+    }
+
     @RequestMapping(value = "/levelTwoSearch", method = RequestMethod.GET)
     public String showHomePage(ModelMap model, HttpServletRequest request) {
         try {
             HttpSession session = request.getSession();
+            session.setAttribute("viewType","list");
             if(session.getAttribute("userID")==null){
                 return "redirect:loginPage";
             }
@@ -88,6 +163,8 @@ public class LevelTwoController {
 
             ArrayList<RegisterManualVerification> roles = (ArrayList<RegisterManualVerification>) mvs.listOfRidsForL2();
             model.addAttribute("galleryList", roles);
+            model.addAttribute("userid",user.getUserid());
+            model.addAttribute("typeofview","list");
             logger.info(logger("LevelTwoController", "showHomePage", getUtcTime(), "userId " + user.getUserid()));
         }catch (Exception e){
             logger.error(logger("LevelTwoController","showHomePage",getUtcTime(), e.toString()));
@@ -114,12 +191,14 @@ public class LevelTwoController {
     @RequestMapping(value = "/leveltwoSearchByName", method = RequestMethod.GET)
     public String leveltwoSearchByName(ModelMap model, HttpServletRequest request, @RequestParam("id") String id, @RequestParam("probe") String probe,
                                        @RequestParam("candidate") String candidate,@RequestParam("requestId") String requestId,@RequestParam("op1Comment")String op1Comment,
-                                       @RequestParam("op1verifyStatus") String op1verifyStatus,@RequestParam("op2verifyStatus") String op2verifyStatus,@RequestParam("op2Comment")String op2Comment
+                                       @RequestParam("op1verifyStatus") String op1verifyStatus,@RequestParam("op2verifyStatus") String op2verifyStatus,@RequestParam("op2Comment")String op2Comment,
+                                       @RequestParam("caseListNo") String caseListNo
     ) {
 
         HttpSession session = request.getSession();
         session.setAttribute("regId",probe );
         session.setAttribute("matchId",candidate);
+        boolean psnGenerated =false;
 
         try {
             if (session.getAttribute("userID") == null) {
@@ -177,7 +256,7 @@ public class LevelTwoController {
 
                 JSONParser jsonParser1 = new JSONParser();
                 int count = mvs.countAllByRegId(probe);
-                model.addAttribute("count",count-1);
+                model.addAttribute("count",caseListNo);
                 try{
 
                     BioScore score = bioRepository.findFirstByRegIDAndMatchedRefIdAndResponseTextNotNull(probe,probe);
@@ -608,6 +687,8 @@ public class LevelTwoController {
         }
         if (candidate != null) {
             try {
+
+                psnGenerated = mvs.getIdentityDetails(candidate);
                 System.out.println("candidate*********"+candidate);
                 List<GalleryBean> rightfingerCan = new ArrayList<GalleryBean>();
                 List<GalleryBean> leftfingerCan = new ArrayList<GalleryBean>();
@@ -983,6 +1064,8 @@ public class LevelTwoController {
                     model.addAttribute("rightfingerCan", rightfingerCan);
                     model.addAttribute("irisCanScore", irisCanScore);
                     model.addAttribute("CanFaceImage", CanFaceImage);
+                   
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -992,6 +1075,9 @@ public class LevelTwoController {
             }
 
         }
+        model.addAttribute("psnGenerated",psnGenerated);
+        model.addAttribute("probeid",probe);
+        model.addAttribute("canid",candidate);
         return "mvsLevelTwoDetail";
 
     }
@@ -1076,10 +1162,12 @@ public class LevelTwoController {
                                   @RequestParam("statusComment") String comment,
                                         @RequestParam("requestId")String requestId) {
         System.out.println("Successssslevel2");
+        String viewType = null;
         try {
             HttpSession session = request.getSession();
+            viewType = (String) session.getAttribute("viewType");
+            System.out.println("view ttype + : "+viewType);
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
-            System.out.println("user"+user);
             System.out.println("id"+id);
             System.out.println("user"+user);
             System.out.println("status"+status);
@@ -1140,7 +1228,11 @@ public class LevelTwoController {
             redirectAttributes.addFlashAttribute("failureMessage", "ERROR WHILE UPDATING.");
 
         }
-        return "redirect:/levelTwoSearch";
+        if(viewType !=null && viewType.equalsIgnoreCase("cluster")){
+            return "redirect:/levelTwoCluster";
+        }else {
+            return "redirect:/levelTwoSearch";
+        }
     }
 
 

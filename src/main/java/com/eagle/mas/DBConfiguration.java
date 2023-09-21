@@ -9,6 +9,7 @@ import java.util.ResourceBundle;
 
 import javax.sql.DataSource;
 
+import com.eagle.mas.config.ConstantValue;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -78,6 +79,12 @@ public class DBConfiguration {
 		try{
 			InputStream in = new FileInputStream(propertyFile);
 			ResourceBundle resource = new PropertyResourceBundle(in);
+			ConstantValue.KERNELAUTHMANAGER=resource.getString("KERNELAUTHMANAGER");
+			ConstantValue.appId=resource.getString("appId");
+			ConstantValue.clientId=resource.getString("clientId");
+			ConstantValue.secretKey=resource.getString("secretKey");
+			ConstantValue.IDENTITY=resource.getString("IDENTITY");
+
 			dataSource.setDriverClassName(resource.getString("db.driver"));
 			dataSource.setUrl(resource.getString("db.url"));
 			dataSource.setUsername(resource.getString("db.username"));

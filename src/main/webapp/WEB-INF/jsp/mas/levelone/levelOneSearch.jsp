@@ -13,7 +13,7 @@
 
 <script>
     $(document).ready(function() {
-        $('#caseAssign').DataTable({
+        const table = $('#caseAssign').DataTable({
             // "buttons": true,
             "searching": false,
             "bSort": false,
@@ -27,13 +27,43 @@
                     "<'row'<'col-sm-12'tr>>" +
                 "<'row'<'col-sm-12 col-md-5'<'float-left'p>><'col-sm-12 col-md-7'f>>"
         });
+        table.on('click', 'tbody tr', function (e) {
+            e.currentTarget.classList.toggle('selected');
+        });
     } );
+
+   function removebackground(){
+        function removee(element, errorClass, validClass) {
+            $(element).addClass('remove');
+        }
+    }
+
 </script>
+<style>
+    .swal2-success-line-tip, .swal2-success-line-long {
+        font-size: 16px !important;
+    }
+    .swal2-x-mark-line-right, .swal2-x-mark-line-left {
+        font-size: 16px !important;
+    }
+    .icon-size{
+        font-size: 16px !important;
+    }
+    .remove{
+        background: none !important;
+    }
+    .selected{
+        background-color: #efef54;
+    }
+    table#caseAssign   tbody tr:hover{
+        background:none !important;
+    }
+</style>
 
 <script>
     function submitCase() {
 
-            document.getElementById('submitcase').action = "/refreshNewCase";
+            document.getElementById('submitcase').action = "/MVS/refreshNewCase";
             document.getElementById('submitcase').submit();
 
     }
@@ -119,7 +149,10 @@
         icon: "success",
         title: 'Success!',
         text: '${successMessage}',
-        confirmButtonText: 'OK'
+        confirmButtonText: 'OK',
+        customClass: {
+            icon: "icon-size"
+        }
     });
 </script>
 </c:if>
@@ -129,7 +162,10 @@
         icon: "error",
         title: 'Faliure!',
         text: '${faliureMessage}',
-        confirmButtonText: 'OK'
+        confirmButtonText: 'OK',
+        customClass: {
+            icon: "icon-size"
+        }
     });
 </script>
 </c:if>
@@ -169,7 +205,7 @@
                                             <th>Process</th>
                                          </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody onmouseover="removebackground()">
                                          <c:forEach var="emp" items="${galleryList}" varStatus="counter">
                                             <tr>
                                                 <td>${counter.count}</td>
@@ -180,8 +216,7 @@
                                                 <td>
                                                     <fmt:formatDate value="${emp.createdDate}" type="date"
                                                                     pattern="dd-MMM-yyyy"/></td>
-                                                <td>
-                                                    <c:out value="${galleryList.size()}"></c:out>
+                                                <td style="align-items: center; justify-content: center;">
                                                    
                                                     <c:choose>
                                                         <c:when test="${emp.op1userId != userid && emp.op2userId != userid}">
@@ -192,21 +227,22 @@
                                                         <c:param name="requestId" value="${emp.reqid}"></c:param>
                                                         <c:param name="caseListNo" value="${counter.count} of ${galleryList.size()}"></c:param>
                                                           </c:url>">
-                                                                <i class="nav-icon fas fa-edit" aria-hidden="true"></i>
+                                                                <i class="nav-icon fas fa-edit fa-2x" aria-hidden="true"></i>
                                                             </a>
+
 
                                                         </c:when>
                                                         <c:when test="${emp.op2verifyStatus == 'nohit'}">
-                                                            <button type="submit" class="btn btn-success" >No Hit</button>
+                                                            <button type="button" class="btn btn-success" >No Hit</button>
                                                         </c:when>
                                                         <c:when test="${emp.op2verifyStatus == 'hit'}">
-                                                            <button type="submit" class="btn btn-danger" >Hit</button>
+                                                            <button type="button" class="btn btn-danger" >Hit</button>
                                                         </c:when>
                                                         <c:when test="${emp.op1verifyStatus == 'nohit'}">
-                                                            <button type="submit" class="btn btn-success" >No Hit</button>
+                                                            <button type="button" class="btn btn-success" >No Hit</button>
                                                         </c:when>
                                                         <c:when test="${emp.op1verifyStatus == 'hit'}">
-                                                            <button type="submit" class="btn btn-danger" >Hit</button>
+                                                            <button type="button" class="btn btn-danger" >Hit</button>
                                                         </c:when>
                                                     </c:choose>
 

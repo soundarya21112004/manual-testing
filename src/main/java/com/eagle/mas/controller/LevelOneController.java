@@ -156,6 +156,7 @@ public class LevelOneController {
         System.out.println("LevelOneController.leveloneSearchByName().probe="+probe);
         System.out.println("LevelOneController.leveloneSearchByName().candidate="+candidate);
         String processStatusExist ="";
+        boolean psnGenerated =false;
 
         HttpSession session = request.getSession();
         session.setAttribute("regId",probe);
@@ -678,6 +679,8 @@ public class LevelOneController {
 
 
                 try {
+
+                    psnGenerated = mvs.getIdentityDetails(candidate);
                     JSONParser jsonParser1 = new JSONParser();
 //                jsonObject = (JSONObject) jsonParser.parse(mvs.fileDataProb(filename, probe));
                     // jsonObject = (JSONObject) jsonParser.parse(reader2);
@@ -1009,6 +1012,7 @@ public class LevelOneController {
                         model.addAttribute("rightfingerCan", rightfingerCan);
                         model.addAttribute("irisCanScore", irisCanScore);
                         model.addAttribute("CanFaceImage", CanFaceImage);
+
                     }
                     catch (Exception e){
                         logger.error(logger("LevelOneController","leveloneSearchByName",getUtcTime(), e.toString()));
@@ -1018,6 +1022,10 @@ public class LevelOneController {
                     logger.error(logger("LevelOneController","leveloneSearchByName",getUtcTime(), e.toString()));
                 }
             }
+        model.addAttribute("psnGenerated",psnGenerated);
+        model.addAttribute("probeid",probe);
+        model.addAttribute("canid",candidate);
+        System.out.println("checking candi and probe id in jsp : "+ probe + " : " +candidate);
             nextPage="mvsLevelOneDetail";
 //        } else {
 //            System.out.println("Processing ");

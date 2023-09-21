@@ -166,9 +166,20 @@ public interface RegManualVerificationRepository extends CrudRepository<Register
 //            query="SELECT s FROM Student s WHERE s.id LIKE :id",
 //            lockMode = WRITE)
 
-//    @Modifying
-//    @Query()
-//    public void resetCaseDecisions();
+    @Modifying
+    @Query(value = "update public.register_manual_verification set operator1_verify_status=null,operator1_upd_date=null,\n" +
+            "operator1_upd_by=null,operator1_comment=null,operator1_user_id=null where req_id =:reqId and sno =:sno",nativeQuery = true)
+    public void resetOp1CaseDecisions(@Param("reqId") String reqId,@Param("sno") int sno);
+
+    @Modifying
+    @Query(value = "update public.register_manual_verification set operator2_verify_status=null,operator2_upd_date=null,\n" +
+            "operator2_upd_by=null,operator2_comment=null,operator2_user_id=null where req_id =:reqId and sno =:sno",nativeQuery = true)
+    public void resetOp2CaseDecisions(@Param("reqId") String reqId,@Param("sno") int sno);
+
+    @Modifying
+    @Query(value = "update public.register_manual_verification set supervisor_verify_status=null,supervisor_upd_date=null,\n" +
+            "supervisor_upd_by=null,supervisor_comment=null,user_id=null where req_id =:reqId and sno =:sno" ,nativeQuery = true)
+    public void resetSupervisorCaseDecisions(@Param("reqId") String reqId,@Param("sno") int sno);
 
     @Query(value = "SELECT t1 FROM RegisterManualVerification t1 where t1.reqid = :reqId and t1.regId <> t1.matchedRefId")
     List<RegisterManualVerification> clusterOfRids(@Param("reqId") String reqId);
@@ -188,9 +199,14 @@ public interface RegManualVerificationRepository extends CrudRepository<Register
 
 //    @Query(value = "SELECT t1 FROM RegManualVerification t1 where t1.statusCode='1'")
 @Query(value="select t1 from RegisterManualVerification t1 where (t1.statusCode='1')" +
-        " and ((t1.op1verifyStatus='hit' AND t1.op2verifyStatus ='nohit') " +
+        " and (t1.proStatus is null or t1.proStatus='0') and ((t1.op1verifyStatus='hit' AND t1.op2verifyStatus ='nohit') " +
         "OR (t1.op1verifyStatus='nohit' AND t1.op2verifyStatus='hit')) order by t1.createdDate asc")
 List listOfRidsForL2();
+
+    @Query(value="select t1.reqid from RegisterManualVerification t1 where (t1.statusCode='1')" +
+            " and (t1.userId<>:userid or t1.userId is null ) and (t1.proStatus is null or t1.proStatus='0') and ((t1.op1verifyStatus='hit' AND t1.op2verifyStatus ='nohit') " +
+            "OR (t1.op1verifyStatus='nohit' AND t1.op2verifyStatus='hit')) order by t1.createdDate asc")
+    String getReqIdForL2(@Param("userid") String userid);
 
     @Query(value = "SELECT t1 FROM RegisterManualVerification t1 where (t1.statusCode='2' and t1.supervisorVerifyStatus = 'hit') or (t1.statusCode='1' and (t1.op1verifyStatus='hit' AND t1.op2verifyStatus ='hit')) order by t1.createdDate asc")
     List listOfRidsForL3();

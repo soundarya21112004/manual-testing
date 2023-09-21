@@ -135,13 +135,18 @@
 package com.eagle.mas.service;
 
 
+import com.eagle.mas.config.ConstantValue;
 import com.eagle.mas.model.RegisterManualVerification;
 import com.eagle.mas.model.UserCaseAssignment;
 import com.eagle.mas.repository.RegManualVerificationRepository;
 import com.eagle.mas.repository.UserCaseAssignmentRepo;
+import com.eagle.mas.service.impl.CredentialAPI;
+import com.eagle.mas.service.impl.TokenGenerator;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -165,6 +170,11 @@ public class ManualVerificationService {
 	@Autowired
 	UserCaseAssignmentRepo caseRepo;
 
+	@Autowired
+	CredentialAPI api;
+
+	@Autowired
+	TokenGenerator tokenGenerator;
 
 	public int countAllByRegId(String regid) {
 		return repo.countAllByRegId(regid);
@@ -357,60 +367,41 @@ public int totalResponseCases(String regid){
 		}
 	}
 
-	@Scheduled(initialDelay = 10000, fixedDelay = 10000)
+	@Scheduled(initialDelay = 10000, fixedDelay = 60000)
 	public void checkTimelpseAndUnassign(){
 		List<UserCaseAssignment> userCaseAssignment = caseRepo.findAll();
 		List<UserCaseAssignment> result = userCaseAssignment.stream().filter(e->
 			 LocalDateTime.now(ZoneId.of("UTC")).isAfter(e.getPickupDtimes().plusHours(72))
 		).collect(Collectors.toList());
+		if(result.size()>0) {
+			result.forEach(e -> {
+				List<RegisterManualVerification> cases = repo.clusterOfRids(e.getRequestId());
+				List<RegisterManualVerification> finalList = cases.stream().filter(t -> {
+					if (t.getOp1userId() != null && t.getOp1userId().equals(e.getUserId())) {
+						resetOp1Decisions(t);
+					} else if (t.getOp2userId() != null && t.getOp2userId().equals(e.getUserId())) {
+						resetOp2Decisions(t);
+					} else if (t.getUserId() != null && t.getUserId().equals(e.getUserId())) {
+						resetSupervisorDecisions(t);
+					}
+					return false;
+				}).collect(Collectors.toList());
 
-
-//		result.forEach(e-> {
-//			List<RegisterManualVerification> cases = repo.clusterOfRids(e.getRequestId());
-//			cases.stream().filter(t->
-//				t.getOp1userId().equals(e.getUserId())
-//			).forEach(this::resetOp1Decisions);
-//			cases.stream().filter(t->
-//					t.getOp2userId().equals(e.getUserId())
-//			).forEach(this::resetOp2Decisions);
-//			cases.stream().filter(t->
-//					t.getUserId().equals(e.getUserId())
-//			).forEach(this::resetOp1Decisions);
-//		});
-		for (UserCaseAssignment s :result
-			 ) {
-			System.out.println("req id : "+ s.getRequestId());
-			System.out.println("user id : "+ s.getUserId());
-			List<RegisterManualVerification> ca = repo.clusterOfRids(s.getRequestId());
-
-			for (RegisterManualVerification reg : ca
-				 ) {
-				System.out.println("operator user id : "+reg.getOp1userId());
-				System.out.println("operator user id : "+reg.getOp2userId());
-				System.out.println("operator user id : "+reg.getUserId());
-				System.out.println("operator s user id : "+s.getUserId());
-				if(reg.getOp1userId().equals(s.getUserId())) {
-					System.out.println("operator 1 user id : "+reg.getOp1userId());
-				}else if(reg.getOp2userId().equals(s.getUserId())) {
-					System.out.println("operator 2 user id : "+reg.getOp2userId());
-				}else if(reg.getUserId().equals(s.getUserId())) {
-					System.out.println("supervisor user id : "+reg.getUserId());
-				}
-			}
-		}
-		result.forEach(e-> {
-			List<RegisterManualVerification> cases = repo.clusterOfRids(e.getRequestId());
-			cases.stream().filter(t->{
-				if(t.getOp1userId().equals(e.getUserId())){
-					resetOp1Decisions(t);
-				}else if(t.getOp2userId().equals(e.getUserId())){
-					resetOp2Decisions(t);
-				}else if(t.getUserId().equals(e.getUserId())){
-					resetSupervisorDecisions(t);
-				}
-				return false;
+				System.out.println("print final list : " + finalList.size());
 			});
-		});
+
+
+			result.forEach(e -> {
+				List<RegisterManualVerification> cases = repo.clusterOfRids(e.getRequestId());
+				cases.replaceAll(ad -> {
+					ad.setProStatus("0");
+					return ad;
+				});
+				repo.saveAll(cases);
+				caseRepo.deleteById(e.getUserId());
+			});
+		}
+
 
 
 
@@ -421,27 +412,76 @@ public int totalResponseCases(String regid){
 	public void resetOp1Decisions(RegisterManualVerification cases){
 
 		if (cases != null){
-			System.out.println("op1  method");
+			repo.resetOp1CaseDecisions(cases.getReqid(),cases.getSno());
+		}else{
+			System.out.println("case is null op1");
 		}
 	}
 
 	public void resetOp2Decisions(RegisterManualVerification cases){
 		if (cases != null){
-			System.out.println("op2  method");
+			repo.resetOp2CaseDecisions(cases.getReqid(),cases.getSno());
+		}else{
+			System.out.println("case is null op2");
 		}
 	}
 
 	public void resetSupervisorDecisions(RegisterManualVerification cases){
 		if (cases != null){
-			System.out.println("supervisor  method");
+			repo.resetSupervisorCaseDecisions(cases.getReqid(),cases.getSno());
+		}else{
+			System.out.println("case is null sup");
 		}
 	}
 
+	public boolean getIdentityDetails(String id){
+		boolean uinGen=false;
+		try {
+			ResponseEntity<String> tempResponse = api.getApi(ConstantValue.IDENTITY+id, String.class, tokenGenerator.getToken());
+			JSONObject response = validate(tempResponse.getBody());
+
+			if(response != null) {
+				String uin = response.getJSONObject("identity").get("UIN").toString();
+				System.out.println("psn generated :"+uin);
+				return uin != null && !uin.isEmpty();
+			}else{
+				return false;
+			}
+
+		}catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
+	}
+		private JSONObject validate(String response) {
+			JSONObject object = new JSONObject(response);
+			if (object.get("response") != JSONObject.NULL){
+				return (JSONObject) object.get("response");
+			}else if (object.get("errors") != JSONObject.NULL){
+				return null;
+//				throw new ApiResourceException("invalid input parameter -ID");
+			}else {
+				return null;
+//				throw new ApiResourceException("Response is null");
+			}
+
+		}
 
 
 
-	public List listOfRidsForL2() {
+
+	public synchronized List listOfRidsForL2() {
 		return repo.listOfRidsForL2();
+	}
+
+	public synchronized List getClusterForL2(String userid) {
+		List<RegisterManualVerification> list = repo.clusterOfRids(repo.getReqIdForL2(userid));
+		if(!list.isEmpty()){
+			list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
+			repo.saveAll(list);
+			setCaseForUser(list.get(0).getReqid(),userid);
+		}
+		return list;
 	}
 
 
