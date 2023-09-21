@@ -32,35 +32,37 @@
         });
     } );
 
-   function removebackground(){
-        function removee(element, errorClass, validClass) {
-            $(element).addClass('remove');
-        }
-    }
+   // function removebackground(){
+   //      function removee(element, errorClass, validClass) {
+   //          $(element).addClass('remove');
+   //      }
+   //  }
 
 </script>
 <style>
-    .swal2-success-line-tip, .swal2-success-line-long {
-        font-size: 16px !important;
-    }
-    .swal2-x-mark-line-right, .swal2-x-mark-line-left {
-        font-size: 16px !important;
-    }
-    .icon-size{
-        font-size: 16px !important;
-    }
-    .remove{
-        background: none !important;
-    }
+    /*.swal2-success-line-tip, .swal2-success-line-long {*/
+    /*    font-size: 16px !important;*/
+    /*}*/
+    /*.swal2-x-mark-line-right, .swal2-x-mark-line-left {*/
+    /*    font-size: 16px !important;*/
+    /*}*/
+    /*.icon-size{*/
+    /*    font-size: 16px !important;*/
+    /*}*/
+    /*.remove{*/
+    /*    background: none !important;*/
+    /*}*/
     .selected{
         background-color: #efef54;
     }
-    table#caseAssign   tbody tr:hover{
-        background:none !important;
-    }
+    /*table#caseAssign   tbody tr:hover{*/
+    /*    background:none !important;*/
+    /*}*/
 </style>
 
 <script>
+
+
     function submitCase() {
 
             document.getElementById('submitcase').action = "/MVS/refreshNewCase";
@@ -146,7 +148,7 @@
 <c:if test="${successMessage != null}">
 <script>
     Swal.fire({
-        icon: "success",
+        // icon: "success",
         title: 'Success!',
         text: '${successMessage}',
         confirmButtonText: 'OK',
@@ -159,7 +161,7 @@
 <c:if test="${faliureMessage != null}">
 <script>
     Swal.fire({
-        icon: "error",
+        // icon: "error",
         title: 'Faliure!',
         text: '${faliureMessage}',
         confirmButtonText: 'OK',
@@ -194,7 +196,8 @@
 <%--                                    <br>--%>
                         <div modelAttribute="galleryList">
                             <div class="card-body">
-                                <table id="caseAssign" class="table table-bordered table-hover">
+                                <c:set var="processedCount" value= "0" ></c:set>
+                                <table id="caseAssign" class="table table-bordered">
                                     <thead>
                                         <tr>
                                             <th>Sno</th>
@@ -205,7 +208,7 @@
                                             <th>Process</th>
                                          </tr>
                                     </thead>
-                                    <tbody onmouseover="removebackground()">
+                                    <tbody >
                                          <c:forEach var="emp" items="${galleryList}" varStatus="counter">
                                             <tr>
                                                 <td>${counter.count}</td>
@@ -233,16 +236,20 @@
 
                                                         </c:when>
                                                         <c:when test="${emp.op2verifyStatus == 'nohit'}">
-                                                            <button type="button" class="btn btn-success" >No Hit</button>
+                                                           <c:set var="processedCount" value= "${processedCount + 1}" ></c:set>
+                                                            <button type="button" class="btn btn-success"  style="width: 85px;">No Hit</button>
                                                         </c:when>
                                                         <c:when test="${emp.op2verifyStatus == 'hit'}">
-                                                            <button type="button" class="btn btn-danger" >Hit</button>
+                                                            <c:set var="processedCount" value= "${processedCount + 1}" ></c:set>
+                                                            <button type="button" class="btn btn-danger" style="width: 85px;">Hit</button>
                                                         </c:when>
                                                         <c:when test="${emp.op1verifyStatus == 'nohit'}">
-                                                            <button type="button" class="btn btn-success" >No Hit</button>
+                                                            <c:set var="processedCount" value= "${processedCount + 1}" ></c:set>
+                                                            <button type="button" class="btn btn-success"  style="width: 85px;">No Hit</button>
                                                         </c:when>
                                                         <c:when test="${emp.op1verifyStatus == 'hit'}">
-                                                            <button type="button" class="btn btn-danger" >Hit</button>
+                                                            <c:set var="processedCount" value= "${processedCount + 1}" ></c:set>
+                                                            <button type="button" class="btn btn-danger"  style="width: 85px;">Hit</button>
                                                         </c:when>
                                                     </c:choose>
 
@@ -253,7 +260,17 @@
                                 </table>
                                 <br>
                                 <div class="col-md-12">
-                                    <button type="button" class="btn btn-primary float-right" onclick="alertSubmit()">SUBMIT</button>
+                                    <c:choose>
+
+                                        <c:when test="${processedCount == galleryList.size() && galleryList.size() != 0 }">
+                                            <button type="button" class="btn btn-primary float-right" onclick="alertSubmit()">SUBMIT</button>
+                                        </c:when>
+                                        <c:when test="${galleryList.size() == 0 }"></c:when>
+                                        <c:otherwise>
+                                            <button type="button" class="btn btn-primary float-right" onclick="alertSubmit()" disabled>SUBMIT</button>
+                                        </c:otherwise>
+                                    </c:choose>
+<%--                                    <button type="button" class="btn btn-primary float-right" onclick="alertSubmit()">SUBMIT</button>--%>
                                 </div>
 
                             </div>

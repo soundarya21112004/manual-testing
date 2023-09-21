@@ -42,17 +42,14 @@
 </script>
 
 <style>
-	.remove{
-		background: none !important;
-	}
+
 	.selected{
 		background-color: #efef54;
 	}
-	table#caseAssign   tbody tr:hover{
-		background:none !important;
-	}
+
 </style>
 <script>
+
 	function submitCase() {
 
 		document.getElementById('submitCase').action = "/MVS/refreshClusterCaseL2";
@@ -161,7 +158,8 @@
 					<!-- /.card-header -->
 					<form:form id="submitCase" method="get" modelAttribute="galleryList">
 						<div class="card-body">
-							<table id="supervisorCaseAssign" class="table table-bordered table-hover">
+							<c:set var="processedCount" value= "0" ></c:set>
+							<table id="supervisorCaseAssign" class="table table-bordered">
 								<thead>
 								<tr>
 									<th>Sno </th>
@@ -209,10 +207,12 @@
 			</c:url>">  <i class="nav-icon fas fa-edit fa-2x" aria-hidden="true"></i></a>
 												</c:when>
 												<c:when test="${emp.supervisorVerifyStatus == 'nohit'}">
-													<button type="button" class="btn btn-success" >No Hit</button>
+													<c:set var="processedCount" value= "${processedCount + 1}" ></c:set>
+													<button type="button" class="btn btn-success"  style="width: 85px;">No Hit</button>
 												</c:when>
 												<c:when test="${emp.supervisorVerifyStatus == 'hit'}">
-													<button type="button" class="btn btn-danger" >Hit</button>
+													<c:set var="processedCount" value= "${processedCount + 1}" ></c:set>
+													<button type="button" class="btn btn-danger"  style="width: 85px;">Hit</button>
 												</c:when>
 
 
@@ -232,7 +232,18 @@
 							<c:choose>
 								<c:when test="${typeofview == 'cluster'}">
 									<div class="col-md-12">
-										<button type="button" class="btn btn-primary float-right" onclick="alertSubmit()">SUBMIT</button>
+										<c:choose>
+
+											<c:when test="${processedCount == galleryList.size() && galleryList.size() != 0 }">
+												<button type="button" class="btn btn-primary float-right" onclick="alertSubmit()">SUBMIT</button>
+											</c:when>
+											<c:when test="${galleryList.size() == 0 }"></c:when>
+											<c:otherwise>
+												<button type="button" class="btn btn-primary float-right" onclick="alertSubmit()" disabled>SUBMIT</button>
+											</c:otherwise>
+										</c:choose>
+
+<%--										<button type="button" class="btn btn-primary float-right" onclick="alertSubmit()">SUBMIT</button>--%>
 									</div>
 
 								</c:when>

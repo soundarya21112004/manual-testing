@@ -386,6 +386,8 @@
             icon: "warning",
             // buttons: true,
             showCancelButton: true,
+            confirmButtonText: "CONFIRM",
+            cancelButtonText: "CANCEL",
 
             // showDenyButton: true,
             // dangerMode: true,
@@ -405,6 +407,8 @@
             // text: "Once deleted, you will not be able to recover this imaginary file!",
             icon: "warning",
             showCancelButton: true,
+            confirmButtonText: "CONFIRM",
+            cancelButtonText: "CANCEL",
             // dangerMode: true,
         })
             .then((result) => {
@@ -604,13 +608,13 @@
 <div class="row">
 <%--    <div class="col-sm-10"></div>--%>
     <div class="col-md-6">
-        <span style="padding-left: 10px; margin-left: 15px;margin-bottom: 5px">PROBE ID : </span>
+        <span style="padding-left: 10px; margin-left: 15px;margin-bottom: 5px;font-weight: bold;">PROBE RID : </span>
 <%--        <span style="border: 1px solid black">${probeid}</span>--%>
         <input type="text" class="form-control-sm" style="width: 250px;margin-bottom: 5px" readonly value="${probeid}">
         <span><i class="far fa-square fa-2x"></i></span>
     </div>
     <div class="col-md-4">
-        <span style="padding-left: 10px; margin-left: 20px;margin-bottom: 5px">CANDIDATE ID : </span>
+        <span style="padding-left: 10px; margin-left: 20px;margin-bottom: 5px; font-weight: bold;">CANDIDATE RID : </span>
 <%--        <span style="border: 1px solid black">${canid}</span>--%>
         <input type="text" class="form-control-sm"  style="width: 250px;margin-bottom: 5px" readonly value="${canid}">
         <c:choose>
