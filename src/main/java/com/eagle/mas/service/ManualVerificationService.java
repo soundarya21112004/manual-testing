@@ -371,7 +371,7 @@ public int totalResponseCases(String regid){
 	public void checkTimelpseAndUnassign(){
 		List<UserCaseAssignment> userCaseAssignment = caseRepo.findAll();
 		List<UserCaseAssignment> result = userCaseAssignment.stream().filter(e->
-			 LocalDateTime.now(ZoneId.of("UTC")).isAfter(e.getPickupDtimes().plusHours(72))
+			 LocalDateTime.now(ZoneId.of("UTC")).isAfter(e.getPickupDtimes().plusHours(ConstantValue.elapsedHours))
 		).collect(Collectors.toList());
 		if(result.size()>0) {
 			result.forEach(e -> {

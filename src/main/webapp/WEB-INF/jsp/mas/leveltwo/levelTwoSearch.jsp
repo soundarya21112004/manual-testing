@@ -169,7 +169,7 @@
 									<th>Verified By Operator</th>
 									<th>Verified By Operator</th>
 									<th>Verified Date</th>
-									<th>Process</th>
+									<th>Action</th>
 
 
 								</tr>

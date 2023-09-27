@@ -205,7 +205,7 @@
                                             <th>Candidate Reference Id</th>
                                             <th>Reason</th>
                                             <th>Created Date</th>
-                                            <th>Process</th>
+                                            <th>Action</th>
                                          </tr>
                                     </thead>
                                     <tbody >

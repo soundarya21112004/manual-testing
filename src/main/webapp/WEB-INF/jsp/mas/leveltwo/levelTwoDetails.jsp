@@ -418,7 +418,7 @@
         if (comment != ''){
             // alert(comment);
             // document.getElementById('leveloneform').action = "/saveMVSL2Result?sno=" + sno + "&verifyStatus=hit"+"&statusComment="+comment+"&requestId="+requestId;
-            document.getElementById('leveloneform').action = "/MVS/saveMVSL2Result?sno=" + sno + "&verifyStatus=hit"+"&statusComment="+comment+"&requestId="+requestId;
+            document.getElementById('leveloneform').action = "/MVS/saveMVSL2Result?sno=" + sno + "&verifyStatus=hit"+"&requestId="+requestId+"&statusComment="+comment;
             document.getElementById('leveloneform').submit();
         }else{
             document.getElementById('comment').style.border = "1px solid red";

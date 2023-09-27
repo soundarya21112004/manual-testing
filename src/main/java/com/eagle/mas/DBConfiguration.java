@@ -84,6 +84,7 @@ public class DBConfiguration {
 			ConstantValue.clientId=resource.getString("clientId");
 			ConstantValue.secretKey=resource.getString("secretKey");
 			ConstantValue.IDENTITY=resource.getString("IDENTITY");
+			ConstantValue.elapsedHours=Long.parseLong(resource.getString("case.unassign.time.limit"));
 
 			dataSource.setDriverClassName(resource.getString("db.driver"));
 			dataSource.setUrl(resource.getString("db.url"));

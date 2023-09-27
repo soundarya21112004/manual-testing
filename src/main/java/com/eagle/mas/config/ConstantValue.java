@@ -10,4 +10,5 @@ public class ConstantValue {
     public static  String clientId;
     public static  String secretKey;
     public static  String IDENTITY;
+    public static  long elapsedHours;
 }
