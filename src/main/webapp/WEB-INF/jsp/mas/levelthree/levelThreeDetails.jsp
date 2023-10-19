@@ -574,7 +574,7 @@
 <%--												<a class=" color-font"><b>Room/Floor/Unit No/Building Name</b><input class="values" value="${probeDemoFields.presentAddressLine1}" readonly/></a><br>--%>
 <%--												<a class=" color-font"><b>House/Lot/Block No</b> <input class="values" value="${probeDemoFields.presentAddressLine1}" readonly/></a><br>--%>
 												<a class=" color-font"><b>Residential Address Field</b>
-													<textarea class="values" cols="23" rows="5" readonly><c:out value="${probeDemoFields.presentAddressLine1}" /> </textarea>
+													<textarea class="values" style="resize: none;" cols="23" rows="5" readonly><c:out value="${probeDemoFields.presentAddressLine1}" /> </textarea>
 
 												</a><br>
 <%--												<a class=" color-font"><b>Subdivision</b> <input class="values" value="${probeDemoFields.subDivision}" readonly/></a><br>--%>
@@ -635,7 +635,7 @@
 <%--												<a class=" color-font"><b>Room/Floor/Unit No/Building Name</b><input class="values" value="${CanDemoFields.presentAddressLine1}" readonly/></a><br>--%>
 <%--												<a class=" color-font"><b>House/Lot/Block No</b> <input class="values" value="${CanDemoFields.presentAddressLine1}" readonly/></a><br>--%>
 												<a class=" color-font"><b>Residential Address Field</b>
-													<textarea class="values" cols="23" rows="5" readonly><c:out value="${CanDemoFields.presentAddressLine1}" /> </textarea>
+													<textarea class="values" style="resize: none;" cols="23" rows="5" readonly><c:out value="${CanDemoFields.presentAddressLine1}" /> </textarea>
 
 												</a><br>
 <%--												<a class=" color-font"><b>Subdivision</b> <input class="values" value="${CanDemoFields.subDivision}" readonly/></a><br>--%>

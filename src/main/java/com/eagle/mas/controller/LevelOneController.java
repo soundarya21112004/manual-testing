@@ -2,6 +2,7 @@ package com.eagle.mas.controller;
 
 import com.eagle.mas.bean.GalleryBean;
 import com.eagle.mas.common.ReadImage;
+import com.eagle.mas.dto.SaveMvsResultRequestDto;
 import com.eagle.mas.model.*;
 import com.eagle.mas.repository.BioScoreRepository;
 import com.eagle.mas.service.ManualVerificationService;
@@ -20,7 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,22 +31,16 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import javax.imageio.ImageIO;
 import javax.net.ssl.HttpsURLConnection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1111,12 +1105,16 @@ public class LevelOneController {
         return temp;
     }
 
+//    @RequestMapping(value = "/saveMVSL1Result")
+//    public String saveMVSL1ResultDetail(ModelMap model, HttpServletRequest request,
+//                                        RedirectAttributes redirectAttributes, @RequestParam("sno") String id,
+//                                        @RequestParam("verifyStatus") String status,
+//                                        @RequestParam("statusComment") String comment,
+//                                        @RequestParam("requestId")String requestId) {
+
     @RequestMapping(value = "/saveMVSL1Result")
     public String saveMVSL1ResultDetail(ModelMap model, HttpServletRequest request,
-                                        RedirectAttributes redirectAttributes, @RequestParam("sno") String id,
-                                        @RequestParam("verifyStatus") String status,
-                                        @RequestParam("statusComment") String comment,
-                                        @RequestParam("requestId")String requestId) {
+                                        RedirectAttributes redirectAttributes, SaveMvsResultRequestDto mvsResultRequestDto) {
         System.out.println("Successssslevel1");
         try {
             HttpSession session = request.getSession();
@@ -1131,64 +1129,56 @@ public class LevelOneController {
                 return "redirect:levelOneSearch";
             }
           String probe= (String) session.getAttribute("regId");
-            System.out.println("  :"+probe);
+
           String candidate= (String) session.getAttribute("matchRegId");
-            System.out.println(candidate);
-//            Userdetails user = (Userdetails) session.getAttribute("userdetails");
-            System.out.println("user*********"+session);
-            System.out.println("user"+user);
-            System.out.println("status"+status);
-            System.out.println("statusComment"+comment);
-            System.out.println("user.getFirstnameEn()"+user);
-            System.out.println("user.getFirstnameEn() user name "+user.getFirstnameEn());
 
             session.getAttribute("regId");
             session.getAttribute("candidate");
 
 //            logger.info(logger("LevelOneController", "saveMVSL1ResultDetail",getUtcTime(),"Status"+status));
 
-            String Statuscoment= mvs.getStatuscomment(Integer.parseInt(id));
+            String Statuscoment= mvs.getStatuscomment(Integer.parseInt(mvsResultRequestDto.getSno()));
             System.out.println("StatusComment"+Statuscoment);
 
             int out=0;
             int UINGen=0;
            // int op2Out=0;
             if(Statuscoment==null || Statuscoment.equalsIgnoreCase("")){
-                out = mvs.updateRID(Integer.parseInt(id), status, comment,user.getUserid(), user.getFirstnameEn(),requestId, "0");
+                out = mvs.updateRID(Integer.parseInt(mvsResultRequestDto.getSno()), mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(),user.getUserid(), user.getFirstnameEn(),mvsResultRequestDto.getRequestId(), "0");
             }
             else if(Statuscoment!=null){
-                out = mvs.updateRIDstatus2(Integer.parseInt(id), status, comment, user.getUserid(),user.getFirstnameEn(), requestId,"1");
+                out = mvs.updateRIDstatus2(Integer.parseInt(mvsResultRequestDto.getSno()), mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(), user.getUserid(),user.getFirstnameEn(), mvsResultRequestDto.getRequestId(),"1");
             }
 //            mvs.modifyProcessStatus(Integer.parseInt(id));
 // need to comment and implement while submitting
-            int nhCase = mvs.operatorVerifiedNohit(Integer.parseInt(id));
-            int hCase = mvs.operatorVerifiedHit(Integer.parseInt(id));
+            int nhCase = mvs.operatorVerifiedNohit(Integer.parseInt(mvsResultRequestDto.getSno()));
+            int hCase = mvs.operatorVerifiedHit(Integer.parseInt(mvsResultRequestDto.getSno()));
             System.out.println("check for boolean value"+nhCase);
             int hitUpdate = 0;
             int noHitUpdate = 0;
             if(nhCase == 1){
-                noHitUpdate = mvs.operatorUpdateNohit(Integer.parseInt(id));
+                noHitUpdate = mvs.operatorUpdateNohit(Integer.parseInt(mvsResultRequestDto.getSno()));
             }
             if(hCase == 1){
-                hitUpdate = mvs.operatorUpdateHit(Integer.parseInt(id));
+                hitUpdate = mvs.operatorUpdateHit(Integer.parseInt(mvsResultRequestDto.getSno()));
             }
 
             if(hitUpdate == 1 || noHitUpdate == 1){
                // String ReqId = mvs.getReqId(Integer.parseInt(id));
-               int reqCount = mvs.getReqIdCount(requestId);
+               int reqCount = mvs.getReqIdCount(mvsResultRequestDto.getRequestId());
 
-               int finalIndicateCount = mvs.getFinIndicate(requestId);
+               int finalIndicateCount = mvs.getFinIndicate(mvsResultRequestDto.getRequestId());
                 reqCount = reqCount-1;
                if(reqCount == finalIndicateCount ){
-                   int NHCount=mvs.getCountforResponse(requestId);
-                   String regId=mvs.getRegId(Integer.parseInt(id),requestId);
+                   int NHCount=mvs.getCountforResponse(mvsResultRequestDto.getRequestId());
+                   String regId=mvs.getRegId(Integer.parseInt(mvsResultRequestDto.getSno()),mvsResultRequestDto.getRequestId());
                    System.out.println("NHCount:"+NHCount+"TotalCount:"+reqCount);
                    if(reqCount==NHCount){
                        UINGen=1;
-                       req.responseRequest(requestId,regId,1);
+                       req.responseRequest(mvsResultRequestDto.getRequestId(),regId,1);
                    }
                    else{
-                       req.responseRequest(requestId,regId,0);
+                       req.responseRequest(mvsResultRequestDto.getRequestId(),regId,0);
                    }
 
                }
@@ -1206,7 +1196,7 @@ public class LevelOneController {
 
             }
             logger.info(logger("LevelOneController","saveMVSL1ResultDetail",getUtcTime(),
-                    "OperatorName:"+user.getFirstnameEn()+","+"Command :"+comment+","+"Status :"+status+","+"regId :"+probe+","+"matchedRefId  :"+candidate));
+                    "OperatorName:"+user.getFirstnameEn()+","+"Command :"+mvsResultRequestDto.getStatusComment()+","+"Status :"+mvsResultRequestDto.getVerifyStatus()+","+"regId :"+probe+","+"matchedRefId  :"+candidate));
 
 
 
@@ -1214,6 +1204,7 @@ public class LevelOneController {
 
 
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error(logger("LevelOneController","saveMVSL1ResultDetail",getUtcTime(), e.toString()));
             redirectAttributes.addFlashAttribute("faliureMessage", "ERROR WHILE UPDATING.");
         }

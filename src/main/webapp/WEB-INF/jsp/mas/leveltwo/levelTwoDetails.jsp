@@ -412,14 +412,35 @@
 <script>
 
     function submitHit() {
+
+        const form = document.getElementById('leveloneform');
+        form.action = "/MVS/saveMVSL2Result";
         var sno = document.getElementById('pkID').value;
         var requestId = document.getElementById('requestId').value;
         var comment = document.getElementById('comment').value;
+        var data = {};
+        data["sno"] = sno;
+        data["verifyStatus"] = 'hit';
+        data["requestId"] = requestId;
+        data["statusComment"] = comment;
         if (comment != ''){
+            for (const key in data) {
+                if (data.hasOwnProperty(key)) {
+                    const hiddenField = document.createElement('input');
+                    hiddenField.type = 'hidden';
+                    hiddenField.name = key;
+                    hiddenField.value = data[key];
+
+
+                    form.appendChild(hiddenField);
+                }
+            }
+            document.body.appendChild(form);
+            form.submit();
             // alert(comment);
             // document.getElementById('leveloneform').action = "/saveMVSL2Result?sno=" + sno + "&verifyStatus=hit"+"&statusComment="+comment+"&requestId="+requestId;
-            document.getElementById('leveloneform').action = "/MVS/saveMVSL2Result?sno=" + sno + "&verifyStatus=hit"+"&requestId="+requestId+"&statusComment="+comment;
-            document.getElementById('leveloneform').submit();
+            // document.getElementById('leveloneform').action = "/MVS/saveMVSL2Result?sno=" + sno + "&verifyStatus=hit"+"&requestId="+requestId+"&statusComment="+comment;
+            // document.getElementById('leveloneform').submit();
         }else{
             document.getElementById('comment').style.border = "1px solid red";
             swal.fire({icon: "warning", title: "please fill the comment box"});
@@ -427,13 +448,33 @@
     }
 
     function submitNoHit() {
+        const form = document.getElementById('leveloneform');
+        form.action = "/MVS/saveMVSL2Result";
         var sno = document.getElementById('pkID').value;
         var requestId = document.getElementById('requestId').value;
         var comment = document.getElementById('comment').value;
+        var data = {};
+        data["sno"] = sno;
+        data["verifyStatus"] = 'hit';
+        data["requestId"] = requestId;
+        data["statusComment"] = comment;
         if (comment != ''){
-            document.getElementById('leveloneform').action = "/MVS/saveMVSL2Result?sno=" + sno + "&verifyStatus=nohit&statusComment="+comment+"&requestId="+requestId;
+            for (const key in data) {
+                if (data.hasOwnProperty(key)) {
+                    const hiddenField = document.createElement('input');
+                    hiddenField.type = 'hidden';
+                    hiddenField.name = key;
+                    hiddenField.value = data[key];
+
+
+                    form.appendChild(hiddenField);
+                }
+            }
+            document.body.appendChild(form);
+            form.submit();
+            // document.getElementById('leveloneform').action = "/MVS/saveMVSL2Result?sno=" + sno + "&verifyStatus=nohit&statusComment="+comment+"&requestId="+requestId;
             // document.getElementById('leveloneform').action = "/saveMVSL2Result?sno=" + sno + "&verifyStatus=nohit&statusComment="+comment+"&requestId="+requestId;
-            document.getElementById('leveloneform').submit();
+            // document.getElementById('leveloneform').submit();
         }else{
             document.getElementById('comment').style.border = "1px solid red";
             swal.fire({icon: "warning", title: "please fill the comment box"});
@@ -578,7 +619,7 @@
     <div class="container-fluid">
         <div class="card card-primary">
 
-            <form:form id="leveloneform" modelAttribute="galleryBean" >
+            <form:form id="leveloneform" modelAttribute="galleryBean"  enctype="application/json">
 
             <div class="row">
 
@@ -657,7 +698,7 @@
 
                                                 <a class=" color-font "><b>Residential Address Field</b>
 <%--                                                    <textarea class="values" value="${probeDemoFields.presentAddressLine1}" readonly></textarea>--%>
-                                                    <textarea class="values" cols="23" rows="5" readonly><c:out value="${probeDemoFields.presentAddressLine1}" /> </textarea>
+                                                    <textarea class="values" style="resize: none;" cols="23" rows="5" readonly><c:out value="${probeDemoFields.presentAddressLine1}" /> </textarea>
 
                                                 </a><br>
 
@@ -715,7 +756,7 @@
                                                 <a class=" color-font "><b>Residential Address Field</b>
 <%--                                                    <textarea class="values" value="${CanDemoFields.presentAddressLine1}" readonly></textarea>--%>
 
-                                                    <textarea class="values" cols="23" rows="5" readonly><c:out value="${CanDemoFields.presentAddressLine1}" /> </textarea>
+                                                    <textarea class="values"  style="resize: none;" cols="23" rows="5" readonly><c:out value="${CanDemoFields.presentAddressLine1}" /> </textarea>
 
                                                 </a><br>
                                                 <a class=" color-font "><b>Barangay / Purok</b> <input class="values" value="${CanDemoFields.presentBarangay}" readonly/></a><br>

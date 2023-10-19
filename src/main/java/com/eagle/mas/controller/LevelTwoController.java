@@ -2,6 +2,7 @@ package com.eagle.mas.controller;
 
 import com.eagle.mas.bean.GalleryBean;
 import com.eagle.mas.common.ReadImage;
+import com.eagle.mas.dto.SaveMvsResultRequestDto;
 import com.eagle.mas.model.BioScore;
 import com.eagle.mas.model.RegisterManualVerification;
 import com.eagle.mas.model.UserCaseAssignment;
@@ -1157,10 +1158,7 @@ public class LevelTwoController {
 
     @RequestMapping(value = "/saveMVSL2Result")
     public String saveMVSL2ResultDetail(ModelMap model, HttpServletRequest request,
-                                  RedirectAttributes redirectAttributes, @RequestParam("sno") String id,
-                                  @RequestParam("verifyStatus") String status,
-                                  @RequestParam("statusComment") String comment,
-                                        @RequestParam("requestId")String requestId) {
+                                  RedirectAttributes redirectAttributes, SaveMvsResultRequestDto mvsResultRequestDto) {
         System.out.println("Successssslevel2");
         String viewType = null;
         try {
@@ -1168,38 +1166,32 @@ public class LevelTwoController {
             viewType = (String) session.getAttribute("viewType");
             System.out.println("view ttype + : "+viewType);
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
-            System.out.println("id"+id);
-            System.out.println("user"+user);
-            System.out.println("status"+status);
-            System.out.println("requestId"+requestId);
-            System.out.println("statusComment"+comment);
-            System.out.println("user.getFirstnameEn()"+user);
             String probe= (String) session.getAttribute("regId" );
             String canditate= (String) session.getAttribute("matchId");
-            int out = mvs.updateRIDTwo(Integer.parseInt(id), status, comment, user.getUserid(), user.getFirstnameEn(), requestId,"2");
-            System.out.println("out"+out);
+            int out = mvs.updateRIDTwo(Integer.parseInt(mvsResultRequestDto.getSno()), mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(), user.getUserid(), user.getFirstnameEn(), mvsResultRequestDto.getRequestId(),"2");
+
 //            if(status.equals("decidelater"))
 //                out = mvs.updateRIDTwo(Integer.valueOf(id), status, comment, user.getFirstnameEn(), "1");
 //            else
 //                out = mvs.updateRIDTwo(Integer.valueOf(id), status, comment, user.getFirstnameEn(), "2");
-            int check = mvs.supervisorVerifiedNohit(Integer.parseInt(id));
-            int hitCheck = mvs.supervisorVerifiedHit(Integer.parseInt(id));
+            int check = mvs.supervisorVerifiedNohit(Integer.parseInt(mvsResultRequestDto.getSno()));
+            int hitCheck = mvs.supervisorVerifiedHit(Integer.parseInt(mvsResultRequestDto.getSno()));
             int hitUpdate = 0;
             int noHitUpdate = 0;
             if(check == 1){
-                noHitUpdate = mvs.operatorUpdateNohit(Integer.parseInt(id));
+                noHitUpdate = mvs.operatorUpdateNohit(Integer.parseInt(mvsResultRequestDto.getSno()));
             }
             if(hitCheck == 1){
-                hitUpdate = mvs.operatorUpdateHit(Integer.parseInt(id));
+                hitUpdate = mvs.operatorUpdateHit(Integer.parseInt(mvsResultRequestDto.getSno()));
             }
             if(hitUpdate == 1 || noHitUpdate == 1){
-                String ReqId = mvs.getReqId(Integer.parseInt(id));
+                String ReqId = mvs.getReqId(Integer.parseInt(mvsResultRequestDto.getSno()));
                 int reqCount = mvs.getReqIdCount(ReqId);
                 int finalIndicateCount = mvs.getFinIndicate(ReqId);
                 reqCount = reqCount-1;
                 if(reqCount == finalIndicateCount ){
                     int NHCount=mvs.getCountforResponse(ReqId);
-                    String regId=mvs.getRegId(Integer.parseInt(id),requestId);
+                    String regId=mvs.getRegId(Integer.parseInt(mvsResultRequestDto.getSno()),mvsResultRequestDto.getRequestId());
                     if(reqCount==NHCount)
                         req.responseRequest(ReqId,regId,1);
                     else
@@ -1222,7 +1214,7 @@ public class LevelTwoController {
 
             }
             logger.info(logger("LevelTwoController","saveMVSL1ResultDetail",getUtcTime(),
-                    "OperatorName:"+user.getFirstnameEn()+","+"Command :"+comment+","+"Status :"+status+","+"regId :"+probe+","+"matchedRefId  :"+canditate));
+                    "OperatorName:"+user.getFirstnameEn()+","+"Command :"+mvsResultRequestDto.getStatusComment()+","+"Status :"+mvsResultRequestDto.getVerifyStatus()+","+"regId :"+probe+","+"matchedRefId  :"+canditate));
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("failureMessage", "ERROR WHILE UPDATING.");

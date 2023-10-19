@@ -443,13 +443,34 @@
     //     }
     // });
     function submitHit() {
+        const form = document.getElementById('leveloneform');
+        form.action = "/MVS/saveMVSL1Result";
         var id = document.getElementById('pkID').value;
         var requestId = document.getElementById('requestId').value;
         var comment = document.getElementById('comment').value;
+        var data = {};
+        data["sno"] = id;
+        data["verifyStatus"] = 'hit';
+        data["requestId"] = requestId;
+        data["statusComment"] = comment;
         if (comment != '' ){
+            for (const key in data) {
+                if (data.hasOwnProperty(key)) {
+                    const hiddenField = document.createElement('input');
+                    hiddenField.type = 'hidden';
+                    hiddenField.name = key;
+                    hiddenField.value = data[key];
+
+
+                    form.appendChild(hiddenField);
+                }
+            }
+            document.body.appendChild(form);
+            form.submit();
+            $('#loader').addClass("loader");
             // document.getElementById('leveloneform').action = "/saveMVSL1Result?sno=" + id + "&verifyStatus=hit"+"&statusComment="+comment+"&requestId="+requestId;
-            document.getElementById('leveloneform').action = "/MVS/saveMVSL1Result?sno=" + id + "&verifyStatus=hit"+"&statusComment="+comment+"&requestId="+requestId;
-            document.getElementById('leveloneform').submit();
+            // document.getElementById('leveloneform').action = "/MVS/saveMVSL1Result?sno=" + id + "&verifyStatus=hit"+"&statusComment="+comment+"&requestId="+requestId;
+            // document.getElementById('leveloneform').submit();
         }else{
             document.getElementById('comment').style.border = "1px solid red";
             swal.fire({icon: "warning", title: "please fill the comment box"});
@@ -459,14 +480,38 @@
     }
 
     function submitNoHit() {
+
+        const form = document.getElementById('leveloneform');
+        form.action = "/MVS/saveMVSL1Result";
         var id = document.getElementById('pkID').value;
         var requestId = document.getElementById('requestId').value;
         console.log("requestId"+requestId);
         var comment = document.getElementById('comment').value;
+        var data = {};
+        data["sno"] = id;
+        data["verifyStatus"] = 'nohit';
+        data["requestId"] = requestId;
+        data["statusComment"] = comment;
         if(comment != ''){
+
+            for (const key in data) {
+                if (data.hasOwnProperty(key)) {
+                    const hiddenField = document.createElement('input');
+                    hiddenField.type = 'hidden';
+                    hiddenField.name = key;
+                    hiddenField.value = data[key];
+
+
+                    form.appendChild(hiddenField);
+                }
+            }
             // document.getElementById('leveloneform').action = "/saveMVSL1Result?sno=" + id + "&verifyStatus=nohit"+"&statusComment="+comment+"&requestId="+requestId;
-            document.getElementById('leveloneform').action = "/MVS/saveMVSL1Result?sno=" + id + "&verifyStatus=nohit"+"&requestId="+requestId+"&statusComment="+comment;
-            document.getElementById('leveloneform').submit();
+            //
+            document.body.appendChild(form);
+            // document.getElementById('leveloneform').action = "/MVS/saveMVSL1Result?sno=" + id + "&verifyStatus=nohit"+"&requestId="+requestId+"&statusComment="+comment;
+            // document.getElementById('leveloneform').submit();
+
+            form.submit();
         }else{
             document.getElementById('comment').style.border = "1px solid red";
             swal.fire({icon: "warning", title: "please fill the comment box"});
@@ -502,6 +547,10 @@
     //         type: "GET",
     //         url: "/MVS/resetProcrssStatus?sno="+id // the URL of the controller action method
     //     });
+    // }
+
+    // window.onunload = window.onbeforeunload = function() {
+    //     $('#loader').addClass("hide-loader");
     // }
 </script>
 <style>
@@ -590,6 +639,7 @@
         float:right;
     }
 </style>
+
 <section class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
@@ -633,7 +683,7 @@
 
             <%--            action="/saveMVSL1Result" method="post"--%>
 
-            <form:form id="leveloneform" modelAttribute="galleryBean" >
+            <form:form id="leveloneform" modelAttribute="galleryBean" enctype="application/json">
 
             <div class="row">
 
@@ -792,7 +842,7 @@
 <%--                                                <a class=" color-font "><b>House/Lot/Block No</b> <input class="values" value="${probeDemoFields.presentAddressLine1}" readonly/></a><br>--%>
                                                 <a class=" color-font "><b>Residential Address Field</b>
 
-                                                    <textarea class="values" cols="23" rows="5" readonly > <c:out value="${probeDemoFields.presentAddressLine1}" /> </textarea>
+                                                    <textarea class="values" style="resize: none;" cols="23" rows="5" readonly > <c:out value="${probeDemoFields.presentAddressLine1}" /> </textarea>
 
 
 <%--                                                    <input class="values" style="height: " value="${probeDemoFields.presentAddressLine1}" readonly></input>--%>
@@ -894,7 +944,7 @@
 <%--                                                <a class=" color-font "><b>Room/Floor/Unit No/Building Name</b><input class="values" value="${CanDemoFields.presentAddressLine1}" readonly/></a><br>--%>
 <%--                                                <a class=" color-font "><b>House/Lot/Block No</b> <input class="values" value="${CanDemoFields.presentAddressLine1}" readonly/></a><br>--%>
                                                 <a class=" color-font "><b>Residential Address Field</b>
-                                                    <textarea class="values" cols="23" rows="5" readonly><c:out value="${CanDemoFields.presentAddressLine1}" /> </textarea></a><br>
+                                                    <textarea class="values" style="resize: none;" cols="23" rows="5" readonly><c:out value="${CanDemoFields.presentAddressLine1}" /> </textarea></a><br>
 
 <%--                                                    <textarea class="values" modelAttributes="${CanDemoFields.presentAddressLine1}" readonly></textarea></a><br>--%>
 <%--                                                <a class=" color-font "><b>Subdivision</b> <input class="values" value="${CanDemoFields.subDivision}" readonly/></a><br>--%>
