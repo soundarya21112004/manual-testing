@@ -5,12 +5,24 @@
          pageEncoding="UTF-8" %>
 <html lang="en">
 
+<div id="spinner" class="loaderWrapper" style="display: none;">
+    <div class="loader" style="position: absolute; top: 50%;left: 25%">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </div>
+</div>
+
+
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.css">
 
 <script src="plugins/sweetalert2/sweetalert2.js"></script>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script src="/plugins/BUP.js"></script>
+
+
+
 
 <%--<script type="text/javascript">
     $(function () {
@@ -276,8 +288,69 @@
     .secondary{
         color: #1f4380;
     }
+
+
+
+
+
+
+    .loaderWrapper { position: fixed;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        z-index: 1000;
+        pointer-events: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: fadeLoader 0.6s 10s ease forwards; }
+
+    .loader {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        z-index: 999;
+    }
+
+    .loader .bar
+    {
+        width: 10px;
+        height: 5px;
+        background: #000000;
+        margin: 2px;
+        animation: bar 1s infinite linear;
+    }
+
+    .loader .bar:nth-child(1) {
+        animation-delay: 0s;
+    }
+    .loader .bar:nth-child(2)
+    { animation-delay: 0.25s;
+    }
+    .loader .bar:nth-child(3)
+    {
+        animation-delay: 0.5s;
+    }
+    @keyframes bar
+    {
+        0% {
+            transform: scaleY(1) scaleX(0.5);
+        } 50% {
+                      transform: scaleY(10) scaleX(1);
+                  }
+        100% { transform: scaleY(1) scaleX(0.5); }
+    }
+    @keyframes fadeLoader { to { opacity: 0; } }
+
+
 </style>
+
+
+
 <script>
+
+
     <%--    jQuery(document).ready(function($) {--%>
     <%--        // if (window.history && window.history.pushState) {--%>
     <%--        //     alert('Back button ');--%>
@@ -376,6 +449,8 @@
         document.getElementById('img01').setAttribute('draggable', false);
     });
 </script>
+
+
 <script>
 
     function alertHit(){
@@ -383,7 +458,7 @@
         swal.fire({
             title: "<div>You are about to tag this case as <span style='color:red; font-style: italic; text-decoration: underline;'>HIT</span></div>",
             // text: "Once deleted, you will not be able to recover this imaginary file!",
-            icon: "warning",
+            // icon: "warning",
             // buttons: true,
             showCancelButton: true,
             confirmButtonText: "CONFIRM",
@@ -394,7 +469,10 @@
         })
             .then((result) => {
                 if (result.isConfirmed) {
+
                     submitHit();
+
+
                 } else {
                     swal.fire({icon: "warning", title: "cancelled"});
                 }
@@ -402,10 +480,11 @@
     }
 
     function alertNoHit(){
+
         swal.fire({
             title: "<div>You are about to tag this case as <span style='color:green; font-style: italic; text-decoration: underline;'>NO HIT</span></div>",
             // text: "Once deleted, you will not be able to recover this imaginary file!",
-            icon: "warning",
+            // icon: "warning",
             showCancelButton: true,
             confirmButtonText: "CONFIRM",
             cancelButtonText: "CANCEL",
@@ -416,11 +495,15 @@
                     submitNoHit();
                 } else {
                     swal.fire({icon: "warning", title: "cancelled"});
+
                 }
             });
     }
 
 </script>
+
+
+
 <script>
 
     // jQuery(document).ready(function($) {
@@ -442,9 +525,17 @@
     //
     //     }
     // });
+
+function addClass(){
+  document.getElementById("spinner").style.display="block";
+
+}
+
+
     function submitHit() {
         const form = document.getElementById('leveloneform');
         form.action = "/MVS/saveMVSL1Result";
+        // form.action = "/saveMVSL1Result";
         var id = document.getElementById('pkID').value;
         var requestId = document.getElementById('requestId').value;
         var comment = document.getElementById('comment').value;
@@ -467,14 +558,16 @@
             }
             document.body.appendChild(form);
             form.submit();
-            $('#loader').addClass("loader");
+            addClass();
+
+
+            // $('#loader').addClass("loader");
             // document.getElementById('leveloneform').action = "/saveMVSL1Result?sno=" + id + "&verifyStatus=hit"+"&statusComment="+comment+"&requestId="+requestId;
             // document.getElementById('leveloneform').action = "/MVS/saveMVSL1Result?sno=" + id + "&verifyStatus=hit"+"&statusComment="+comment+"&requestId="+requestId;
             // document.getElementById('leveloneform').submit();
         }else{
             document.getElementById('comment').style.border = "1px solid red";
             swal.fire({icon: "warning", title: "please fill the comment box"});
-
 
         }
     }
@@ -483,6 +576,7 @@
 
         const form = document.getElementById('leveloneform');
         form.action = "/MVS/saveMVSL1Result";
+        // form.action = "/saveMVSL1Result";
         var id = document.getElementById('pkID').value;
         var requestId = document.getElementById('requestId').value;
         console.log("requestId"+requestId);
@@ -512,6 +606,8 @@
             // document.getElementById('leveloneform').submit();
 
             form.submit();
+            addClass();
+
         }else{
             document.getElementById('comment').style.border = "1px solid red";
             swal.fire({icon: "warning", title: "please fill the comment box"});
@@ -550,7 +646,9 @@
     // }
 
     // window.onunload = window.onbeforeunload = function() {
-    //     $('#loader').addClass("hide-loader");
+    //     // $('#loader').addClass("hide-loader");
+    //     var element = document.getElementById("spinner");
+    //     element.classList.remove("loaderWrapper");
     // }
 </script>
 <style>
@@ -646,8 +744,8 @@
             <div class="col-sm-6"></div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="dashBoard">Home</a></li>
-                    <li class="breadcrumb-item active">Operators</li>
+                    <li class="breadcrumb-item"><a href="dashBoard" >Home</a></li>
+                    <li class="breadcrumb-item active" >Operators</li>
                 </ol>
             </div>
         </div>
@@ -655,27 +753,71 @@
     <!-- /.container-fluid -->
 </section>
 
+
+
 <div class="row">
-<%--    <div class="col-sm-10"></div>--%>
-    <div class="col-md-6">
-        <span style="padding-left: 10px; margin-left: 15px;margin-bottom: 5px;font-weight: bold;">PROBE RID : </span>
-<%--        <span style="border: 1px solid black">${probeid}</span>--%>
-        <input type="text" class="form-control-sm" style="width: 250px;margin-bottom: 5px" readonly value="${probeid}">
-        <span><i class="far fa-square fa-2x"></i></span>
+    <%--    <div class="col-sm-10"></div>--%>
+    <div class="col-md-6" style="padding-left: 30px;padding-bottom: 10px;position: relative">
+        <span>PROBE RID : </span>
+        <%--        <span style="border: 1px solid black">${probeid}</span>--%>
+        <input type="text" class="form-control-sm"  readonly value="${probeid}">
+        <span style="position: absolute;top:-2px; margin-left: 10px"><i class="far fa-square fa-2x"></i></span>
     </div>
-    <div class="col-md-4">
-        <span style="padding-left: 10px; margin-left: 20px;margin-bottom: 5px; font-weight: bold;">CANDIDATE RID : </span>
-<%--        <span style="border: 1px solid black">${canid}</span>--%>
-        <input type="text" class="form-control-sm"  style="width: 250px;margin-bottom: 5px" readonly value="${canid}">
+    <div class="col-md-4" style="padding-left: 15px;padding-bottom: 10px;position: relative">
+        <span >CANDIDATE RID : </span>
+        <%--        <span style="border: 1px solid black">${canid}</span>--%>
+        <input type="text" class="form-control-sm"   readonly value="${canid}">
         <c:choose>
-            <c:when test="${psnGenerated  == true}"><span><i class="far fa-check-square fa-2x"></i></span></c:when>
-            <c:when test="${psnGenerated  == false}"><span><i class="far fa-square fa-2x"></i></span></c:when>
+            <c:when test="${psnGenerated  == true}"><span style="position: absolute;top:-2px; margin-left: 10px"><i class="far fa-check-square fa-2x"></i></span></c:when>
+            <c:when test="${psnGenerated  == false}"><span style="position: absolute;top:-2px; margin-left: 10px"><i class="far fa-square fa-2x"></i></span></c:when>
         </c:choose>
     </div>
     <div class="col-md-2">
-        <h6 style="text-align: center"><span style="padding-left: 10px">${count}</span> candidates </h6>
+        <h6 style="text-align: center;"><span>${count}<br></span> candidates </h6>
     </div>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<%--<div class="row">--%>
+<%--&lt;%&ndash;    <div class="col-sm-10"></div>&ndash;%&gt;--%>
+<%--    <div class="col-md-6">--%>
+<%--        <span style="padding-left: 10px; margin-left: 15px;margin-bottom: 5px;font-weight: bold;position: relative;top: 25px;">PROBE RID : </span>--%>
+<%--&lt;%&ndash;        <span style="border: 1px solid black">${probeid}</span>&ndash;%&gt;--%>
+<%--        <input type="text" class="form-control-sm" style="width: 250px;margin-bottom: 5px;position: relative;top:25px;" readonly value="${probeid}">--%>
+<%--        <span style="position: relative;top:32px"><i class="far fa-square fa-2x"></i></span>--%>
+<%--    </div>--%>
+<%--    <div class="col-md-4" style="position: relative;left: 10px">--%>
+<%--        <span style="margin-left: 20px;margin-bottom: 5px; font-weight: bold;position: relative;right:28px;top:35px">CANDIDATE RID : </span>--%>
+<%--&lt;%&ndash;        <span style="border: 1px solid black">${canid}</span>&ndash;%&gt;--%>
+<%--        <input type="text" class="form-control-sm"  style="width: 250px;margin-bottom: 5px;position: relative;left:110px;" readonly value="${canid}">--%>
+<%--        <c:choose>--%>
+<%--            <c:when test="${psnGenerated  == true}"><span style="position:relative;left:112px;top:5px"><i class="far fa-check-square fa-2x"></i></span></c:when>--%>
+<%--            <c:when test="${psnGenerated  == false}"><span style="position:relative;left:112px;top:5px"><i class="far fa-square fa-2x"></i></span></c:when>--%>
+<%--        </c:choose>--%>
+<%--    </div>--%>
+<%--    <div class="col-md-2">--%>
+<%--        <h6 style="text-align: center"><span style="padding-left: 10px;position:relative;top: 35px">${count}</span> candidates </h6>--%>
+<%--    </div>--%>
+<%--</div>--%>
+
+
+
+
+
+
+
+
 <!-- Main content -->
 <section class="content">
     <div class="container-fluid">
@@ -1186,8 +1328,11 @@
                         <div class="card card-primary">
                             <div class="card-header p-2">
                                 <h3 class="card-title"><b>MANUAL ADJUDICATION DECISION AND REMARKS OPERATOR 1</b></h3>
-                                <div class="col-md-8 float-right">${commentABIS}</div>
+<%--                                <div class="col-md-8 float-right">${commentABIS}</div>--%>
+
                             </div>
+                            <input type="text" id="commentABIS" value="${commentABIS}" style="padding: 0 7em 2em 0;" />
+
                            </div>
                     </div></div>
 
@@ -1200,8 +1345,11 @@
                         <div class="card card-primary">
                             <div class="card-header p-2">
                                 <h3 class="card-title"><b>MANUAL ADJUDICATION DECISION AND REMARKS OPERATOR 2</b></h3>
-                                <div class="col-md-8 float-right">${comment1ABIS}</div>
+<%--                                <div class="col-md-8 float-right">${comment1ABIS}</div>--%>
                             </div>
+
+                            <input type="text" id="comment1ABIS"  value="${comment1ABIS}" style="padding: 0 7em 2em 0;" />
+
                              </div>
                     </div></div>
 
@@ -1219,7 +1367,9 @@
         </form:form>
 
         <div class="card-footer">
-
+            <div class="spinner-border" role="status" style="display: none; transition: 4s" id="spinner">
+                <span class="visually-hidden"></span>
+            </div>
             <button type="submit" id="button" class="btn btn-success" onclick="alertNoHit();">No Hit</button>
             <button type="submit" class="btn btn-danger" onclick="return alertHit()">Hit</button>
 

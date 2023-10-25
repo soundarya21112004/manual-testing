@@ -30,6 +30,10 @@
 			"pagingType": "simple",
 			"language": {
 				"info": "Showing page _PAGE_ of _PAGES_"
+				'paginate': {
+					'previous': '<span >BACK</span>',
+					'next': '<span >NEXT</span>'
+				}
 			},
 			"dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6 '<'float-right'i>>>" +
 					"<'row'<'col-sm-12'tr>>" +

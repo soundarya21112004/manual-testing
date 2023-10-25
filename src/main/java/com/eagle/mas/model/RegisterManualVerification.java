@@ -1,9 +1,12 @@
 package com.eagle.mas.model;
 
+import lombok.ToString;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 @Entity
+@ToString
 @Table(name = "register_manual_verification")
 public class RegisterManualVerification implements Serializable  {
 

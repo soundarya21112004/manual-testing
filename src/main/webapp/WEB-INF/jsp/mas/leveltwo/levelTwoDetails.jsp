@@ -5,6 +5,15 @@
          pageEncoding="UTF-8" %>
 <html lang="en">
 
+<div id="spinner" class="loaderWrapper" style="display: none;">
+    <div class="loader" style="position: absolute; top: 50%;left: 25%">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </div>
+</div>
+
+
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.css">
 
@@ -273,6 +282,60 @@
         width: 35px;
     }
 
+
+
+
+    .loaderWrapper { position: fixed;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        z-index: 1000;
+        pointer-events: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: fadeLoader 0.6s 10s ease forwards; }
+
+    .loader {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        z-index: 999;
+    }
+
+    .loader .bar
+    {
+        width: 10px;
+        height: 5px;
+        background: #000000;
+        margin: 2px;
+        animation: bar 1s infinite linear;
+    }
+
+    .loader .bar:nth-child(1) {
+        animation-delay: 0s;
+    }
+    .loader .bar:nth-child(2)
+    { animation-delay: 0.25s;
+    }
+    .loader .bar:nth-child(3)
+    {
+        animation-delay: 0.5s;
+    }
+    @keyframes bar
+    {
+        0% {
+            transform: scaleY(1) scaleX(0.5);
+        } 50% {
+              transform: scaleY(10) scaleX(1);
+          }
+        100% { transform: scaleY(1) scaleX(0.5); }
+    }
+    @keyframes fadeLoader { to { opacity: 0; } }
+
+
+
 </style>
 <script>
     function imageZoom(imgID, resultID) {
@@ -371,7 +434,7 @@
         swal.fire({
             title: "<div>You are about to tag this case as <span style='color:red; font-style: italic; text-decoration: underline;'>HIT</span></div>",
             // text: "Once deleted, you will not be able to recover this imaginary file!",
-            icon: "warning",
+            // icon: "warning",
             // buttons: true,
             showCancelButton: true,
             confirmButtonText: "CONFIRM",
@@ -393,7 +456,7 @@
         swal.fire({
             title: "<div>You are about to tag this case as <span style='color:green; font-style: italic; text-decoration: underline;'>NO HIT</span></div>",
             // text: "Once deleted, you will not be able to recover this imaginary file!",
-            icon: "warning",
+            // icon: "warning",
             showCancelButton: true,
             confirmButtonText: "CONFIRM",
             cancelButtonText: "CANCEL",
@@ -409,7 +472,17 @@
     }
 
 </script>
+
+
+
+
 <script>
+
+    function addClass(){
+        document.getElementById("spinner").style.display="block";
+
+    }
+
 
     function submitHit() {
 
@@ -437,6 +510,10 @@
             }
             document.body.appendChild(form);
             form.submit();
+
+            addClass();
+
+
             // alert(comment);
             // document.getElementById('leveloneform').action = "/saveMVSL2Result?sno=" + sno + "&verifyStatus=hit"+"&statusComment="+comment+"&requestId="+requestId;
             // document.getElementById('leveloneform').action = "/MVS/saveMVSL2Result?sno=" + sno + "&verifyStatus=hit"+"&requestId="+requestId+"&statusComment="+comment;
@@ -472,6 +549,10 @@
             }
             document.body.appendChild(form);
             form.submit();
+
+            addClass();
+
+
             // document.getElementById('leveloneform').action = "/MVS/saveMVSL2Result?sno=" + sno + "&verifyStatus=nohit&statusComment="+comment+"&requestId="+requestId;
             // document.getElementById('leveloneform').action = "/saveMVSL2Result?sno=" + sno + "&verifyStatus=nohit&statusComment="+comment+"&requestId="+requestId;
             // document.getElementById('leveloneform').submit();
@@ -593,27 +674,60 @@
     </div>
     <!-- /.container-fluid -->
 </section>
+
+
 <div class="row">
-<%--    <div class="col-sm-10"></div>--%>
-    <div class="col-md-6">
-        <span style="padding-left: 10px; margin-left: 15px;margin-bottom: 5px;font-weight: bold;">PROBE RID : </span>
+    <%--    <div class="col-sm-10"></div>--%>
+    <div class="col-md-6" style="padding-left: 30px;padding-bottom: 10px;position: relative">
+        <span>PROBE RID : </span>
         <%--        <span style="border: 1px solid black">${probeid}</span>--%>
-        <input type="text" class="form-control-sm" style="width: 250px;margin-bottom: 5px" readonly value="${probeid}">
-        <span><i class="fas fa-light fa-square fa-2x"></i></span>
+        <input type="text" class="form-control-sm"  readonly value="${probeid}">
+        <span style="position: absolute;top:-2px; margin-left: 10px"><i class="far fa-square fa-2x"></i></span>
     </div>
-    <div class="col-md-4">
-        <span style="padding-left: 10px; margin-left: 20px;margin-bottom: 5px;font-weight: bold;">CANDIDATE RID : </span>
+    <div class="col-md-4" style="padding-left: 15px;padding-bottom: 10px;position: relative">
+        <span >CANDIDATE RID : </span>
         <%--        <span style="border: 1px solid black">${canid}</span>--%>
-        <input type="text" class="form-control-sm"  style="width: 250px;margin-bottom: 5px" readonly value="${canid}">
+        <input type="text" class="form-control-sm"   readonly value="${canid}">
         <c:choose>
-            <c:when test="${psnGenerated  == true}"><span><i class="fas fa-check-square fa-2x"></i></span></c:when>
-            <c:when test="${psnGenerated  == false}"><span><i class="fas fa-light fa-square fa-2x"></i></span></c:when>
+            <c:when test="${psnGenerated  == true}"><span style="position: absolute;top:-2px; margin-left: 10px"><i class="far fa-check-square fa-2x"></i></span></c:when>
+            <c:when test="${psnGenerated  == false}"><span style="position: absolute;top:-2px; margin-left: 10px"><i class="far fa-square fa-2x"></i></span></c:when>
         </c:choose>
     </div>
     <div class="col-md-2">
-        <h6 style="text-align: center"><span style="padding-left: 10px">${count}</span> candidates </h6>
+        <h6 style="text-align: center;"><span>${count}<br></span> candidates </h6>
     </div>
 </div>
+
+
+
+
+
+<%--<div class="row">--%>
+<%--&lt;%&ndash;    <div class="col-sm-10"></div>&ndash;%&gt;--%>
+<%--    <div class="col-md-6">--%>
+<%--        <span style="padding-left: 10px; margin-left: 15px;margin-bottom: 5px;font-weight: bold;">PROBE RID : </span>--%>
+<%--        &lt;%&ndash;        <span style="border: 1px solid black">${probeid}</span>&ndash;%&gt;--%>
+<%--        <input type="text" class="form-control-sm" style="width: 250px;margin-bottom: 5px" readonly value="${probeid}">--%>
+<%--        <span><i class="fas fa-light fa-square fa-2x"></i></span>--%>
+<%--    </div>--%>
+<%--    <div class="col-md-4">--%>
+<%--        <span style="padding-left: 10px; margin-left: 20px;margin-bottom: 5px;font-weight: bold;">CANDIDATE RID : </span>--%>
+<%--        &lt;%&ndash;        <span style="border: 1px solid black">${canid}</span>&ndash;%&gt;--%>
+<%--        <input type="text" class="form-control-sm"  style="width: 250px;margin-bottom: 5px" readonly value="${canid}">--%>
+<%--        <c:choose>--%>
+<%--            <c:when test="${psnGenerated  == true}"><span><i class="fas fa-check-square fa-2x"></i></span></c:when>--%>
+<%--            <c:when test="${psnGenerated  == false}"><span><i class="fas fa-light fa-square fa-2x"></i></span></c:when>--%>
+<%--        </c:choose>--%>
+<%--    </div>--%>
+<%--    <div class="col-md-2">--%>
+<%--        <h6 style="text-align: center"><span style="padding-left: 10px">${count}</span> candidates </h6>--%>
+<%--    </div>--%>
+<%--</div>--%>
+
+
+
+
+
 <!-- Main content -->
 <section class="content">
     <div class="container-fluid">
@@ -995,8 +1109,9 @@
                         <div class="card card-primary">
                             <div class="card-header p-2">
                                 <h3 class="card-title"><b>MANUAL ADJUDICATION DECISION AND REMARKS OPERATOR 1</b></h3>
-                                <div class="col-md-8 float-right">${commentABIS}</div>
+<%--                                <div class="col-md-8 float-right">${commentABIS}</div>--%>
                             </div>
+                            <input type="text" id="commentABIS" value="${commentABIS}" style="padding: 0 7em 2em 0;" />
                         </div>
                     </div></div>
 
@@ -1009,8 +1124,9 @@
                         <div class="card card-primary">
                             <div class="card-header p-2">
                                 <h3 class="card-title"><b>MANUAL ADJUDICATION DECISION AND REMARKS OPERATOR 2</b></h3>
-                                <div class="col-md-8 float-right">${comment1ABIS}</div>
+<%--                                <div class="col-md-8 float-right">${comment1ABIS}</div>--%>
                             </div>
+                            <input type="text" id="comment1ABIS" value="${comment1ABIS}" style="padding: 0 7em 2em 0;" />
                         </div>
                     </div></div>
             <div class="card card-primary">

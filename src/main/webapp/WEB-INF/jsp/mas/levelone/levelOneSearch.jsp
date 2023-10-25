@@ -18,11 +18,20 @@
             "searching": false,
             "bSort": false,
             "paging": true,
-            "lengthMenu": [ 20, 30, 40 ,50 ],
+            "lengthMenu": [20, 30, 40, 50],
             "pagingType": "simple",
-            "language": {
-                "info": "Showing page _PAGE_ of _PAGES_"
+            'language': {
+                "info": "Showing page _PAGE_ of _PAGES_",
+                'paginate': {
+                    'previous': '<span >BACK</span>',
+                    'next': '<span >NEXT</span>'
+                }
             },
+            // "language": {
+            //     "info": "Showing page _PAGE_ of _PAGES_",
+            //     'previous': '<h5>Back</h5>',
+            //     'next': '<h5>Next</h5>'
+        // },
             "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6 '<'float-right'i>>>" +
                     "<'row'<'col-sm-12'tr>>" +
                 "<'row'<'col-sm-12 col-md-5'<'float-left'p>><'col-sm-12 col-md-7'f>>"

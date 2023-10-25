@@ -122,10 +122,17 @@ public class LevelOneController {
                     roles = (ArrayList<RegisterManualVerification>) mvs.listOfRids(user.getUserid());
                 }
 
-
             }else{
                 roles = (ArrayList<RegisterManualVerification>) mvs.retreiveCaseForUser(userCaseRequest.getRequestId());
             }
+//            for(int i=0; i<roles.size();i++)
+//            {
+//                System.out.println(roles);
+//                System.out.println("List of roles"+roles.get(i).toString());
+//
+//            }
+            System.out.println("my list  " + roles);
+
             model.addAttribute("galleryList", roles);
             model.addAttribute("userid",user.getUserid());
             logger.info(logger("LevelOneController", "showHomePage", getUtcTime(), "UserId :" + user.getUserid()));
@@ -270,6 +277,7 @@ public class LevelOneController {
                                 String comment1 = (String) matchedDetails1.get("comment");
                                 model.addAttribute("comment1ABIS",comment1);
                                 model.addAttribute("commentABIS",comment);
+
                                 // }
                             }
                         }
