@@ -6,7 +6,7 @@
 <html lang="en">
 
 <div id="spinner" class="loaderWrapper" style="display: none;">
-    <div class="loader" style="position: absolute; top: 50%;left: 25%">
+    <div class="loader" style="position: absolute; top: 50%;left: 40%">
         <div class="bar"></div>
         <div class="bar"></div>
         <div class="bar"></div>
@@ -447,7 +447,8 @@
                 if (result.isConfirmed) {
                     submitHit();
                 } else {
-                    swal.fire({icon: "warning", title: "cancelled"});
+                    // swal.fire({icon: "warning", title: "cancelled"});
+                    swal.fire({title: "cancelled"});
                 }
             });
     }
@@ -466,7 +467,8 @@
                 if (result.isConfirmed) {
                     submitNoHit();
                 } else {
-                    swal.fire({icon: "warning", title: "cancelled"});
+                    // swal.fire({icon: "warning", title: "cancelled"});
+                    swal.fire({title: "cancelled"});
                 }
             });
     }
@@ -520,7 +522,8 @@
             // document.getElementById('leveloneform').submit();
         }else{
             document.getElementById('comment').style.border = "1px solid red";
-            swal.fire({icon: "warning", title: "please fill the comment box"});
+            // swal.fire({icon: "warning", title: "please fill the comment box"});
+            swal.fire({ title: "please fill the comment box"});
         }
     }
 
@@ -558,7 +561,8 @@
             // document.getElementById('leveloneform').submit();
         }else{
             document.getElementById('comment').style.border = "1px solid red";
-            swal.fire({icon: "warning", title: "please fill the comment box"});
+            // swal.fire({icon: "warning", title: "please fill the comment box"});
+            swal.fire({title: "please fill the comment box"});
         }
     }
 
@@ -681,13 +685,13 @@
     <div class="col-md-6" style="padding-left: 30px;padding-bottom: 10px;position: relative">
         <span>PROBE RID : </span>
         <%--        <span style="border: 1px solid black">${probeid}</span>--%>
-        <input type="text" class="form-control-sm"  readonly value="${probeid}">
+        <input type="text" style="width: 222px"  class="form-control-sm"  readonly value="${probeid}">
         <span style="position: absolute;top:-2px; margin-left: 10px"><i class="far fa-square fa-2x"></i></span>
     </div>
-    <div class="col-md-4" style="padding-left: 15px;padding-bottom: 10px;position: relative">
+    <div class="col-md-4" style="padding-left: 10px;padding-bottom: 10px;position: relative">
         <span >CANDIDATE RID : </span>
         <%--        <span style="border: 1px solid black">${canid}</span>--%>
-        <input type="text" class="form-control-sm"   readonly value="${canid}">
+        <input type="text" style="width: 222px"  class="form-control-sm"   readonly value="${canid}">
         <c:choose>
             <c:when test="${psnGenerated  == true}"><span style="position: absolute;top:-2px; margin-left: 10px"><i class="far fa-check-square fa-2x"></i></span></c:when>
             <c:when test="${psnGenerated  == false}"><span style="position: absolute;top:-2px; margin-left: 10px"><i class="far fa-square fa-2x"></i></span></c:when>

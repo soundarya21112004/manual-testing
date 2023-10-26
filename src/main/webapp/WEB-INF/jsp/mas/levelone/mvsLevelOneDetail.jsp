@@ -6,7 +6,7 @@
 <html lang="en">
 
 <div id="spinner" class="loaderWrapper" style="display: none;">
-    <div class="loader" style="position: absolute; top: 50%;left: 25%">
+    <div class="loader" style="position: absolute; top: 50%;left: 40%">
         <div class="bar"></div>
         <div class="bar"></div>
         <div class="bar"></div>
@@ -292,8 +292,6 @@
 
 
 
-
-
     .loaderWrapper { position: fixed;
         top: 0;
         width: 100%;
@@ -474,7 +472,8 @@
 
 
                 } else {
-                    swal.fire({icon: "warning", title: "cancelled"});
+                    // swal.fire({icon: "warning", title: "cancelled"});
+                    swal.fire({title: "cancelled"});
                 }
             });
     }
@@ -494,8 +493,8 @@
                 if (result.isConfirmed) {
                     submitNoHit();
                 } else {
-                    swal.fire({icon: "warning", title: "cancelled"});
-
+                    // swal.fire({icon: "warning", title: "cancelled"});
+                    swal.fire({title: "cancelled"});
                 }
             });
     }
@@ -528,14 +527,13 @@
 
 function addClass(){
   document.getElementById("spinner").style.display="block";
-
 }
 
 
     function submitHit() {
         const form = document.getElementById('leveloneform');
-        form.action = "/MVS/saveMVSL1Result";
-        // form.action = "/saveMVSL1Result";
+        // form.action = "/MVS/saveMVSL1Result";//war
+        form.action = "/saveMVSL1Result";//local
         var id = document.getElementById('pkID').value;
         var requestId = document.getElementById('requestId').value;
         var comment = document.getElementById('comment').value;
@@ -567,7 +565,8 @@ function addClass(){
             // document.getElementById('leveloneform').submit();
         }else{
             document.getElementById('comment').style.border = "1px solid red";
-            swal.fire({icon: "warning", title: "please fill the comment box"});
+            // swal.fire({icon: "warning", title: "please fill the comment box"});
+            swal.fire({title: "please fill the comment box"});
 
         }
     }
@@ -575,8 +574,8 @@ function addClass(){
     function submitNoHit() {
 
         const form = document.getElementById('leveloneform');
-        form.action = "/MVS/saveMVSL1Result";
-        // form.action = "/saveMVSL1Result";
+        // form.action = "/MVS/saveMVSL1Result";
+        form.action = "/saveMVSL1Result";
         var id = document.getElementById('pkID').value;
         var requestId = document.getElementById('requestId').value;
         console.log("requestId"+requestId);
@@ -610,8 +609,8 @@ function addClass(){
 
         }else{
             document.getElementById('comment').style.border = "1px solid red";
-            swal.fire({icon: "warning", title: "please fill the comment box"});
-
+            // swal.fire({icon: "warning", title: "please fill the comment box"});
+            swal.fire({title: "please fill the comment box"});
         }
     }
 
@@ -754,23 +753,24 @@ function addClass(){
 </section>
 
 
-
 <div class="row">
     <%--    <div class="col-sm-10"></div>--%>
     <div class="col-md-6" style="padding-left: 30px;padding-bottom: 10px;position: relative">
         <span>PROBE RID : </span>
         <%--        <span style="border: 1px solid black">${probeid}</span>--%>
-        <input type="text" class="form-control-sm"  readonly value="${probeid}">
+        <input type="text" style="width: 222px" class="form-control-sm"  readonly value="${probeid}">
         <span style="position: absolute;top:-2px; margin-left: 10px"><i class="far fa-square fa-2x"></i></span>
     </div>
-    <div class="col-md-4" style="padding-left: 15px;padding-bottom: 10px;position: relative">
+    <div class="col-md-4" style="padding-left: 10px;padding-bottom: 10px;position: relative">
         <span >CANDIDATE RID : </span>
         <%--        <span style="border: 1px solid black">${canid}</span>--%>
-        <input type="text" class="form-control-sm"   readonly value="${canid}">
+        <input type="text" style="width: 222px"  class="form-control-sm"   readonly value="${canid}">
         <c:choose>
             <c:when test="${psnGenerated  == true}"><span style="position: absolute;top:-2px; margin-left: 10px"><i class="far fa-check-square fa-2x"></i></span></c:when>
             <c:when test="${psnGenerated  == false}"><span style="position: absolute;top:-2px; margin-left: 10px"><i class="far fa-square fa-2x"></i></span></c:when>
         </c:choose>
+
+
     </div>
     <div class="col-md-2">
         <h6 style="text-align: center;"><span>${count}<br></span> candidates </h6>

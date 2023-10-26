@@ -80,9 +80,9 @@
     }
     function alertSubmit(){
         swal.fire({
-            title: "Submit all cases?",
+            title: "Have you submitted all cases?",
             // text: "Once deleted, you will not be able to recover this imaginary file!",
-            icon: "question",
+            // icon: "question",
             showCancelButton: true,
             // dangerMode: true,
         })
@@ -90,7 +90,8 @@
                 if (result.isConfirmed) {
                     submitCase();
                 } else {
-                    swal.fire({icon: "warning", title: "cancelled"});
+                    // swal.fire({icon: "warning", title: "cancelled"});
+                    swal.fire({title: "cancelled"});
                 }
             });
     }
