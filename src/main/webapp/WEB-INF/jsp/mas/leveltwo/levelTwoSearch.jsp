@@ -23,7 +23,7 @@
 	$(document).ready(function() {
 		const table = $('#supervisorCaseAssign').DataTable({
 			// "buttons": true,
-			"searching": false,
+			"searching": true,
 			"bSort": false,
 			"paging": true,
 			"lengthMenu": [ 20, 30, 40 ,50 ],
@@ -62,7 +62,7 @@
 	}
 	function alertSubmit(){
 		swal.fire({
-			title: "Have you submitted all cases?",
+			title: "Do you want to submit all the cases?",
 			// text: "Once deleted, you will not be able to recover this imaginary file!",
 			// icon: "question",
 			showCancelButton: true,

@@ -1115,7 +1115,7 @@
                                 <h3 class="card-title"><b>MANUAL ADJUDICATION DECISION AND REMARKS OPERATOR 1</b></h3>
 <%--                                <div class="col-md-8 float-right">${commentABIS}</div>--%>
                             </div>
-                            <input type="text" id="commentABIS" value="${commentABIS}" style="padding: 0 7em 2em 0;" />
+                            <input readonly="readonly" type="text" id="commentABIS" value="${commentABIS}" style="padding: 0 7em 2em 0;" />
                         </div>
                     </div></div>
 
@@ -1130,24 +1130,24 @@
                                 <h3 class="card-title"><b>MANUAL ADJUDICATION DECISION AND REMARKS OPERATOR 2</b></h3>
 <%--                                <div class="col-md-8 float-right">${comment1ABIS}</div>--%>
                             </div>
-                            <input type="text" id="comment1ABIS" value="${comment1ABIS}" style="padding: 0 7em 2em 0;" />
+                            <input readonly="readonly" type="text" id="comment1ABIS" value="${comment1ABIS}" style="padding: 0 7em 2em 0;" />
                         </div>
                     </div></div>
             <div class="card card-primary">
                 <div class="card-header p-2 ">
                     <h3 class="card-title"><b>Manual Verification Operator 1 : Decision &ensp;</b> </h3>
-                    <div class="col-md-8 float-right" >${op1verifyStatus}</div>
+                    <div readonly="true" class="col-md-8 float-right" >${op1verifyStatus}</div>
                 </div>
                 <div class="card-header p-2">
                     <h3 class="card-title"><b>Manual Verification Operator 1 : Remarks  &ensp;</b></h3><br>
-                    <input type="text"  style="width:100%; padding: 0 7em 2em 0;" value="${op1Comment}" readonly>
+                    <input readonly="readonly" type="text"  style="width:100%; padding: 0 7em 2em 0;" value="${op1Comment}" readonly>
                 </div>
             </div>
 
                                 <div class="card card-primary">
                                     <div class="card-header p-2">
                                         <h3 class="card-title"><b>Manual Verification Operator 2 : Decision </b></h3>
-                                        <div class="col-md-8 float-right" >${op2verifyStatus}</div>
+                                        <div readonly="true" class="col-md-8 float-right" >${op2verifyStatus}</div>
                                     </div>
                                     <div class="card-header p-2">
 
@@ -1166,7 +1166,7 @@
                         <%--                    <input type="text" style="width:100%; padding: 0 7em 2em 0;"><br>--%>
                     <h3 class="card-title">Manual Verification Supervisor : Remarks </h3><br>
 
-                    <input type="text" id="comment" style="width:100%; padding: 0 7em 2em 0;">
+                    <input readonly="readonly" type="text" id="comment" style="width:100%; padding: 0 7em 2em 0;">
                 </div></div>
 
             <div class="col-md-12">

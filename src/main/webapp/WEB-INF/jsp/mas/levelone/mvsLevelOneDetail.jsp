@@ -532,8 +532,8 @@ function addClass(){
 
     function submitHit() {
         const form = document.getElementById('leveloneform');
-        // form.action = "/MVS/saveMVSL1Result";//war
-        form.action = "/saveMVSL1Result";//local
+        form.action = "/MVS/saveMVSL1Result";//war
+        // form.action = "/saveMVSL1Result";//local
         var id = document.getElementById('pkID').value;
         var requestId = document.getElementById('requestId').value;
         var comment = document.getElementById('comment').value;
@@ -574,8 +574,8 @@ function addClass(){
     function submitNoHit() {
 
         const form = document.getElementById('leveloneform');
-        // form.action = "/MVS/saveMVSL1Result";
-        form.action = "/saveMVSL1Result";
+        form.action = "/MVS/saveMVSL1Result";//war
+        // form.action = "/saveMVSL1Result";//local
         var id = document.getElementById('pkID').value;
         var requestId = document.getElementById('requestId').value;
         console.log("requestId"+requestId);
@@ -1331,7 +1331,7 @@ function addClass(){
 <%--                                <div class="col-md-8 float-right">${commentABIS}</div>--%>
 
                             </div>
-                            <input type="text" id="commentABIS" value="${commentABIS}" style="padding: 0 7em 2em 0;" />
+                            <input type="text" id="commentABIS" readonly="readonly" value="${commentABIS}" style="padding: 0 7em 2em 0;" />
 
                            </div>
                     </div></div>
@@ -1348,7 +1348,7 @@ function addClass(){
 <%--                                <div class="col-md-8 float-right">${comment1ABIS}</div>--%>
                             </div>
 
-                            <input type="text" id="comment1ABIS"  value="${comment1ABIS}" style="padding: 0 7em 2em 0;" />
+                            <input type="text" id="comment1ABIS" readonly="readonly" value="${comment1ABIS}" style="padding: 0 7em 2em 0;" />
 
                              </div>
                     </div></div>
@@ -1361,7 +1361,7 @@ function addClass(){
                         <div class="card-header p-2">
                             <h3 class="card-title">MANUAL VERIFICATION REMARKS</h3>
                         </div>
-                        <input type="text" id="comment"  style="padding: 0 7em 2em 0;" />
+                        <input type="text" id="comment" readonly="readonly"  style="padding: 0 7em 2em 0;" />
                     </div></div></div></div>
 
         </form:form>

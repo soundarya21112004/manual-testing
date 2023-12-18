@@ -80,7 +80,7 @@
     }
     function alertSubmit(){
         swal.fire({
-            title: "Have you submitted all cases?",
+            title: "Do you want to submit all the cases?",
             // text: "Once deleted, you will not be able to recover this imaginary file!",
             // icon: "question",
             showCancelButton: true,
