@@ -54,6 +54,7 @@ package com.eagle.mas.repository;
 
 import com.eagle.mas.model.RegisterManualVerification;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -65,7 +66,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 @Repository
-public interface RegManualVerificationRepository extends CrudRepository<RegisterManualVerification, BigInteger> {
+public interface RegManualVerificationRepository extends JpaRepository<RegisterManualVerification, BigInteger> {
 
 
     int countAllByRegId(String regid);
@@ -159,8 +160,8 @@ public interface RegManualVerificationRepository extends CrudRepository<Register
     @Query(value = "SELECT t1 FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null ) and (t1.regId <> t1.matchedRefId)  )")
     List listOfRids(@Param("userid") String userid);
 
-    @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null ) and (t1.regId <> t1.matchedRefId)  )")
-    String getRequestIdOperator(@Param("userid") String userid);
+    @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null ) and (t1.regId <> t1.matchedRefId) ) order by t1.createdDate asc ")
+    List<String> getRequestIdOperator(@Param("userid") String userid, Pageable size);
 
 //    @NamedQuery(name="optimisticLock",
 //            query="SELECT s FROM Student s WHERE s.id LIKE :id",
@@ -211,7 +212,7 @@ public interface RegManualVerificationRepository extends CrudRepository<Register
     @Query(value="select t1.reqid from RegisterManualVerification t1 where (t1.statusCode='1')" +
             " and (t1.userId<>:userid or t1.userId is null ) and (t1.proStatus is null or t1.proStatus='0') and ((t1.op1verifyStatus='hit' AND t1.op2verifyStatus ='nohit') " +
             "OR (t1.op1verifyStatus='nohit' AND t1.op2verifyStatus='hit')) order by t1.createdDate asc")
-    String getReqIdForL2(@Param("userid") String userid);
+    List<String> getReqIdForL2(@Param("userid") String userid,Pageable size);
 
     @Query(value = "SELECT t1 FROM RegisterManualVerification t1 where (t1.statusCode='2' and t1.supervisorVerifyStatus = 'hit') or (t1.statusCode='1' and (t1.op1verifyStatus='hit' AND t1.op2verifyStatus ='hit')) order by t1.createdDate asc")
     List listOfRidsForL3();

@@ -29,20 +29,22 @@
 			"lengthMenu": [ 20, 30, 40 ,50 ],
 			"pagingType": "simple",
 			"language": {
-				"info": "Showing page _PAGE_ of _PAGES_"
+				"info": "Showing page _PAGE_ of _PAGES_",
 				'paginate': {
 					'previous': '<span >BACK</span>',
 					'next': '<span >NEXT</span>'
 				}
 			},
-			"dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6 '<'float-right'i>>>" +
+			"dom": "<'row'<'col-sm-12'<'float-right'f>>>"+
+					"<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'<'float-right'i>>>" +
 					"<'row'<'col-sm-12'tr>>" +
-					"<'row'<'col-sm-12 col-md-5'<'float-left'p>><'col-sm-12 col-md-7'f>>"
+					"<'row'<'col-sm-12'<'float-left'p>>>"
 		});
-		table.on('click', 'tbody tr', function (e) {
-			e.currentTarget.classList.toggle('selected');
-		});
-	} );
+		// table.on('click', 'tbody tr', function (e) {
+		// 	e.currentTarget.classList.toggle('selected');
+		// });
+
+	});
 </script>
 
 <style>
@@ -55,11 +57,10 @@
 <script>
 
 	function submitCase() {
-
 		document.getElementById('submitCase').action = "/MVS/refreshClusterCaseL2";
 		document.getElementById('submitCase').submit();
-
 	}
+
 	function alertSubmit(){
 		swal.fire({
 			title: "Do you want to submit all the cases?",

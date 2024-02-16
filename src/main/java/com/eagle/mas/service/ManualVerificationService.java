@@ -306,7 +306,11 @@ public int totalResponseCases(String regid){
 
 
 	public synchronized List<RegisterManualVerification> listOfRids(String userid) {
-		List<RegisterManualVerification> list = repo.clusterOfRids(repo.getRequestIdOperator(userid));
+		List<RegisterManualVerification> list = new ArrayList<>();
+		List<String> reqId = repo.getRequestIdOperator(userid,PageRequest.of(0,1));
+		if(!reqId.isEmpty()) {
+			list = repo.clusterOfRids(reqId.get(0));
+		}
 		if(!list.isEmpty()){
 			list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
 			repo.saveAll(list);
@@ -475,7 +479,11 @@ public int totalResponseCases(String regid){
 	}
 
 	public synchronized List getClusterForL2(String userid) {
-		List<RegisterManualVerification> list = repo.clusterOfRids(repo.getReqIdForL2(userid));
+		List<String> reqId = repo.getReqIdForL2(userid, PageRequest.of(0,1));
+		List<RegisterManualVerification> list = new ArrayList<>();
+		if(!reqId.isEmpty()) {
+			 list = repo.clusterOfRids(reqId.get(0));
+		}
 		if(!list.isEmpty()){
 			list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
 			repo.saveAll(list);

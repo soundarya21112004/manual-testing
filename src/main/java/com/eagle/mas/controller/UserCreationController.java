@@ -43,7 +43,6 @@ import com.eagle.mas.service.UserdetailsService;
 @Controller
 public class UserCreationController {
 
-
 	@Autowired
 	UserManagementDAO userdao;
 

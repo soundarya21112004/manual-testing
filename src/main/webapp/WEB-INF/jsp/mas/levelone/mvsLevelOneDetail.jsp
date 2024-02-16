@@ -14,7 +14,7 @@
 </div>
 
 
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.css">
 
 <script src="plugins/sweetalert2/sweetalert2.js"></script>
@@ -290,8 +290,8 @@
     }
 
 
-
-
+/*
+MYLOADER*/
     .loaderWrapper { position: fixed;
         top: 0;
         width: 100%;
@@ -1331,7 +1331,7 @@ function addClass(){
 <%--                                <div class="col-md-8 float-right">${commentABIS}</div>--%>
 
                             </div>
-                            <input type="text" id="commentABIS" readonly="readonly" value="${commentABIS}" style="padding: 0 7em 2em 0;" />
+                            <input type="text" readonly="readonly" id="commentABIS" value="${commentABIS}" style="padding: 0 7em 2em 0;" />
 
                            </div>
                     </div></div>
@@ -1361,7 +1361,7 @@ function addClass(){
                         <div class="card-header p-2">
                             <h3 class="card-title">MANUAL VERIFICATION REMARKS</h3>
                         </div>
-                        <input type="text" id="comment" readonly="readonly"  style="padding: 0 7em 2em 0;" />
+                        <input type="text" id="comment"  style="padding: 0 7em 2em 0;" />
                     </div></div></div></div>
 
         </form:form>

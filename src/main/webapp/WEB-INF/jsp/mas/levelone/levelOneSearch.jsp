@@ -15,7 +15,7 @@
     $(document).ready(function() {
         const table = $('#caseAssign').DataTable({
             // "buttons": true,
-            "searching": false,
+            "searching": true,
             "bSort": false,
             "paging": true,
             "lengthMenu": [20, 30, 40, 50],
@@ -23,8 +23,8 @@
             'language': {
                 "info": "Showing page _PAGE_ of _PAGES_",
                 'paginate': {
-                    'previous': '<span >BACK</span>',
-                    'next': '<span >NEXT</span>'
+                    'previous': '<span>BACK</span>',
+                    'next': '<span>NEXT</span>'
                 }
             },
             // "language": {
@@ -32,14 +32,19 @@
             //     'previous': '<h5>Back</h5>',
             //     'next': '<h5>Next</h5>'
         // },
-            "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6 '<'float-right'i>>>" +
+
+            "dom":  "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6 '<'float-right'i>>>" +
                     "<'row'<'col-sm-12'tr>>" +
-                "<'row'<'col-sm-12 col-md-5'<'float-left'p>><'col-sm-12 col-md-7'f>>"
+                "<'row'<'col-sm-12 col-md-5'<'float-left'p>>>"
         });
-        table.on('click', 'tbody tr', function (e) {
-            e.currentTarget.classList.toggle('selected');
-        });
-    } );
+
+
+        // It is used to change color when hover table
+        // table.on('click', 'tbody tr', function (e) {
+        //     e.currentTarget.classList.toggle('selected');
+        // });
+
+    });
 
    // function removebackground(){
    //      function removee(element, errorClass, validClass) {
@@ -61,9 +66,11 @@
     /*.remove{*/
     /*    background: none !important;*/
     /*}*/
+
     .selected{
         background-color: #efef54;
     }
+
     /*table#caseAssign   tbody tr:hover{*/
     /*    background:none !important;*/
     /*}*/
@@ -233,7 +240,7 @@
                                                    
                                                     <c:choose>
                                                         <c:when test="${emp.op1userId != userid && emp.op2userId != userid}">
-                                                            <a href="<c:url value="leveloneSearchByName">
+                                                            <a href="<c:url value="leveloneSearchByName">hover
                                                          <c:param name="id" value="${emp.sno}"></c:param>
                                                          <c:param name="probe" value="${emp.regId}"></c:param>
                                                          <c:param name="candidate" value="${emp.matchedRefId}"></c:param>

@@ -71,7 +71,7 @@ public class SendSMS {
         String host = strServerName;
         String port = strServerPort;
 
-        try {
+        try{
 
             String requestUrl = "http://" + host + ":" + port + "/smshttpquery/qs?"
                     + "REQUESTTYPE=SMSSubmitReq&USERNAME=" + URLEncoder.encode(username, "UTF-8")
