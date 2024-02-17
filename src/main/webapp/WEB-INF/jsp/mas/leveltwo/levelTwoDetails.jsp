@@ -1262,6 +1262,22 @@
 
 
 <script>
+    function base64PDFToBlobUrl(base64){
+        console.log('base64 ')
+        const binStr = atob( base64 );
+        const len = binStr.length;
+        const arr = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            arr[ i ] = binStr.charCodeAt( i );
+        }
+        const blob =  new Blob( [ arr ], { type: 'application/pdf' });
+        const url = URL.createObjectURL( blob );
+        // console.log('url sanitized : '+ this.sanitizer.bypassSecurityTrustResourceUrl(url+'#toolbar=0'))
+        // return  this.sanitizer.bypassSecurityTrustResourceUrl(url+'#toolbar=0');
+        return url; // return only this url
+    }
+
+
     /* 1popup documents pdffunction  */
     //obj = document.getElementById(), then set obj.onclick
     $("#probepoa").click(function(e){
@@ -1269,7 +1285,7 @@
         var isInit = true; // indicates if the popup already been initialized.
         var isClosed = false; // indicates the state of the popup
         document.getElementById("popup").style.display = "block";
-        document.getElementById('iframe').src = "${reportPDFPOA}#toolbar=0";
+        document.getElementById('iframe').src = base64PDFToBlobUrl("${reportPDFPOA}")+"#toolbar=0";
         document.getElementById('page').className = "darken";
         document.getElementById('closepdf').onclick = function () {
             if (isInit) {
@@ -1292,7 +1308,7 @@
         var isInit = true; // indicates if the popup already been initialized.
         var isClosed = false; // indicates the state of the popup
         document.getElementById("popup").style.display = "block";
-        document.getElementById('iframe').src = "${reportPDFPOI}#toolbar=0";
+        document.getElementById('iframe').src = base64PDFToBlobUrl("${reportPDFPOI}")+"#toolbar=0";
         document.getElementById('page').className = "darken";
         document.getElementById('closepdf').onclick = function () {
             if (isInit) {
@@ -1359,7 +1375,7 @@
         var isInit = true; // indicates if the popup already been initialized.
         var isClosed = false; // indicates the state of the popup
         document.getElementById("popupc").style.display = "block";
-        document.getElementById('iframec').src = "${reportPDFPOICan}#toolbar=0";
+        document.getElementById('iframec').src = base64PDFToBlobUrl("${reportPDFPOICan}")+"#toolbar=0";
         document.getElementById('pagec').className = "darken";
         document.getElementById('closepdf1').onclick = function () {
             if (isInit) {
@@ -1381,7 +1397,7 @@
         var isInit = true; // indicates if the popup already been initialized.
         var isClosed = false; // indicates the state of the popup
         document.getElementById("popupc").style.display = "block";
-        document.getElementById('iframec').src = "${reportPDFPOACan}#toolbar=0";
+        document.getElementById('iframec').src = base64PDFToBlobUrl("${reportPDFPOACan}")+"#toolbar=0";
         document.getElementById('pagec').className = "darken";
         document.getElementById('closepdf1').onclick = function () {
             if (isInit) {

@@ -331,11 +331,13 @@ public class LevelTwoController {
                             JSONObject jsonObjectResponse = (JSONObject) ((JSONObject) jsonObject1).get("documents");
                             if(jsonObjectResponse.get("proofOfIdentity")!=null) {
                                 base64StringPOI = (String) jsonObjectResponse.get("proofOfIdentity");
-                                pdfFileI = "data:application/pdf;base64," + base64StringPOI;
+                                pdfFileI = base64StringPOI;
+//                                pdfFileI = "data:application/pdf;base64," + base64StringPOI;
                             }
                             if(jsonObjectResponse.get("proofOfAddress")!=null) {
                                 base64StringPOA = (String) jsonObjectResponse.get("proofOfAddress");
-                                pdfFileA = "data:application/pdf;base64," + base64StringPOA;
+                                pdfFileA = base64StringPOA;
+//                                pdfFileA = "data:application/pdf;base64," + base64StringPOA;
                             }
                             if(jsonObjectResponse.get("proofOfException")!=null) {
                                 base64StringPOE = (String) jsonObjectResponse.get("proofOfException");
@@ -725,11 +727,13 @@ public class LevelTwoController {
                             JSONObject jsonObjectResponse = (JSONObject) ((JSONObject) jsonObject1).get("documents");
                             if (jsonObjectResponse.get("proofOfIdentity") != null) {
                                 base64StringCPOI = (String) jsonObjectResponse.get("proofOfIdentity");
-                                pdfFileCPOI = "data:application/pdf;base64," + base64StringCPOI;
+                                pdfFileCPOI =  base64StringCPOI;
+//                                pdfFileCPOI = "data:application/pdf;base64," + base64StringCPOI;
                             }
                             if (jsonObjectResponse.get("proofOfAddress") != null) {
                                 base64StringCPOA = (String) jsonObjectResponse.get("proofOfAddress");
-                                pdfFileCPOA = "data:application/pdf;base64," + base64StringCPOA;
+                                pdfFileCPOA = base64StringCPOA;
+//                                pdfFileCPOA = "data:application/pdf;base64," + base64StringCPOA;
                             }
                             if (jsonObjectResponse.get("proofOfException") != null) {
                                 base64StringCPOE = (String) jsonObjectResponse.get("proofOfException");
