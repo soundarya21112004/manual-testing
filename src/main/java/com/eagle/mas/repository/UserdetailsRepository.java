@@ -61,5 +61,7 @@ public interface UserdetailsRepository extends CrudRepository<Userdetails, Strin
 
 	@Query(value = "SELECT u.verifycodePwd FROM Userdetails u  where u.userid=:userId")
 	public String getUserOldPassword(@Param("userId") String userId);
-	
+
+	@Query(value = "select count(u) from Userdetails u where u.email=:email")
+	int checkmail(String email);
 }

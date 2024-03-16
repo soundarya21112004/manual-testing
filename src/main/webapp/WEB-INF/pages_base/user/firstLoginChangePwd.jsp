@@ -76,7 +76,7 @@
     function CheckPasswordStrength(password) {
         var password_strength = document.getElementById("password_strength");
         //TextBox left blank.
-        if (password.length == 0) {
+        if (password.length == 0){
             password_strength.innerHTML = "";
             return;
         }
@@ -120,7 +120,7 @@
                 color = "green";
                 break;
             case 5:
-                strength = "Very Strong";
+                strength = "Excellent";
                 color = "darkgreen";
                 break;
         }
@@ -131,10 +131,16 @@
 
     function pwdvalidCheck() {
         var password_strength = document.getElementById("password_strength").innerHTML;
-        if (password_strength === "Very Strong") {
+        if (password_strength === "Excellent" || password_strength==="Strong") {
 
         } else {
-            alert("Set valid password");
+            // alert("Set valid password");
+            // Swal.fire("set valid password")
+            Swal.fire({
+                title: 'Warning!',
+                text: "set valid password",
+                confirmButtonText: 'OK'
+            });
             document.getElementById("password").value = "";
             document.getElementById("password_strength").innerHTML = "";
             return false;

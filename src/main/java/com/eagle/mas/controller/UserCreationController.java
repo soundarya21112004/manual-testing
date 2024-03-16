@@ -21,10 +21,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.eagle.mas.bean.MstRolesBean;
@@ -63,6 +60,7 @@ public class UserCreationController {
 		return convertDate;
 
 	}
+
 //created by paramu
 @RequestMapping(value = "/userCreation", method = RequestMethod.GET)
 public String showHomePage(ModelMap model, @ModelAttribute("mstRolesBean") MstRolesBean mstRolesBean,
@@ -139,6 +137,7 @@ public String showHomePage(ModelMap model, @ModelAttribute("mstRolesBean") MstRo
 			Userdetails user = mstRolesBean.getUserdetails();
 
 			MstRoleGroup  mstRoleGroup = mstRoleGroupService.findbygroupId(groupId);
+
 			System.out.println("print Group Name" +mstRoleGroup.getGroupName());
 			Integer maxSno = 0;
 			String mfid = null;
@@ -388,4 +387,17 @@ catch (Exception e){
 				"\"time stamp\":"+time+","+"\"response\":\""+response+"\""+ "}";
 		return loggerJson;
 	}
+
+	@GetMapping("/exitsemail")
+	@ResponseBody boolean exitsEmail(@RequestParam("email") String email){
+		int n = userService.checkmail(email);
+		System.out.println("email addresss  ="+email);
+		return n != 0;
+	}
+
+
+//	redirectAttributes.addFlashAttribute("faliureMessage","email already exits");
+//			return "redirect:userCreation";
+
+
 }

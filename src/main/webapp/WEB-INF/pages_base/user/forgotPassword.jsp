@@ -135,7 +135,7 @@
                 color = "green";
                 break;
             case 5:
-                strength = "Very Strong";
+                strength = "Excellent";
                 color = "darkgreen";
                 break;
         }
@@ -146,10 +146,15 @@
 
     function pwdvalidCheck() {
         var password_strength = document.getElementById("password_strength").innerHTML;
-        if (password_strength === "Very Strong") {
-
-        } else {
-            alert("Set valid password");
+        if (password_strength === "Excellent" || password_strength === "Strong") {
+        } else{
+            // alert("Set valid password");
+            // swal("Set valid password");
+            Swal.fire({
+                title: 'Warning!',
+                text: "set valid password",
+                confirmButtonText: 'OK'
+            });
             document.getElementById("password").value = "";
             document.getElementById("password_strength").innerHTML = "";
             return false;
@@ -216,6 +221,14 @@
 
     function cnfmpwdvalidCheck() {
         var newpwd = document.getElementById('password').value;
+        if(newpwd == ''){
+            Swal.fire({
+                title: 'Warning!',
+                text: "set valid password",
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
         var cnfmpwd = document.getElementById('confirm').value;
         if (newpwd != cnfmpwd) {
             // alert('if');
@@ -314,11 +327,16 @@
                                name="password" placeholder="New Password"  required
                                onkeyup="CheckPasswordStrength(this.value)"
                                onblur="pwdvalidCheck()" >
+
                         <div class="input-group-append"  style= "margin-right:20px">
                             <div class="input-group-text">
                                 <span class="fas fa-lock"></span>
                             </div>
                         </div>
+                            <div style="color: #006a4d;" class="px-3">Note: Password must have
+                                1 uppercase,1 lowercase,numeric characters
+                                and Special characters.</div>
+
                         <%--                                 <div style="color:black">--%>
                         <%--                              Note: Password must have 8 characters--%>
                         <%--                                </div>--%>

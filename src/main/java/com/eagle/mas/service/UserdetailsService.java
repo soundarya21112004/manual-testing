@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -163,4 +164,7 @@ public String getUserType(String id){
 		return userrepository.getUserOldPassword( userId);
 	}
 
+	public int checkmail(String email) {
+		 return userrepository.checkmail(email);
+	}
 }

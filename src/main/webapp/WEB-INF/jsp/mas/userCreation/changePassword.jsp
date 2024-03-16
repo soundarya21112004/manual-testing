@@ -29,10 +29,23 @@
 <script type="text/javascript">
 function validateOnSubmit() {
 	var oldemail = document.getElementById('userPwd').value;
+	if(oldemail === ''){
+		Swal.fire(
+				'please provide old password'
+		)
+		return;
+	}
 	var newemail = document.getElementById('password').value;
+	if(newemail === ''){
+		Swal.fire(
+				'please provide new password'
+		)
+		return;
+	}
+
 	var oldpass = document.getElementById('oldpass').value;
-	if(oldpass == oldemail) {
-	if (oldemail == newemail) {
+	if(oldpass === oldemail) {
+	if (oldemail === newemail) {
 		$("#password").focus();
 		$("#password").val("");
 		// alert("OLD PASSWORD AND NEW PASSWORD SHOULD NOT BE SAME.");
@@ -103,7 +116,7 @@ function cnfmpwdvalidCheck() {
 
 		var passed = 0;
 		//Validate for each Regular Expression.
-		for (var i = 0; i < regex.length; i++) {
+		for(var i = 0; i < regex.length; i++) {
 			if (new RegExp(regex[i]).test(password)) {
 				passed++;
 			}
@@ -118,7 +131,7 @@ function cnfmpwdvalidCheck() {
 		var color = "";
 		var strength = "";
 
-		switch (passed) {
+		switch (passed){
 		case 0:
 		case 1:
 			strength = "Weak";
@@ -134,21 +147,26 @@ function cnfmpwdvalidCheck() {
 			color = "green";
 			break;
 		case 5:
-			strength = "Very Strong";
+			strength = "Excellent";
 			color = "darkgreen";
 			break;
-
 		}
 
 		password_strength.innerHTML = strength;
 		password_strength.style.color = color;
+
 	}
 
-	function pwdvalidCheck() {
+	function pwdvalidCheck(){
 		var password_strength = document.getElementById("password_strength").innerHTML;
-		if (password_strength === "Very Strong") {
+		if (password_strength === "Excellent" || password_strength === "Strong") {
 		} else {
 			// alert("Set valid password");
+			Swal.fire({
+				title: 'Warning!',
+				text: "set valid password",
+				confirmButtonText: 'OK'
+			});
 			document.getElementById("password").value = "";
 			document.getElementById("password_strength").innerHTML = "";
 			return false;
@@ -264,10 +282,10 @@ function cnfmpwdvalidCheck() {
 											   title="Password must be 8 characters including 1 uppercase letter,1 lowercase letter,numeric characters and Special characters"
 											   name="password" placeholder="New Password"
 											   onkeyup="CheckPasswordStrength(this.value)"
-											   onblur="pwdvalidCheck()">
-<%--										<div style="color: #006a4d">Note: Password must have 8--%>
-<%--											characters including 1 uppercase,1 lowercase,numeric characters--%>
-<%--											and Special characters.</div>--%>
+											   onblur="pwdvalidCheck()" required/>
+										<div style="color: #006a4d">Note: Password must have
+											1 uppercase,1 lowercase,numeric characters
+											and Special characters.</div>
 
 									</div>
 									<span id="password_strength"></span>
@@ -281,7 +299,7 @@ function cnfmpwdvalidCheck() {
 									<div class="form-group">
 										<input type="password" class="form-control" name="confirm"
 											   placeholder="Confirm Password" id="confirm"
-											   onchange="cnfmpwdvalidCheck()">
+											   onchange="cnfmpwdvalidCheck()" required>
 									</div>
 								</div>
 							</div>

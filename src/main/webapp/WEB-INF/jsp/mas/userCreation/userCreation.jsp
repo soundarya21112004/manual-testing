@@ -88,7 +88,7 @@
 <script>
 
     Swal.fire({
-        title: 'error!',
+        title: 'Error!',
         text: '${faliureMessage}',
         confirmButtonText: 'OK'
     });
@@ -106,12 +106,30 @@
 </script>
 </c:if>
 
+<script>
+    function submitForm() {
+        var mail = document.getElementById('email').value;
+        $.ajax({
+            type: "GET",
+            datatype: "json",
+            url: "exitsemail?email=" + mail,
+            success: function (result) {
+                if (result == true) {
+                    Swal.fire("Email already exist");
+                    document.getElementById("email").value = "";
+                    return false;
+                }
+            }
+        })
+    }
+</script>
 
 <!-- Main content -->
 <section class="content">
     <div class="container-fluid">
         <!-- SELECT2 EXAMPLE    action="createUser" method="POST" -->
         <form id="quickForm"  modelAttribute="mstRolegfsBean" action="createUser" method="POST" >
+<%--        <form id="quickForm"  modelAttribute="mstRolegfsBean" id="usercreate">--%>
             <div class="card card-primary">
                 <div class="card-header">
                     <h3 class="card-title">Add User</h3>
@@ -176,7 +194,7 @@
                             <div class="form-group" style="height: 102px; margin-bottom: 5px;">
                                 <label>Email</label>
                                 <input type="email" class="form-control required" pattern="([A-Za-z0-9-_.]+@[A-Za-z0-9-_]+(?:\.[A-Za-z0-9]+)+)" required
-                                       name="userdetails.email" id="email" autocomplete="nope"
+                                       name="userdetails.email" id="email" autocomplete="nope" onchange="submitForm();"
                                        onkeyup="return spaceNotAllowed(this);" placeholder="Enter email">
                             </div>
 <%--                            onkeypress="return onlyAlphabets(event);" autocomplete="off"--%>
@@ -230,7 +248,7 @@
 
 
             <div class="card-footer">
-                <button type="submit" onclick="  checkPhone(); " id="validate"  class="btn btn-info">Submit</button>
+                <button type="submit" onclick="checkPhone();" id="validate"  class="btn btn-info">Submit</button>
                 <button type="reset" class="btn btn-default float-right">Cancel</button>
             </div>
 
@@ -273,7 +291,6 @@
 <script language="javascript">
 
     function checkEmail() {
-
         var email = document.getElementById('email');
         var filter = /^[a-z0-9._%+-]+@[a-z0-9-]+\.[a-z]{3,3}$/;
 
@@ -300,9 +317,9 @@
 </script>
 <script type="text/javascript">
     function validateOnsubmit() {
-
+        alert("validate on submit")
         if ($('#validate').valid()) {
-
+            alert("validate ");
             swal({
                 title: 'Are you sure?',
                 type: "warning",
