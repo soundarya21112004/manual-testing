@@ -23,7 +23,7 @@
 	$(document).ready(function() {
 		const table = $('#supervisorCaseAssign').DataTable({
 			// "buttons": true,
-			"searching": true,
+			"searching": false,
 			"bSort": false,
 			"paging": true,
 			"lengthMenu": [ 20, 30, 40 ,50 ],
