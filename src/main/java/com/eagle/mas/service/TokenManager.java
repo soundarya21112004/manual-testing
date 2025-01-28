@@ -19,6 +19,7 @@ public class TokenManager implements Serializable {
      *
      */
     private static final long serialVersionUID = 7008375124389347049L; public static final long TOKEN_VALIDITY = 10*8650;
+//    private static final long serialVersionUID = 7008375124389347049L; public static final long TOKEN_VALIDITY = 10;
     @Value("${secret}")
     private String jwtSecret;
     public String generateJwtToken(Userdetails userdetails) {
@@ -29,8 +30,13 @@ public class TokenManager implements Serializable {
                 .signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
     }
     public Boolean validateJwtToken(String token, Userdetails userdetails) {
+        if (userdetails == null){
+            return false;
+        }
+        System.out.println("UserDetails entity"+userdetails.getEmail());
         String username = getUsernameFromToken(token);
         System.out.println("getUsernameFromToken :"+token);
+        System.out.println("username from token  :"+username);
 
         Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
         Boolean isTokenExpired = claims.getExpiration().before(new Date());

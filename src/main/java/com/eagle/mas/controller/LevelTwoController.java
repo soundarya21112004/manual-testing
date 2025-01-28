@@ -2,15 +2,19 @@ package com.eagle.mas.controller;
 
 import com.eagle.mas.bean.GalleryBean;
 import com.eagle.mas.common.ReadImage;
+import com.eagle.mas.config.ConstantValue;
 import com.eagle.mas.dto.SaveMvsResultRequestDto;
 import com.eagle.mas.model.BioScore;
 import com.eagle.mas.model.RegisterManualVerification;
 import com.eagle.mas.model.UserCaseAssignment;
 import com.eagle.mas.model.Userdetails;
 import com.eagle.mas.repository.BioScoreRepository;
+import com.eagle.mas.repository.RegManualVerificationRepository;
+import com.eagle.mas.repository.UserCaseAssignmentRepo;
 import com.eagle.mas.service.ManualVerificationService;
 import com.eagle.mas.service.MvJsonService;
 import com.eagle.mas.service.ReportsService;
+import com.eagle.mas.service.UserdetailsService;
 import org.jose4j.base64url.Base64Url;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
@@ -23,6 +27,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -58,13 +65,22 @@ public class LevelTwoController {
     private ManualVerificationService mvs;
 
     @Autowired
+    private RegManualVerificationRepository regManualVerificationRepository;
+
+    @Autowired
     MvJsonService mvJsonService;
 
     @Autowired
     LevelThreeController req;
 
     @Autowired
+    private UserdetailsService userdetailsService;
+
+    @Autowired
     BioScoreRepository bioRepository;
+
+    @Autowired
+    UserCaseAssignmentRepo userCaseAssignmentRepo;
 
     File catalinaBase = new File(System.getProperty("catalina.base")).getAbsoluteFile();
     File propertyFile = new File(catalinaBase, "bin/mvs/");
@@ -100,16 +116,22 @@ public class LevelTwoController {
                     }
                 }).collect(Collectors.toList());
 
-                System.out.println("result size : " + result.size());
-                if (result.size() == list.size()) {
+                int reqCount = list.size();
+                int finalIndicateCount = mvs.getFinIndicate(userCaseRequest.getRequestId());
+                if(reqCount == finalIndicateCount){
+                    list.forEach(li -> li.setCaseEvaluationComplete(1));
+                    regManualVerificationRepository.saveAll(list);
                     mvs.resetProcessStatus(userCaseRequest.getRequestId());
                     mvs.removeProcessedCaseForUser(user.getUserid());
                     redirectAttributes.addFlashAttribute("successMessage", "case is submitted");
-                } else {
+                }else {
                     redirectAttributes.addFlashAttribute("faliureMessage", "please process all the cases before submission");
                 }
+                System.out.println("result size : " + result.size());
+
+
             }else{
-                redirectAttributes.addFlashAttribute("faliureMessage","late subimission is not allowed");
+                redirectAttributes.addFlashAttribute("faliureMessage","late submission is not allowed");
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -128,7 +150,7 @@ public class LevelTwoController {
                 return "redirect:loginPage";
             }
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
-            System.out.println("user" + user.getUserid());
+            System.out.println("user---->" + user.getUserid());
             ArrayList<RegisterManualVerification> roles = new ArrayList<>();
             UserCaseAssignment supervisorCases = mvs.userCaseDetails(user.getUserid());
             if(supervisorCases ==null) {
@@ -136,9 +158,16 @@ public class LevelTwoController {
             }else{
                 roles = (ArrayList<RegisterManualVerification>) mvs.retreiveCaseForUser(supervisorCases.getRequestId());
             }
-            model.addAttribute("galleryList", roles);
+
+            List<RegisterManualVerification> filteredItems = roles.stream()
+                    .filter(item -> (("hit".equals(item.getOp1verifyStatus()) && "nohit".equals(item.getOp2verifyStatus()))
+                            || ("nohit".equals(item.getOp1verifyStatus()) && "hit".equals(item.getOp2verifyStatus()))))
+                    .collect(Collectors.toList());
+
+
+            model.addAttribute("galleryList", filteredItems);
             model.addAttribute("userid",user.getUserid());
-            model.addAttribute("typeofview","cluster");
+            model.addAttribute("typeOfView","clusterView");
 
             logger.info(logger("LevelTwoController", "showHomePage", getUtcTime(), "userId " + user.getUserid()));
         }catch (Exception e){
@@ -147,7 +176,7 @@ public class LevelTwoController {
 
         }
 
-        return "levelTwoSearch";
+        return "levelTwoClusterSearch";
 
     }
 
@@ -155,26 +184,117 @@ public class LevelTwoController {
     public String showHomePage(ModelMap model, HttpServletRequest request) {
         try {
             HttpSession session = request.getSession();
-            session.setAttribute("viewType","list");
             if(session.getAttribute("userID")==null){
                 return "redirect:loginPage";
             }
+            session.setAttribute("viewType","master");
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
             System.out.println("user" + user.getUserid());
 
-            ArrayList<RegisterManualVerification> roles = (ArrayList<RegisterManualVerification>) mvs.listOfRidsForL2();
-            model.addAttribute("galleryList", roles);
-            model.addAttribute("userid",user.getUserid());
-            model.addAttribute("typeofview","list");
+//            ArrayList<RegisterManualVerification> roles = (ArrayList<RegisterManualVerification>) mvs.listOfRidsForL2();
+            Set<String> operators = userdetailsService.getOperator();
+
+
+            model.addAttribute("operators", operators);
+            model.addAttribute("typeOfView","listView");
+//            model.addAttribute("galleryList", roles);
             logger.info(logger("LevelTwoController", "showHomePage", getUtcTime(), "userId " + user.getUserid()));
         }catch (Exception e){
             logger.error(logger("LevelTwoController","showHomePage",getUtcTime(), e.toString()));
             return "redirect:errorPage";
-
         }
 
         return "levelTwoSearch";
 
+    }
+
+    @RequestMapping(value="/loadLevelTwoData", method= RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadLevelTwoData(ModelMap model, HttpServletRequest request) {
+        try {
+            HttpSession session = request.getSession();
+            if (session.getAttribute("userID") == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
+        ArrayList<RegisterManualVerification> data = (ArrayList<RegisterManualVerification>) mvs.listOfRidsForL2(PageRequest.of(0, ConstantValue.MAXRESULT));
+        List<String> cases = userCaseAssignmentRepo.getRequestIds();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("data",FilterL2Data(data, cases)); // Indicate if more data is available   FilterL2Data(data, cases)
+
+        return ResponseEntity.ok(response);
+    }
+
+    public List<RegisterManualVerification> FilterL2Data(List<RegisterManualVerification> list, List<String> cases){
+     return list.stream().filter(item->  !cases.contains(item.getReqid())).collect(Collectors.toList());
+    }
+
+
+    @RequestMapping(value = "/loadDataTwo", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadMoreFilterDataTwo(
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            @RequestParam String operator1,
+            @RequestParam String operator2,
+            @RequestParam String dateType,
+            @RequestParam int offSet,
+            HttpServletRequest request) throws java.text.ParseException {
+        System.out.println("offSet  : "+offSet);
+        try {
+            HttpSession session = request.getSession();
+            if (session.getAttribute("userID") == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Map<String, Object> response = new HashMap<>();
+        List<RegisterManualVerification> data;
+        if(startDate.isEmpty()){
+            data = mvs.listOfRidsForL2(PageRequest.of(offSet,ConstantValue.MAXRESULT));
+            System.out.println("Successful data ----> "+ data.size());
+            response.put("data", data);
+        }
+        else{
+            Date start = sdf.parse(startDate);
+            Date end = sdf.parse(endDate);
+            // Process the data here and return a response
+            System.out.println("naveen------------------------------->>>>" + start +" - "+ end);
+            System.out.println("oper1" + operator1);
+            System.out.println("oper2" + operator2);
+            System.out.println("startDate" + startDate);
+            System.out.println("endDate" + endDate);
+
+            if(operator1.isEmpty() && operator2.isEmpty()){
+                System.out.println("if block");
+                data = mvs.listOfRidsForL22(start, end, dateType, offSet);
+            }
+            else if(operator2.isEmpty()){
+                System.out.println("Operator2 is empty");
+                data = mvs.listOfRidsForL2Op1(start, end, operator1,dateType, offSet);
+            }
+            else if(operator1.isEmpty()){
+                System.out.println("Operator1 is empty");
+                data = mvs.listOfRidsForL2Op2(start, end, operator2,dateType, offSet);
+            }
+            else{
+                System.out.println("else");
+                data = mvs.listOfRidsForL2(start, end, operator1, operator2,dateType, offSet);
+            }
+
+            System.out.println("Successful data ----> "+ data.size());
+            response.put("data", data);
+        }
+        // Indicate if more data is available
+
+        return ResponseEntity.ok(response); // Properly return data with HTTP 200 status
     }
 
     @RequestMapping(value = "/leveltwodetails", method = RequestMethod.GET)
@@ -193,7 +313,7 @@ public class LevelTwoController {
     public String leveltwoSearchByName(ModelMap model, HttpServletRequest request, @RequestParam("id") String id, @RequestParam("probe") String probe,
                                        @RequestParam("candidate") String candidate,@RequestParam("requestId") String requestId,@RequestParam("op1Comment")String op1Comment,
                                        @RequestParam("op1verifyStatus") String op1verifyStatus,@RequestParam("op2verifyStatus") String op2verifyStatus,@RequestParam("op2Comment")String op2Comment,
-                                       @RequestParam("caseListNo") String caseListNo
+                                       @RequestParam("caseListNo") String caseListNo, @RequestParam("typeOfView") String typeOfView
     ) {
 
         HttpSession session = request.getSession();
@@ -213,6 +333,7 @@ public class LevelTwoController {
         model.addAttribute("Prob", probe);
         model.addAttribute("id", id);
         model.addAttribute("requestId", requestId);
+        model.addAttribute("typeOfView", typeOfView);
         System.out.println("id"+id);
         System.out.println("probe"+probe);
         System.out.println("candidate"+candidate);
@@ -1069,7 +1190,7 @@ public class LevelTwoController {
                     model.addAttribute("rightfingerCan", rightfingerCan);
                     model.addAttribute("irisCanScore", irisCanScore);
                     model.addAttribute("CanFaceImage", CanFaceImage);
-                   
+
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -1162,13 +1283,13 @@ public class LevelTwoController {
 
     @RequestMapping(value = "/saveMVSL2Result")
     public String saveMVSL2ResultDetail(ModelMap model, HttpServletRequest request,
-                                  RedirectAttributes redirectAttributes, SaveMvsResultRequestDto mvsResultRequestDto) {
+                                        RedirectAttributes redirectAttributes, SaveMvsResultRequestDto mvsResultRequestDto) {
         System.out.println("Successssslevel2");
         String viewType = null;
         try {
             HttpSession session = request.getSession();
             viewType = (String) session.getAttribute("viewType");
-            System.out.println("view ttype + : "+viewType);
+            System.out.println("view type + : "+viewType);
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
             String probe= (String) session.getAttribute("regId" );
             String canditate= (String) session.getAttribute("matchId");

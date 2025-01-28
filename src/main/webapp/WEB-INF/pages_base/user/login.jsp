@@ -16,7 +16,10 @@
   <!-- Theme style -->
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
   <script src="plugins/sweetalert2/sweetalert2.js"></script>
-  <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.js">
+    <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.js">
+
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </head>
 
@@ -85,7 +88,7 @@
   </script>
 </c:if>
 <body class="hold-transition login-page">
-<div class="login-box" style="position: center">
+<div class="login-box" >
   <!-- /.login-logo -->
   <div class="card card-outline card-primary">
     <div class="card-header text-center">

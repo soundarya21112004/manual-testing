@@ -5,6 +5,7 @@ import com.eagle.mas.common.ReadImage;
 import com.eagle.mas.dto.SaveMvsResultRequestDto;
 import com.eagle.mas.model.*;
 import com.eagle.mas.repository.BioScoreRepository;
+import com.eagle.mas.repository.RegManualVerificationRepository;
 import com.eagle.mas.service.ManualVerificationService;
 import com.eagle.mas.service.MvJsonService;
 import org.jose4j.base64url.Base64Url;
@@ -54,6 +55,10 @@ public class LevelOneController {
     MvJsonService mvJsonService;
     @Autowired
     LevelThreeController req;
+
+    @Autowired
+    RegManualVerificationRepository regManualVerificationRepository;
+
     @Autowired
     BioScoreRepository bioRepository;
     Logger logger = LoggerFactory.getLogger(LoginController.class);
@@ -85,9 +90,19 @@ public class LevelOneController {
                         return false;
                     }
                 }).collect(Collectors.toList());
+//                int reqCount = mvs.getReqIdCount(userCaseRequest.getRequestId());
+               /* int reqCount = list.size();
+                int finalIndicateCount = mvs.getFinIndicate(userCaseRequest.getRequestId());
+                if(reqCount == finalIndicateCount){
+                    list.forEach(li -> li.setCaseEvaluationComplete(1));
+                    regManualVerificationRepository.saveAll(list);
+                }*/
+
 
                 System.out.println("result size : " + result.size());
                 if (result.size() == list.size()) {
+                    list.stream().filter(e -> "DUP".equals(e.getFinindi())).forEach(e -> e.setCaseEvaluationComplete(1));
+                    regManualVerificationRepository.saveAll(list);
                     mvs.resetProcessStatus(userCaseRequest.getRequestId());
                     mvs.removeProcessedCaseForUser(user.getUserid());
                     redirectAttributes.addFlashAttribute("successMessage", "case is submitted");

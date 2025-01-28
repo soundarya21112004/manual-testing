@@ -8,7 +8,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.swing.*;
-import javax.transaction.Transactional;
 
 import com.eagle.mas.model.MstRoleToGroup;
 
@@ -27,12 +26,13 @@ import org.springframework.stereotype.Repository;
 
 import com.eagle.mas.model.TblAssigned;
 import com.eagle.mas.service.AssignmentService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-@Transactional
+@Transactional("transactionManager")
 public class ApprovalDao {
 	@Autowired
 	private AssignmentService service;

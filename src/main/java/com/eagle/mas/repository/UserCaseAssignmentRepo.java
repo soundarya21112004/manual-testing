@@ -13,5 +13,6 @@ public interface UserCaseAssignmentRepo extends JpaRepository<UserCaseAssignment
 
     public UserCaseAssignment findByUserId(String userId);
 
-
+    @Query(value = "SELECT t1.requestId FROM UserCaseAssignment t1")
+    List<String> getRequestIds();
 }

@@ -1,5 +1,6 @@
 package com.eagle.mas.repository;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -64,4 +65,10 @@ public interface UserdetailsRepository extends CrudRepository<Userdetails, Strin
 
 	@Query(value = "select count(u) from Userdetails u where u.email=:email")
 	int checkmail(String email);
+
+//	@Query(value = "SELECT u.firstnameEn FROM Userdetails u  where u.belongsTo= 'OperatorL1' or u.belongsTo = 'OperatorL2' and u.activestatus='1'")
+//	Set<String> getOperator();
+
+	@Query(value = "SELECT u.firstnameEn FROM Userdetails u  where u.designation= 'OPERATOR' and u.activestatus='1'")
+	Set<String> getOperator();
 }

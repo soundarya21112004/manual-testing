@@ -2,17 +2,20 @@ package com.eagle.mas.controller;
 
 import com.eagle.mas.bean.GalleryBean;
 import com.eagle.mas.common.ReadImage;
+import com.eagle.mas.config.ConstantValue;
 import com.eagle.mas.dao.ResponseMvsDao;
 import com.eagle.mas.model.BioScore;
 import com.eagle.mas.model.RegisterManualVerification;
 import com.eagle.mas.model.ResponseMvs;
 import com.eagle.mas.model.Userdetails;
 import com.eagle.mas.repository.BioScoreRepository;
+import com.eagle.mas.repository.UserCaseAssignmentRepo;
 import com.eagle.mas.service.ManualVerificationService;
 
 
 import com.eagle.mas.service.MvJsonService;
 import com.eagle.mas.service.ResponseMvsService;
+import com.eagle.mas.service.UserdetailsService;
 import org.jose4j.base64url.Base64Url;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -21,6 +24,9 @@ import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -53,10 +59,16 @@ public class LevelThreeController {
     private ManualVerificationService mvs;
 
     @Autowired
+    private UserdetailsService userdetailsService;
+
+    @Autowired
     BioScoreRepository bioRepository;
 
     @Autowired
     MvJsonService mvJsonService;
+
+    @Autowired
+    UserCaseAssignmentRepo userCaseAssignmentRepo;
 
     File catalinaBase = new File(System.getProperty("catalina.base")).getAbsoluteFile();
     File propertyFile = new File(catalinaBase, "bin/mvs/");
@@ -160,29 +172,107 @@ return "sample";
     }
 
     @RequestMapping(value = "/levelthreeSearch", method = RequestMethod.GET)
-    public String showHomePage(ModelMap model, HttpServletRequest request) throws ParseException, java.text.ParseException {
+    public String showHomePage(ModelMap model, HttpServletRequest request) {
         try{
             HttpSession session = request.getSession();
-            if(session.getAttribute("userID")==null){
+            if(session.getAttribute("userID")==null) {
                 return "redirect:loginPage";
             }
-
         }
         catch(Exception e){
             System.out.println(e.toString());
         }
 
-        ArrayList<RegisterManualVerification> roles = (ArrayList<RegisterManualVerification>) mvs.listOfRidsForL3();
-        model.addAttribute("galleryList", roles);
-
-//for(int j=0; j< obj.length;j++){
-//    System.out.println(obj[j]);
-//
-//}
-        System.out.println("levelthreeSearch");
+        Set<String> operators = userdetailsService.getOperator();
+        model.addAttribute("operators", operators);
+//        sortedRoles = mvs.listOfRidsForL3();
         return "levelThreeSearch";
-
     }
+
+    @RequestMapping(value="/loadLevelThreeData", method= RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadLevelThreeData(ModelMap model, HttpServletRequest request) {
+        try {
+            HttpSession session = request.getSession();
+            if (session.getAttribute("userID") == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
+        ArrayList<RegisterManualVerification> data = (ArrayList<RegisterManualVerification>) mvs.listOfRidsForL3(PageRequest.of(0, ConstantValue.MAXRESULT));
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", data); // Indicate if more data is available
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    @RequestMapping(value = "/loadDataThree", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> loadMoreFilterDataThree(
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            @RequestParam String operator1,
+            @RequestParam String operator2,
+            @RequestParam String dateType,
+            @RequestParam int offSet,
+            HttpServletRequest request) throws java.text.ParseException {
+
+        try {
+            HttpSession session = request.getSession();
+            if (session.getAttribute("userID") == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Map<String, Object> response = new HashMap<>();
+        List<RegisterManualVerification> data;
+        if(startDate.isEmpty()){
+
+            data = mvs.listOfRidsForL3(PageRequest.of(offSet,ConstantValue.MAXRESULT));
+            System.out.println("Successful data ----> "+ data.size());
+            response.put("data", data);
+        }
+        else{
+            Date start = sdf.parse(startDate);
+            Date end = sdf.parse(endDate);
+            // Process the data here and return a response
+
+            System.out.println("naveen------------------------------->>>>" + start +""+ end+""+ ""+operator1+""+ operator2);
+            System.out.println("Opt1--->"+ operator1.isEmpty());
+            System.out.println("Opt2--->"+ operator2.isEmpty());
+
+            if(operator1.isEmpty() && operator2.isEmpty()){
+                System.out.println("if block");
+                data = mvs.listOfRidsForL33(start, end, dateType, offSet);
+            }
+            else if (operator2.isEmpty()) {
+                System.out.println("Operator2 is empty");
+                data = mvs.listOfRidsForL3Op1(start, end, operator1, dateType, offSet);
+
+            }
+            else if (operator1.isEmpty()) {
+                System.out.println("Operator1 is empty");
+                data = mvs.listOfRidsForL3Op2(start, end, operator2, dateType, offSet);
+            }
+            else{
+                System.out.println("else block");
+                data = mvs.listOfRidsForL3(start, end, operator1, operator2, dateType,offSet);
+            }
+
+            System.out.println("Successful data ----> "+ data.size());
+            response.put("data", data);
+        }
+         // Indicate if more data is available
+
+        return ResponseEntity.ok(response); // Properly return data with HTTP 200 status
+    }
+
 
     @RequestMapping(value = "/levelthreedetails", method = RequestMethod.GET)
     public String showLevelThreeDetailsPage(ModelMap model, HttpServletRequest request, RedirectAttributes redirectAttributes) {

@@ -37,7 +37,8 @@
 		}
 		function checkwindow(){
 			if(window.name != 'appname')
-				window.location = "/MVS/loginPage";
+				window.location = "<c:url value='loginPage'/>";
+				// window.location = "/MVS/loginPage";
 		}
 	</script>
 </head>

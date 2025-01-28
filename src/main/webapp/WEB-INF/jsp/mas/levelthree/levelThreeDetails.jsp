@@ -355,7 +355,8 @@
 		var requestId = document.getElementById('requestId').value;
 		var comment = document.getElementById('comment').value;
 		if (comment != ''){
-			document.getElementById('leveloneform').action = "/MVS/saveMVSL3Result?sno=" + sno + "&verifyStatusthree=hit"+"&statusCommentthree="+comment+"&requestId"+requestId;
+			document.getElementById('leveloneform').action = <c:url  value='saveMVSL3Result?sno=" + ${sno} + "&verifyStatusthree=hit"+"&statusCommentthree="+${comment}+"&requestId"+${requestId}'/>;
+			// document.getElementById('leveloneform').action = "/MVS/saveMVSL3Result?sno=" + sno + "&verifyStatusthree=hit"+"&statusCommentthree="+comment+"&requestId"+requestId;
 			document.getElementById('leveloneform').submit();
 		}else{
 			document.getElementById('comment').style.border = "1px solid red";

@@ -81,7 +81,8 @@
 
     function submitCase() {
 
-            document.getElementById('submitcase').action = "/MVS/refreshNewCase";
+            // document.getElementById('submitcase').action = "/MVS/refreshNewCase";
+            document.getElementById('submitcase').action = "<c:url value='refreshNewCase'/>";
             document.getElementById('submitcase').submit();
 
     }

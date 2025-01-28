@@ -2,7 +2,6 @@
   <library name="bioutils-0.0.1-SNAPSHOT">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/lib/bio-utils-main-1.0.jar!/" />
-      <root url="jar://$MAVEN_REPOSITORY$/com/idrsolutions/image/bioutils-0.0.1-SNAPSHOT.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

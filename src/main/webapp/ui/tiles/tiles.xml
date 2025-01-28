@@ -133,6 +133,11 @@
 		<put-attribute name="body"
 					   value="/WEB-INF/jsp/mas/leveltwo/levelTwoSearch.jsp" />
 	</definition>
+
+	<definition name="levelTwoClusterSearch" extends="baseLayout">
+		<put-attribute name="body"
+					   value="/WEB-INF/jsp/mas/leveltwo/levelTwoClusterSearch.jsp" />
+	</definition>
 	<definition name="mvsLevelTwoDetail" extends="baseLayout">
 		<put-attribute name="body"
 			value="/WEB-INF/jsp/mas/leveltwo/levelTwoDetails.jsp" />

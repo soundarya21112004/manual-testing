@@ -3,15 +3,17 @@ package com.eagle.mas.dao;
 import com.eagle.mas.model.MstRoleGroup;
 import com.eagle.mas.model.ResponseMvs;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
 
 @Repository
-@Transactional
+@Transactional("transactionManager")
 public class ResponseMvsDao {
     @Autowired
+    @Qualifier("entityManagerFactory")
     private EntityManager em;
     public void saveAll(ResponseMvs responseObj) {
         try {

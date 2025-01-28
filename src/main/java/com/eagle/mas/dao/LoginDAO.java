@@ -6,19 +6,21 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import javax.transaction.Transactional;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import com.eagle.mas.model.Userdetails;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-@Transactional
+@Transactional("transactionManager")
 public class LoginDAO {
 
 	@Autowired
+	@Qualifier("entityManagerFactory")
 	private EntityManager em;
 
 	public Userdetails getAllPersons(String email, String pwd) {

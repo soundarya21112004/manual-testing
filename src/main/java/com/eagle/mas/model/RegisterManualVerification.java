@@ -45,8 +45,18 @@ public class RegisterManualVerification implements Serializable  {
 
     private String priority;
 
-    @Id
+    private int caseEvaluationComplete;
 
+    @Column(name = "case_evaluation_complete")
+    public int getCaseEvaluationComplete() {
+        return caseEvaluationComplete;
+    }
+
+    public void setCaseEvaluationComplete(int caseEvaluationComplete) {
+        this.caseEvaluationComplete = caseEvaluationComplete;
+    }
+
+    @Id
     public int getSno() {
         return sno;
     }
@@ -277,4 +287,6 @@ public class RegisterManualVerification implements Serializable  {
     public void setPriority(String priority) {
         this.priority = priority;
     }
+
+
 }

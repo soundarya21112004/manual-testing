@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,9 +32,14 @@ public String getUserType(String id){
 	}
 	@Override
 	public ArrayList <Userdetails> getUserdetails(){
-		 ArrayList<Userdetails>   list= (ArrayList) userrepository.getUserdetails();
+		 ArrayList<Userdetails> list= (ArrayList) userrepository.getUserdetails();
 		return list;
 	}
+	@Override
+	public Set<String> getOperator() {
+		return userrepository.getOperator();
+	}
+
 	@Override
 	public void setActivestatus(String userid){
 		userrepository.setActivestatus(userid);

@@ -532,7 +532,7 @@ function addClass(){
 
     function submitHit() {
         const form = document.getElementById('leveloneform');
-        form.action = "/MVS/saveMVSL1Result";//war
+        form.action = "<c:url value='saveMVSL1Result'/>";//war
         // form.action = "/saveMVSL1Result";//local
         var id = document.getElementById('pkID').value;
         var requestId = document.getElementById('requestId').value;
@@ -574,7 +574,7 @@ function addClass(){
     function submitNoHit() {
 
         const form = document.getElementById('leveloneform');
-        form.action = "/MVS/saveMVSL1Result";//war
+        form.action = "<c:url value='saveMVSL1Result'/>";//war
         // form.action = "/saveMVSL1Result";//local
         var id = document.getElementById('pkID').value;
         var requestId = document.getElementById('requestId').value;

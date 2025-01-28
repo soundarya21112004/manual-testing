@@ -3,20 +3,23 @@ package com.eagle.mas.dao;
 import java.util.Date;
 
 import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
 
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import com.eagle.mas.model.MstRolegroupToUser;
 import com.eagle.mas.model.Userdetails;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-@Transactional
+@Transactional("transactionManager")
 public class UserManagementDAO {
 
+
 	@Autowired
+	@Qualifier("entityManagerFactory")
 	private EntityManager em;
 
 	public boolean saveAll(Userdetails user) {

@@ -17,7 +17,8 @@ public class MvJson {
     private String url;
     private String reqTime;
     private Date currentTime;
-    private boolean encryptionStatus;
+   /* private boolean encryptionStatus;
+
     @Column(name = "encryption_status")
     public boolean isEncryptionStatus() {
         return encryptionStatus;
@@ -25,10 +26,7 @@ public class MvJson {
 
     public void setEncryptionStatus(boolean encryptionStatus) {
         this.encryptionStatus = encryptionStatus;
-    }
-
-
-
+    }*/
 
     @Id
     @Column(name = "id")

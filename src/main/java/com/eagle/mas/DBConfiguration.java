@@ -10,9 +10,11 @@ import java.util.ResourceBundle;
 import javax.sql.DataSource;
 
 import com.eagle.mas.config.ConstantValue;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -22,7 +24,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-//@EnableJpaRepositories(basePackages = "com.eagle.mas.repository")
+@EnableJpaRepositories(basePackages = "com.eagle.mas.repository", entityManagerFactoryRef = "entityManagerFactory",
+		transactionManagerRef = "transactionManager")
 public class DBConfiguration {
 	File propertyFile;
 //	@Value("${spring.datasource.driver}")
@@ -71,10 +74,11 @@ public class DBConfiguration {
 			}
 		}
 	}
-
-	@Bean
+	@Primary
+	@Bean(name = "dataSource")
 	public DataSource dataSource() {
 		OSCheck();
+		System.out.println("Data Source");
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		try{
 			InputStream in = new FileInputStream(propertyFile);
@@ -85,9 +89,10 @@ public class DBConfiguration {
 			ConstantValue.secretKey=resource.getString("secretKey");
 			ConstantValue.IDENTITY=resource.getString("IDENTITY");
 			ConstantValue.elapsedHours=Long.parseLong(resource.getString("case.unassign.time.limit"));
-
+			ConstantValue.MAXRESULT =Integer.parseInt(resource.getString("search.filter.max.result"));
 			dataSource.setDriverClassName(resource.getString("db.driver"));
 			dataSource.setUrl(resource.getString("db.url"));
+			System.out.println("url ---> " + resource.getString("db.url"));
 			dataSource.setUsername(resource.getString("db.username"));
 			dataSource.setPassword(resource.getString("db.password"));
 		}
@@ -97,11 +102,11 @@ public class DBConfiguration {
 
 		return dataSource;
 	}
-
+	@Primary
 	@Bean(name = "entityManagerFactory")
-	public LocalSessionFactoryBean sessionFactory() {
+	public LocalSessionFactoryBean sessionFactory(@Qualifier("dataSource") DataSource dataSource) {
 		LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-		sessionFactory.setDataSource(dataSource());
+		sessionFactory.setDataSource(dataSource);
 		sessionFactory.setPackagesToScan(PACKAGES_TO_SCAN);
 		Properties hibernateProperties = new Properties();
 		hibernateProperties.put("hibernate.dialect", DIALECT);
@@ -111,11 +116,11 @@ public class DBConfiguration {
 
 		return sessionFactory;
 	}
-
-	@Bean
-	public HibernateTransactionManager transactionManager() {
+	@Primary
+	@Bean(name = "transactionManager")
+	public HibernateTransactionManager transactionManager(@Qualifier("entityManagerFactory") LocalSessionFactoryBean sessionFactory) {
 		HibernateTransactionManager transactionManager = new HibernateTransactionManager();
-		transactionManager.setSessionFactory(sessionFactory().getObject());
+		transactionManager.setSessionFactory(sessionFactory.getObject());
 		return transactionManager;
 	}
 }

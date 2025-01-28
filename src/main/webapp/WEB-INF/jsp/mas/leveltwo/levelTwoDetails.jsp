@@ -489,7 +489,8 @@
     function submitHit() {
 
         const form = document.getElementById('leveloneform');
-        form.action = "/MVS/saveMVSL2Result";
+        form.action = "<c:url value='saveMVSL2Result'/>";
+        // form.action = "/MVS/saveMVSL2Result";
         var sno = document.getElementById('pkID').value;
         var requestId = document.getElementById('requestId').value;
         var comment = document.getElementById('comment').value;
@@ -529,13 +530,14 @@
 
     function submitNoHit() {
         const form = document.getElementById('leveloneform');
-        form.action = "/MVS/saveMVSL2Result";
+        form.action = "<c:url value='saveMVSL2Result'/>";
+        // form.action = "/MVS/saveMVSL2Result";
         var sno = document.getElementById('pkID').value;
         var requestId = document.getElementById('requestId').value;
         var comment = document.getElementById('comment').value;
         var data = {};
         data["sno"] = sno;
-        data["verifyStatus"] = 'hit';
+        data["verifyStatus"] = 'nohit';
         data["requestId"] = requestId;
         data["statusComment"] = comment;
         if (comment != ''){
@@ -697,9 +699,16 @@
             <c:when test="${psnGenerated  == false}"><span style="position: absolute;top:-2px; margin-left: 10px"><i class="far fa-square fa-2x"></i></span></c:when>
         </c:choose>
     </div>
-    <div class="col-md-2">
+  <%--  <div class="col-md-2">
         <h6 style="text-align: center;"><span>${count}<br></span> candidates </h6>
-    </div>
+    </div>--%>
+
+        <div class="col-md-2">
+            <c:choose>
+                <c:when test="${typeOfView  == 'listView'}"><h6 style="text-align: center;"><span>${count}<br></span> Total cases </h6></c:when>
+                <c:when test="${typeOfView  == 'clusterView'}"><h6 style="text-align: center;"><span>${count}<br></span> candidates </h6></c:when>
+            </c:choose>
+        </div>
 </div>
 
 

@@ -136,6 +136,7 @@ package com.eagle.mas.service;
 
 
 import com.eagle.mas.config.ConstantValue;
+import com.eagle.mas.idrepo.repo.UinRepo;
 import com.eagle.mas.model.RegisterManualVerification;
 import com.eagle.mas.model.UserCaseAssignment;
 import com.eagle.mas.repository.RegManualVerificationRepository;
@@ -176,6 +177,9 @@ public class ManualVerificationService {
 	@Autowired
 	TokenGenerator tokenGenerator;
 
+	@Autowired
+	UinRepo uinRepo;
+
 	public int countAllByRegId(String regid) {
 		return repo.countAllByRegId(regid);
 	}
@@ -183,7 +187,7 @@ public class ManualVerificationService {
 	//dashboard admin
 
 	public int numberofHits(){
-		 int count=repo.numberofHits();
+		int count=repo.numberofHits();
 		return count;
 	}
 
@@ -215,9 +219,9 @@ public class ManualVerificationService {
 	}
 
 
-public int totalResponseCases(String regid){
-	return repo.totalResponseCases(regid);
-}
+	public int totalResponseCases(String regid){
+		return repo.totalResponseCases(regid);
+	}
 
 	public int responseCasesHit(String regid){
 		return repo.responseCasesHit(regid);
@@ -238,9 +242,9 @@ public int totalResponseCases(String regid){
 	}
 
 
-    public int modifyProcessStatus(int sno){
-        return repo.modifyProcessStatus(sno);
-    }
+	public int modifyProcessStatus(int sno){
+		return repo.modifyProcessStatus(sno);
+	}
 
 	public int operatorVerifiedNohit(int sno){
 
@@ -314,6 +318,7 @@ public int totalResponseCases(String regid){
 		if(!list.isEmpty()){
 			list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
 			repo.saveAll(list);
+			repo.flush();
 			setCaseForUser(list.get(0).getReqid(),userid);
 		}
 		return list;
@@ -333,7 +338,7 @@ public int totalResponseCases(String regid){
 		caseAssignment.setRequestId(reqId);
 		caseAssignment.setUserId(userId);
 		caseAssignment.setPickupDtimes(LocalDateTime.now(ZoneId.of("UTC")));
-		caseRepo.save(caseAssignment);
+		caseRepo.saveAndFlush(caseAssignment);
 	}
 
 	public void removeProcessedCaseForUser(String userId){
@@ -355,6 +360,7 @@ public int totalResponseCases(String regid){
 		if(!list.isEmpty()){
 			list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
 			repo.saveAll(list);
+			repo.flush();
 			setCaseForUser(list.get(0).getReqid(),userid);
 		}
 		return list;
@@ -375,7 +381,7 @@ public int totalResponseCases(String regid){
 	public void checkTimelpseAndUnassign(){
 		List<UserCaseAssignment> userCaseAssignment = caseRepo.findAll();
 		List<UserCaseAssignment> result = userCaseAssignment.stream().filter(e->
-			 LocalDateTime.now(ZoneId.of("UTC")).isAfter(e.getPickupDtimes().plusHours(ConstantValue.elapsedHours))
+				LocalDateTime.now(ZoneId.of("UTC")).isAfter(e.getPickupDtimes().plusHours(ConstantValue.elapsedHours))
 		).collect(Collectors.toList());
 		if(result.size()>0) {
 			result.forEach(e -> {
@@ -439,8 +445,7 @@ public int totalResponseCases(String regid){
 	}
 
 	public boolean getIdentityDetails(String id){
-		boolean uinGen=false;
-		try {
+		/*try {
 			ResponseEntity<String> tempResponse = api.getApi(ConstantValue.IDENTITY+id, String.class, tokenGenerator.getToken());
 			JSONObject response = validate(tempResponse.getBody());
 
@@ -455,47 +460,141 @@ public int totalResponseCases(String regid){
 		}catch (Exception e){
 			e.printStackTrace();
 			return false;
+		}*/
+		try{
+			System.out.println(uinRepo.existsByRegId(id));
+			return uinRepo.existsByRegId(id);
 		}
+		catch (Exception e){
+			e.printStackTrace();
+		}
+		return false;
 	}
-		private JSONObject validate(String response) {
-			JSONObject object = new JSONObject(response);
-			if (object.get("response") != JSONObject.NULL){
-				return (JSONObject) object.get("response");
-			}else if (object.get("errors") != JSONObject.NULL){
-				return null;
+	private JSONObject validate(String response) {
+		JSONObject object = new JSONObject(response);
+		if (object.get("response") != JSONObject.NULL){
+			return (JSONObject) object.get("response");
+		}else if (object.get("errors") != JSONObject.NULL){
+			return null;
 //				throw new ApiResourceException("invalid input parameter -ID");
-			}else {
-				return null;
+		}else {
+			return null;
 //				throw new ApiResourceException("Response is null");
-			}
-
 		}
 
-
-
-
-	public synchronized List listOfRidsForL2() {
-		return repo.listOfRidsForL2();
 	}
+
+
+	public List<RegisterManualVerification> listOfRidsForL2(Pageable pageable) {
+		return repo.listOfRidsForL2(pageable);
+	}
+
+
+	public List<RegisterManualVerification> listOfRidsForL2(Date startDate, Date endDate, String operator1, String operator2, String dateType, int pageNo) {
+		if(dateType.equals("verifiedDate")){
+			return repo.listOfRidsForVerifiedDateL2(startDate, endDate, operator1, operator2, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+		else {
+			return repo.listOfRidsForCreatedDateL2(startDate, endDate, operator1, operator2, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+
+	}
+
+
+	public List<RegisterManualVerification> listOfRidsForL22(Date startDate, Date endDate,String dateType, int pageNo) {
+		if(dateType.equals("verifiedDate")){
+			return repo.listOfRidsForVerifiedDateL22(startDate, endDate, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+		else {
+			return repo.listOfRidsForCreatedDateL22(startDate, endDate, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+
+	}
+
+
+	public List<RegisterManualVerification> listOfRidsForL2Op1(Date startDate, Date endDate, String operator1,String dateType, int pageNo) {
+		if(dateType.equals("verifiedDate")) {
+			return repo.listOfRidsForVerifiedDateL2Op1(startDate, endDate, operator1, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+		else {
+			return repo.listOfRidsForCreatedDateL2Op1(startDate, endDate, operator1, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+	}
+
+
+	public List<RegisterManualVerification> listOfRidsForL2Op2(Date startDate, Date endDate, String operator2,String dateType, int pageNo) {
+		if(dateType.equals("verifiedDate")) {
+			return repo.listOfRidsForVerifiedDateL2Op2(startDate, endDate, operator2, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+		else {
+			return repo.listOfRidsForCreatedDateL2Op2(startDate, endDate, operator2, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+	}
+
+
+
+
+	public List<RegisterManualVerification> listOfRidsForL3(Pageable pageable) {
+		return repo.listOfRidsForL3(pageable);
+	}
+
+
+	public List<RegisterManualVerification> listOfRidsForL3(Date startDate, Date endDate, String operator1, String operator2, String dateType, int pageNo) {
+		if(dateType.equals("verifiedDate")){
+			return repo.listOfRidsForVerifiedDateL3(startDate, endDate, operator1, operator2, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+		else {
+			return repo.listOfRidsForCreatedDateL3(startDate, endDate, operator1, operator2, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+	}
+
+
+	public List<RegisterManualVerification> listOfRidsForL33(Date startDate, Date endDate, String dateType, int pageNo) {
+		if(dateType.equals("verifiedDate")){
+			return repo.listOfRidsForVerifiedDateL33(startDate, endDate, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+		else{
+			return repo.listOfRidsForCreatedDateL33(startDate, endDate, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+	}
+
+	public List<RegisterManualVerification> listOfRidsForL3Op1(Date startDate, Date endDate, String operator1, String dateType, int pageNo) {
+		if(dateType.equals("verifiedDate")){
+			return repo.listOfRidsForVerifiedDateL3Op1(startDate, endDate, operator1, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+		else {
+			return repo.listOfRidsForCreatedDateL3Op1(startDate, endDate, operator1, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+
+	}
+
+	public List<RegisterManualVerification> listOfRidsForL3Op2(Date startDate, Date endDate, String operator1, String dateType, int pageNo) {
+		if(dateType.equals("verifiedDate")){
+			return repo.listOfRidsForVerifiedDateL3Op2(startDate, endDate, operator1, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+		else {
+			return repo.listOfRidsForCreatedDateL3Op2(startDate, endDate, operator1, PageRequest.of(pageNo,ConstantValue.MAXRESULT));
+		}
+
+	}
+
+
 
 	public synchronized List getClusterForL2(String userid) {
 		List<String> reqId = repo.getReqIdForL2(userid, PageRequest.of(0,1));
 		List<RegisterManualVerification> list = new ArrayList<>();
 		if(!reqId.isEmpty()) {
-			 list = repo.clusterOfRids(reqId.get(0));
+			list = repo.clusterOfRids(reqId.get(0));
 		}
 		if(!list.isEmpty()){
 			list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
 			repo.saveAll(list);
+			repo.flush();
 			setCaseForUser(list.get(0).getReqid(),userid);
 		}
 		return list;
 	}
 
-
-	public List listOfRidsForL3(){
-		return repo.listOfRidsForL3();
-	}
 
 	public List listForCandiat(String reqid){
 		return repo.listForCandiat(reqid);
