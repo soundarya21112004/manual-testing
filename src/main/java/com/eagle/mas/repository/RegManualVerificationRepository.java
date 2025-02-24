@@ -69,7 +69,6 @@ import java.util.List;
 @Repository
 public interface RegManualVerificationRepository extends JpaRepository<RegisterManualVerification, BigInteger> {
 
-
     int countAllByRegId(String regid);
 
     @Query(value = "SELECT count(t1) FROM RegisterManualVerification t1 where (t1.op1verifyStatus='hit' and t1.op2verifyStatus='hit') or t1.supervisorVerifyStatus='hit'  ")
@@ -84,10 +83,8 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
     @Query(value = "SELECT count(t1) FROM  RegisterManualVerification t1  WHERE ((t1.op1verifyStatus='hit' and t1.op2verifyStatus='hit') or t1.supervisorVerifyStatus='hit') and (MONTH(t1.op1updDate)=:month AND YEAR(t1.op1updDate)=:year)")
     int hitsThisMonth(@Param("year") int year,@Param("month") int month);
 
-
     @Query(value = "SELECT count(t1) FROM RegisterManualVerification t1  where  (t1.regId <> t1.matchedRefId)")
     int toalRecords();
-
 
     @Query("SELECT count(t1) FROM RegisterManualVerification t1 where t1.regId=:regid")
     int totalResponseCases(@Param("regid") String regid);
@@ -122,7 +119,7 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
 
     @Modifying
     @Query(value = "update RegisterManualVerification t1  set t1.finindi='DUP' where t1.sno=:sno")
-     int operatorUpdateHit(@Param("sno") int sno);
+    int operatorUpdateHit(@Param("sno") int sno);
 
     @Query(value = "SELECT count(t1)  FROM RegisterManualVerification t1 where t1.sno=:sno and t1.supervisorVerifyStatus='nohit' ")
     int supervisorVerifiedNohit(@Param("sno") int sno);
@@ -152,22 +149,25 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
     @Query(value = "SELECT t1 FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null ) and (t1.regId <> t1.matchedRefId)  )")
     List listOfRids(@Param("userid") String userid);
 
-    @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null ) and (t1.regId <> t1.matchedRefId) ) order by t1.createdDate asc ")
+    /*@Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null ) and (t1.regId <> t1.matchedRefId) ) order by t1.createdDate asc ")
+    List<String> getRequestIdOperator(@Param("userid") String userid, Pageable size);*/
+
+    @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId is null or t1.op2userId is null) and (t1.op1userId<>:userid or t1.op1userId is null) and (t1.op2userId<>:userid or t1.op2userId is null) and (t1.regId <> t1.matchedRefId) ) order by t1.createdDate asc ")
     List<String> getRequestIdOperator(@Param("userid") String userid, Pageable size);
 
     @Modifying
     @Query(value = "update public.register_manual_verification set operator1_verify_status=null,operator1_upd_date=null,\n" +
-            "operator1_upd_by=null,operator1_comment=null,operator1_user_id=null where req_id =:reqId and sno =:sno",nativeQuery = true)
+            "operator1_upd_by=null,operator1_comment=null,operator1_user_id=null, process_code = '0' where req_id =:reqId and sno =:sno",nativeQuery = true)
     void resetOp1CaseDecisions(@Param("reqId") String reqId,@Param("sno") int sno);
 
     @Modifying
     @Query(value = "update public.register_manual_verification set operator2_verify_status=null,operator2_upd_date=null,\n" +
-            "operator2_upd_by=null,operator2_comment=null,operator2_user_id=null where req_id =:reqId and sno =:sno",nativeQuery = true)
+            "operator2_upd_by=null,operator2_comment=null,operator2_user_id=null, process_code = '0' where req_id =:reqId and sno =:sno",nativeQuery = true)
     void resetOp2CaseDecisions(@Param("reqId") String reqId,@Param("sno") int sno);
 
     @Modifying
     @Query(value = "update public.register_manual_verification set supervisor_verify_status=null,supervisor_upd_date=null,\n" +
-            "supervisor_upd_by=null,supervisor_comment=null,user_id=null where req_id =:reqId and sno =:sno" ,nativeQuery = true)
+            "supervisor_upd_by=null,supervisor_comment=null,user_id=null, process_code = '0' where req_id =:reqId and sno =:sno" ,nativeQuery = true)
     void resetSupervisorCaseDecisions(@Param("reqId") String reqId,@Param("sno") int sno);
 
     @Query(value = "SELECT t1 FROM RegisterManualVerification t1 where t1.reqid = :reqId and t1.regId <> t1.matchedRefId order by t1.sno")
@@ -180,7 +180,7 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
 
     @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 " +
             "where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null )" +
-            " and (t1.regId <> t1.matchedRefId) and t1.priority= '1'  )")
+            " and (t1.regId <> t1.matchedRefId) and t1.priority= '1')")
     String getRequestIdPriority(@Param("userid") String userid);
 
     @Query(value="select t1.reqid from RegisterManualVerification t1 where (t1.statusCode='1')" +

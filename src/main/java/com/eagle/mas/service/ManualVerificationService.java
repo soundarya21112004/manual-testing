@@ -328,6 +328,8 @@ public class ManualVerificationService {
 	public void resetProcessStatus(String reqId){
 		List<RegisterManualVerification> list = repo.clusterOfRids(reqId);
 		if(!list.isEmpty()){
+			System.out.println("LIST SIZE : "+ list.size());
+			System.out.println("Set Process code equal to 0");
 			list.replaceAll(ad-> {ad.setProStatus("0"); return ad;});
 			repo.saveAll(list);
 		}
@@ -341,9 +343,11 @@ public class ManualVerificationService {
 		caseRepo.saveAndFlush(caseAssignment);
 	}
 
+	@Transactional
 	public void removeProcessedCaseForUser(String userId){
-
+		System.out.println("Remove Case for user");
 		caseRepo.deleteById(userId);
+		caseRepo.flush();
 
 	}
 
@@ -388,11 +392,16 @@ public class ManualVerificationService {
 				List<RegisterManualVerification> cases = repo.clusterOfRids(e.getRequestId());
 				List<RegisterManualVerification> finalList = cases.stream().filter(t -> {
 					if (t.getOp1userId() != null && t.getOp1userId().equals(e.getUserId())) {
+						System.out.println("Schedulor if");
+						System.out.println( "sno"+ t.getSno());
+						System.out.println("reqid"+ t.getReqid());
 						resetOp1Decisions(t);
 					} else if (t.getOp2userId() != null && t.getOp2userId().equals(e.getUserId())) {
 						resetOp2Decisions(t);
+						System.out.println("Schedulor else if 1");
 					} else if (t.getUserId() != null && t.getUserId().equals(e.getUserId())) {
 						resetSupervisorDecisions(t);
+						System.out.println("Schedulor else if 1");
 					}
 					return false;
 				}).collect(Collectors.toList());
@@ -402,43 +411,43 @@ public class ManualVerificationService {
 
 
 			result.forEach(e -> {
-				List<RegisterManualVerification> cases = repo.clusterOfRids(e.getRequestId());
-				cases.replaceAll(ad -> {
-					ad.setProStatus("0");
-					return ad;
-				});
-				repo.saveAll(cases);
-				caseRepo.deleteById(e.getUserId());
+//				List<RegisterManualVerification> cases = repo.clusterOfRids(e.getRequestId());
+//				cases.replaceAll(ad -> {
+//					ad.setProStatus("0");
+//					return ad;
+//				});
+//				repo.saveAll(cases);
+				removeProcessedCaseForUser(e.getUserId());
+//				caseRepo.deleteById(e.getUserId());
 			});
 		}
 
-
-
-
-
-
 	}
 
+	@Transactional
 	public void resetOp1Decisions(RegisterManualVerification cases){
 
 		if (cases != null){
 			repo.resetOp1CaseDecisions(cases.getReqid(),cases.getSno());
+			repo.flush();
 		}else{
 			System.out.println("case is null op1");
 		}
 	}
-
+	@Transactional
 	public void resetOp2Decisions(RegisterManualVerification cases){
 		if (cases != null){
 			repo.resetOp2CaseDecisions(cases.getReqid(),cases.getSno());
+			repo.flush();
 		}else{
 			System.out.println("case is null op2");
 		}
 	}
-
+	@Transactional
 	public void resetSupervisorDecisions(RegisterManualVerification cases){
 		if (cases != null){
 			repo.resetSupervisorCaseDecisions(cases.getReqid(),cases.getSno());
+			repo.flush();
 		}else{
 			System.out.println("case is null sup");
 		}
