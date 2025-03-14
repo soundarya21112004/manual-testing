@@ -70,7 +70,7 @@ public String showHomePage(ModelMap model, @ModelAttribute("mstRolesBean") MstRo
 		//session.setMaxInactiveInterval(600);
 		HttpSession session = request.getSession();
 		if(session.getAttribute("userID")==null){
-			return "redirect:loginPage";
+			return "redirect:redirectlogin";
 		}
 
 		Iterable<MstRoleGroup> loadRoleGroup = mstRoleGroupService.listRoleToGroup();
@@ -313,7 +313,7 @@ public String showHomePage(ModelMap model, @ModelAttribute("mstRolesBean") MstRo
 		try {
 			HttpSession session = request.getSession();
 			if (session.getAttribute("userID") == null) {
-				return "redirect:loginPage";
+				return "redirect:redirectlogin";
 			}
 			ArrayList<Userdetails> list = userService.getUserdetails();
 
@@ -366,7 +366,7 @@ try {
 
 	} else {
 		System.out.println("works");
-		redirectAttributes.addFlashAttribute("faliureMessage", "ERROR WHILE PROCESSING.");
+		redirectAttributes.addFlashAttribute("failureMessage", "ERROR WHILE PROCESSING.");
 	}
 
 }
@@ -396,7 +396,7 @@ catch (Exception e){
 	}
 
 
-//	redirectAttributes.addFlashAttribute("faliureMessage","email already exits");
+//	redirectAttributes.addFlashAttribute("failureMessage","email already exits");
 //			return "redirect:userCreation";
 
 

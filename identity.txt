@@ -1,0 +1,78 @@
+{presentAddressLine1=[ {
+  "language" : "eng",
+  "value" : "sdfkotfdrxcgbjhjnk"
+} ], presentZipcode=[ {
+  "language" : "eng",
+  "value" : "3812"
+} ], presentProvince=[ {
+  "language" : "eng",
+  "value" : "Apayao"
+} ], lastName=[ {
+  "language" : "eng",
+  "value" : "praba"
+} ], presentAddressLine2=null, presentAddressLine3=null, pobCountry=[ {
+  "language" : "eng",
+  "value" : "Philippines"
+} ], presentAddressLine4=null, proofOfAddress={
+  "value" : "proofOfAddress",
+  "type" : "DOC034",
+  "format" : "PDF"
+}, pobProvince=[ {
+  "language" : "eng",
+  "value" : "Aklan"
+} ], gender=[ {
+  "language" : "eng",
+  "value" : "Male"
+} ], proofOfConsent=null, permanentBarangay=[ {
+  "language" : "eng",
+  "value" : "Capannikian"
+} ], mobileno=null, suffix=[ {
+  "language" : "eng",
+  "value" : "mr"
+} ], bloodType=[ {
+  "language" : "eng",
+  "value" : "A+"
+} ], individualBiometrics={
+  "format" : "cbeff",
+  "version" : 1.0,
+  "value" : "individualBiometrics_bio_CBEFF"
+}, presentBarangay=[ {
+  "language" : "eng",
+  "value" : "Capannikian"
+} ], proofOfDateOfBirth=null, residenceStatus=[ {
+  "language" : "eng",
+  "value" : "Filipino"
+} ], email=null, permanentZipcode=[ {
+  "language" : "eng",
+  "value" : "3812"
+} ], pobCity=[ {
+  "language" : "eng",
+  "value" : "Altavas"
+} ], dateOfBirth=2001/12/08, presentCity=[ {
+  "language" : "eng",
+  "value" : "Pudtol"
+} ], firstName=[ {
+  "language" : "eng",
+  "value" : "mano"
+} ], proofOfIdentity=null, permanentAddressLine1=[ {
+  "language" : "eng",
+  "value" : "sdfkotfdrxcgbjhjnk"
+} ], proofOfException=null, permanentCountry=[ {
+  "language" : "eng",
+  "value" : "Philippines"
+} ], presentCountry=[ {
+  "language" : "eng",
+  "value" : "Philippines"
+} ], permanentProvince=[ {
+  "language" : "eng",
+  "value" : "Apayao"
+} ], middleName=[ {
+  "language" : "eng",
+  "value" : "j"
+} ], proofOfRelationship=null, permanentCity=[ {
+  "language" : "eng",
+  "value" : "Pudtol"
+} ], permanentAddressLine2=null, permanentAddressLine3=null, permanentAddressLine4=null, maritalStatus=[ {
+  "language" : "eng",
+  "value" : "Single"
+} ]}

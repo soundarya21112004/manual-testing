@@ -1,29 +1,23 @@
 package com.eagle.mas.controller;
 
-import java.awt.*;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
-//import java.util.logging.Logger;
+
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.swing.*;
 
+import com.eagle.mas.model.TokenDetails;
+import com.eagle.mas.security.jwt.JwtService;
+import com.eagle.mas.repository.TokenRepository;
 import com.eagle.mas.service.*;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -45,13 +39,20 @@ public class LoginController {
 	LoginDAO logindao;
 	@Autowired
 	RolesService roleservice;
-	@Autowired
-	private TokenManager tokenManager;
+//	@Autowired
+//	private TokenManager tokenManager;
 	@Autowired
 	UserdetailsService userservice;
 	@Autowired
 	UserManagementDAO userDao;
 	private Scanner scanner;
+	@Autowired
+	private TokenRepository tokenRepository;
+	@Autowired
+	private JwtService jwtService;
+
+	@Value("${admin.jwt.security.access.expiration}")
+	private long expiration;
 
 	@Autowired
 	private ManualVerificationService mvs;
@@ -59,7 +60,7 @@ public class LoginController {
 	@Autowired
 	DashBoardService dashService;
 
-	Logger logger = (Logger) LoggerFactory.getLogger(LoginController.class);
+	public static Logger logger = LoggerFactory.getLogger(LoginController.class);
 
 
 public String getUtcTime(){
@@ -83,27 +84,29 @@ public String getUtcTime(){
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String showLoginPage(ModelMap model) {
-		System.out.println("testing login ----------");
+		System.out.println("------Redirecting to login page------");
 		return "login";
 	}
 	@RequestMapping(value = "/errorPage", method = RequestMethod.GET)
 	public String errorpage(ModelMap model) {
-		System.out.println("testing login ----------");
 		return "errorPage";
 	}
 
 	@RequestMapping("/redirectlogin")
 	public String tokenexpriy(ModelMap model, RedirectAttributes redirectAttributes, HttpServletRequest request,HttpServletResponse response) {
-		System.out.println("testing login ----------");
-//		redirectAttributes.addAttribute("token")
 		model.addAttribute("errorMessage", "Session is expired redirect to loginPage");
-
-//		return "redirect:login";
 		return "login";
 	}
+
+	@RequestMapping("/redirectLogin")
+	public String tokenExpired(ModelMap model, RedirectAttributes redirectAttributes, HttpServletRequest request,HttpServletResponse response) {
+		model.addAttribute("errorMessage", "Token is invalid redirect to loginPage");
+		return "login";
+	}
+
 	@RequestMapping(value = "/loginPage", method = RequestMethod.GET)
 	public String showLoginPage1(ModelMap model) {
-		System.out.println("testing login ----------");
+//		System.out.println("testing login ----------");
 		return "login";
 	}
 
@@ -124,9 +127,8 @@ public String getUtcTime(){
 
 		System.out.println("useri id"+session.getAttribute("userID"));
 		if(session.getAttribute("userID")==null){
-			return "redirect:loginPage";
+			return "redirect:redirectloginn";
 		}
-		System.out.println("testing login ----------");
 		String id= (String) session.getAttribute("userID");
 		System.out.println("testing login ----------for user id"+id);
 
@@ -249,40 +251,24 @@ else if(usertype.equalsIgnoreCase("SUPERVISOR")){
 
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public String showWelcomePage(ModelMap model, RedirectAttributes redirectAttributes, HttpServletRequest request, @RequestParam String username,
-								  HttpServletResponse response,
-			@RequestParam String password ) {
-		
+								  HttpServletResponse response, @RequestParam String password ) {
 		try {
-
 			HttpSession session = request.getSession();
 			session.setMaxInactiveInterval(600);
 			password = new MacAddress().md5Encode(password.getBytes());
-
 			Userdetails user = logindao.getAllPersons(username, password);
-
-
 			if(user==null){
+				System.out.println("User not found");
 //				model.addAttribute("invalidPass","please enter vaild Email and password");
 				redirectAttributes.addFlashAttribute("errorMessage", "please enter valid Email and password");
 				return "redirect:loginPage";
 			}
 
 //			model.addAttribute("invalidPass","please enter vaild user and password");
-
-			System.out.println(username+"user email");
-
 			Userdetails userdetails= userservice.passwordChangeDetails(username);
-			System.out.println(userdetails.getLoginStatus());
-			System.out.println(userdetails.getActivestatus());
-
-//			public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request, HttpServletResponse response) throws Exception {
-
-//				return ResponseEntity.ok("Connection succeeded");
 
 			if(userdetails.getLoginStatus()!=null && userdetails.getActivestatus()=='1') {
 				if (user != null) {
-//					redirectAttributes.addAttribute("setWindowName","appname");
-					System.out.println("Record found");
 					Set<String> userRoles = (Set<String>) roleservice.findAllByUserid(user.getUserid());
 					Set<String> userSubRoles = (Set<String>) roleservice.findAllSubrolesByUserid(user.getUserid());
 					Set<String> userSubRolesCount = (Set<String>) roleservice.findAllSubrolesByUseridCount(user.getUserid());
@@ -293,33 +279,42 @@ else if(usertype.equalsIgnoreCase("SUPERVISOR")){
 					model.put("password", password);
 					session.setAttribute("headerMenu", userRoles);
 					session.setAttribute("userdetails", user);
-
 					session.setAttribute("subMenu", roles);
 					session.setAttribute("subRoles", userSubRoles);
 					session.setAttribute("subRolesCount", userSubRolesCount);
 					session.setAttribute("userID", user.getUserid());
 					session.setAttribute("isLoggedin","true");
 
-//					model.addAttribute("headerMenu", userRoles);
-//					model.addAttribute("userdetails", user);
-//					model.addAttribute("subMenu", roles);
-//					model.addAttribute("subRoles", userSubRoles);
-//					model.addAttribute("subRolesCount", userSubRolesCount);
-//					model.addAttribute("userID", user.getUserid());
-//					System.out.println("............... :"+session.getAttribute("userID"));
-					System.out.println("userSubRoles :" + userSubRoles);
-					System.out.println("userID:" + user.getUserid());
-					System.out.println("userID:" + user.getFirstnameEn());
+					final String token = jwtService.GenerateToken(user.getEmail());
+					System.out.println("token = " + token);
+					final String refreshToken = jwtService.GenerateRefreshToken(user.getEmail());
+					Optional<TokenDetails> tokenDetailsOptional = tokenRepository.findByUserdetailsAndExpiredAndRevoked(user, false, false);
+					if (tokenDetailsOptional.isPresent()) {
+						TokenDetails tokenDetails = tokenDetailsOptional.get();
+						tokenDetails.setToken(token);
+						tokenDetails.setAccess_createdAt(new Date(System.currentTimeMillis()));
+						tokenDetails.setAccess_updatedAt(new Date(System.currentTimeMillis()));
+						tokenDetails.setAccess_expiredAt(new Date(System.currentTimeMillis() + expiration));
+						tokenDetails.setRefresh_token(refreshToken);
+						tokenRepository.save(tokenDetails);
+					}else{
+						tokenRepository.save(TokenDetails.builder()
+								.expired(false)
+								.revoked(false)
+								.token(token)
+								.refresh_token(refreshToken)
+								.access_createdAt(new Date(System.currentTimeMillis()))
+								.access_updatedAt(new Date(System.currentTimeMillis()))
+								.access_expiredAt(new Date(System.currentTimeMillis() + expiration))
+								.userdetails(user)
+								.build());
+						tokenRepository.flush();
+					}
 
-					final String jwtToken = tokenManager.generateJwtToken(userdetails);
-					System.out.println("Token Generation  :"+jwtToken);
-					Cookie cookie = new Cookie("Authorization",jwtToken);
+					Cookie cookie = new Cookie("Authorization",token);
 					cookie.setHttpOnly(true);
 					cookie.setSecure(true);
 					response.addCookie(cookie);
-
-
-
 					return "redirect:dashBoard";
 				} else {
 					System.out.println("else:: error");
@@ -332,13 +327,9 @@ else if(usertype.equalsIgnoreCase("SUPERVISOR")){
 				return "firstLogin_changePwd";
 			}
 			else if(userdetails.getLoginStatus()==null && userdetails.getActivestatus()=='0'){
-//				model.addAttribute("invalidPass","please enter vaild Email and password");
 				redirectAttributes.addFlashAttribute("errorMessage", "please enter vaild Email and password");
 				return "redirect:loginPage";
 			}
-
-
-
 		} catch (Exception e) {
 			System.out.println("userSubRolesCount:: error");
 			logger.error(logger("LoginController","showWelcomePage",getUtcTime(), e.toString()));
@@ -347,13 +338,37 @@ else if(usertype.equalsIgnoreCase("SUPERVISOR")){
 	}
 
 	@RequestMapping(value = "/logout", method = RequestMethod.GET)
-	public String logout(ModelMap model, HttpServletRequest request) {
+	public String logout(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+		System.out.println("logout=====>");
 		HttpSession session = request.getSession();
 		session.getAttribute("userID");
 		session.setAttribute("isLoggedin","false");
-
 		session.invalidate();
+
+		Cookie cookie = new Cookie("Authorization", null);
+		cookie.setMaxAge(0);
+		cookie.setSecure(true);
+		cookie.setHttpOnly(true);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		return "login";
+	}
+
+	@RequestMapping(value = "/logout1", method = RequestMethod.GET)
+	public String logout1(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
+		System.out.println("LOGOUT 1 METHOD");
+		HttpSession session = request.getSession();
+		session.getAttribute("userID");
+		session.setAttribute("isLoggedin","false");
+		session.invalidate();
+
+		Cookie cookie = new Cookie("Authorization", "");
+		cookie.setMaxAge(0);
+		cookie.setPath("/MVS");
+		cookie.setSecure(true);
+		cookie.setHttpOnly(true);
+		response.addCookie(cookie);
+		return "redirect:/";
 	}
 
 //	@RequestMapping(value = "/home", method = RequestMethod.GET)
@@ -426,7 +441,6 @@ else if(usertype.equalsIgnoreCase("SUPERVISOR")){
 
 	@RequestMapping(value = "/forgotPasswordDetails")
 	public String forgotPasswordDetails (){
-
 		return "forgotPassword";
 
 	}

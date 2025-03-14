@@ -1,8 +1,10 @@
 package com.eagle.mas;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesView;
@@ -19,7 +21,6 @@ public class BeanConfig {
 
 	@Bean
 	public TilesConfigurer tilesConfigurer() {
-
 		TilesConfigurer tiles = new TilesConfigurer();
 		tiles.setDefinitions(new String[] { "/ui/tiles/tiles.xml" });
 		return tiles;
@@ -33,4 +34,6 @@ public class BeanConfig {
 		resolver.setMaxUploadSize(100000000);
 		return resolver;
 	}
+
+
 }

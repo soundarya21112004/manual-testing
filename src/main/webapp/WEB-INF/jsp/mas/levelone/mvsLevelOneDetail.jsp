@@ -1,9 +1,403 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-
-
          pageEncoding="UTF-8" %>
 <html lang="en">
+
+<head>
+    <style>
+
+        .card-title1{
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin: 0;
+            text-align: center;
+        }
+
+        /* The Modal (background) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 15%;
+            top: 0;
+            width: 40%; /* Full width */
+            height: 100%; /* Full height */
+            /* overflow: auto;  Enable scroll if needed */
+            /*background-color: rgb(0,0,0); !* Fallback color *!*/
+            background-color: rgba(0, 0, 0, 0.9); /* Black w/ opacity */
+        }
+
+        .modal1 {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 60%;
+            top: 0;
+            right: 0;
+            width: 40%; /* Full width */
+            height: 100%; /* Full height */
+            /* overflow: auto; Enable scroll if needed */
+            /*background-color: rgb(0,0,0); !* Fallback color *!*/
+            background-color: rgba(0, 0, 0, 0.9); /* Black w/ opacity */
+        }
+
+        /* Modal Content (Image) */
+        .modal-content {
+            margin: auto;
+            display: block;
+            /*top: 10%;*/
+            top: 10%;
+            width: 80%;
+            height: 60%;
+            max-width: 700px;
+        }
+        /*Caption of Modal Image (Image Text) - Same Width as the Image */
+        #caption {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+            text-align: center;
+            color: #ccc;
+            padding: 10px 0;
+            height: 150px;
+        }
+
+        /* Add Animation - Zoom in the Modal */
+        .modal-content, #caption {
+            animation-name: zoom;
+            animation-duration: 0.6s;
+        }
+
+        @keyframes zoom {
+            from {
+                transform: scale(0)
+            }
+            to {
+                transform: scale(1)
+            }
+        }
+
+        /* The Close Button */
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .close1 {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #acacac;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .close1:hover,
+        .close1:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* POPUP for documents pdffunction */
+        #popup {
+            display: none;
+            border: 1px black solid;
+            /*width: 700px;*/
+            height: 700px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: white;
+            z-index: 10;
+            padding: 2em;
+            position: absolute;
+        }
+
+        #popupc {
+            display: none;
+            border: 1px black solid;
+            /* width: 700px;*/
+            height: 700px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: white;
+            z-index: 10;
+            padding: 2em;
+            position: absolute;
+        }
+
+        .darken {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        #iframe {
+            border: 0;
+        }
+
+        /*html, body, #page { height: 100%;}*/
+
+        /* 100% Image Width on Smaller Screens */
+        @media only screen and (max-width: 700px) {
+            .modal-content {
+                width: 100%;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            .img-zoom-container {
+                position: relative;
+            }
+
+            .img-zoom-lens {
+                position: absolute;
+                border: 1px solid #d4d4d4;
+                /*set the size of the lens:*/
+                width: 40px;
+                height: 40px;
+            }
+
+            .img-zoom-result {
+                border: 1px solid #d4d4d4;
+                /*set the size of the result div:*/
+                width: 300px;
+                height: 300px;
+            }
+        }
+        #controls{
+            position: fixed;
+            left: 20%;
+            width: 30px;
+            height: 30px;
+            top:85%;
+        }
+        #lftrot{
+            top: 30px;
+            left : 400px;
+            position: absolute;
+        }
+        #rftrot{
+            top:30px;
+            position: absolute;
+            left: 440px;
+        }
+        #overlap{
+            top: 30px;
+            left:480px;
+            position: absolute;
+        }
+        #zoomplus {
+            top: 30px;
+            left: 0px;
+            position: absolute;
+        }
+        #zoomminus{
+            top: 30px;
+            left:40px;
+            position: absolute;
+        }
+        #zoomplus:hover, #zoomplus:focus{
+            background-color: #ffffff;
+            height: 35px;
+            width: 35px;
+        }
+        #zoomminus:hover, #zoomminus:focus{
+            background-color: #ffffff;
+            height: 35px;
+            width: 35px;
+        }
+        #rftrot:hover, #rftrot:focus{
+            background-color: #ffffff;
+            height: 35px;
+            width: 35px;
+        }
+        #lftrot:hover, #lftrot:focus{
+            background-color: #ffffff;
+            height: 35px;
+            width: 35px;
+        }
+        #overlap:hover, #overlap:focus{
+            background-color: #ffffff;
+            height: 35px;
+            width: 35px;
+        }
+        #original{
+            top: 30px;
+            left:520px;
+            position: absolute;
+        }
+        #original:hover, #original:focus{
+            background-color: #ffffff;
+            height: 35px;
+            width: 35px;
+        }
+        .secondary{
+            color: #1f4380;
+        }
+
+
+        /*
+        MYLOADER*/
+        .loaderWrapper { position: fixed;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            z-index: 1000;
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeLoader 0.6s 10s ease forwards; }
+
+        .loader {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .loader .bar
+        {
+            width: 10px;
+            height: 5px;
+            background: #000000;
+            margin: 2px;
+            animation: bar 1s infinite linear;
+        }
+
+        .loader .bar:nth-child(1) {
+            animation-delay: 0s;
+        }
+        .loader .bar:nth-child(2)
+        { animation-delay: 0.25s;
+        }
+        .loader .bar:nth-child(3)
+        {
+            animation-delay: 0.5s;
+        }
+        @keyframes bar
+        {
+            0% {
+                transform: scaleY(1) scaleX(0.5);
+            } 50% {
+                  transform: scaleY(10) scaleX(1);
+              }
+            100% { transform: scaleY(1) scaleX(0.5); }
+        }
+        @keyframes fadeLoader { to { opacity: 0; } }
+
+
+
+
+
+        .frame {
+            width: 250px;
+            height: 200px;
+            border: 2px solid #4080bf;
+            background: white;
+            margin: auto;
+            padding: 10px 10px;
+
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .photo {
+            border-radius: 6px;
+            border: 2px solid #4080bf;
+            width: 200px;
+            height: 200px;
+            margin-top: 10px;
+            margin-left: 10px;
+            float: left;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .photo1 {
+            border-radius: 6px;
+            border: 2px solid #4080bf;
+            width: 150px;
+            height: 150px;
+            margin-top: 10px;
+            margin-left: 10px;
+            float: left;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .photo-name {
+            /*margin-top: 245px;*/
+            /*padding: 0.5em;*/
+            position: absolute;
+            width: 100%;
+            text-align: left;
+            background-color: #4080bf;
+        }
+
+        .box-text {
+            margin-top: 50px;
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            font-size: 40px;
+            color: black;
+        }
+
+        .post {
+            border-bottom: 1px solid #adb5bd;
+            color: white;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+        }
+
+        .color-font {
+            color: #1f4380;
+
+        }
+
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
+        }
+        .color-fonts{
+            padding-left: 400px;
+        }
+        .values{
+            float:right;
+        }
+
+
+    </style>
+</head>
 
 <div id="spinner" class="loaderWrapper" style="display: none;">
     <div class="loader" style="position: absolute; top: 50%;left: 40%">
@@ -19,7 +413,6 @@
 
 <script src="plugins/sweetalert2/sweetalert2.js"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-<script src="/plugins/BUP.js"></script>
 
 
 
@@ -37,339 +430,13 @@
     });
 </script>--%>
 
-<style>
 
-    .card-title1{
-        font-size: 1.1rem;
-        font-weight: 400;
-        margin: 0;
-        text-align: center;
-    }
-
-    /* The Modal (background) */
-    .modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1; /* Sit on top */
-        padding-top: 100px; /* Location of the box */
-        left: 15%;
-        top: 0;
-        width: 40%; /* Full width */
-        height: 100%; /* Full height */
-        /* overflow: auto;  Enable scroll if needed */
-        /*background-color: rgb(0,0,0); !* Fallback color *!*/
-        background-color: rgba(0, 0, 0, 0.9); /* Black w/ opacity */
-    }
-
-    .modal1 {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1; /* Sit on top */
-        padding-top: 100px; /* Location of the box */
-        left: 60%;
-        top: 0;
-        right: 0;
-        width: 40%; /* Full width */
-        height: 100%; /* Full height */
-        /* overflow: auto; Enable scroll if needed */
-        /*background-color: rgb(0,0,0); !* Fallback color *!*/
-        background-color: rgba(0, 0, 0, 0.9); /* Black w/ opacity */
-    }
-
-    /* Modal Content (Image) */
-    .modal-content {
-        margin: auto;
-        display: block;
-        /*top: 10%;*/
-        top: 10%;
-        width: 80%;
-        height: 60%;
-        max-width: 700px;
-    }
-    /*Caption of Modal Image (Image Text) - Same Width as the Image */
-    #caption {
-        margin: auto;
-        display: block;
-        width: 80%;
-        max-width: 700px;
-        text-align: center;
-        color: #ccc;
-        padding: 10px 0;
-        height: 150px;
-    }
-
-    /* Add Animation - Zoom in the Modal */
-    .modal-content, #caption {
-        animation-name: zoom;
-        animation-duration: 0.6s;
-    }
-
-    @keyframes zoom {
-        from {
-            transform: scale(0)
-        }
-        to {
-            transform: scale(1)
-        }
-    }
-
-    /* The Close Button */
-    .close {
-        position: absolute;
-        top: 15px;
-        right: 35px;
-        color: #f1f1f1;
-        font-size: 40px;
-        font-weight: bold;
-        transition: 0.3s;
-    }
-
-    .close1 {
-        position: absolute;
-        top: 15px;
-        right: 35px;
-        color: #f1f1f1;
-        font-size: 40px;
-        font-weight: bold;
-        transition: 0.3s;
-    }
-
-    .close:hover,
-    .close:focus {
-        color: #acacac;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    .close1:hover,
-    .close1:focus {
-        color: #bbb;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    /* POPUP for documents pdffunction */
-    #popup {
-        display: none;
-        border: 1px black solid;
-        /*width: 700px;*/
-        height: 700px;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: white;
-        z-index: 10;
-        padding: 2em;
-        position: absolute;
-    }
-
-    #popupc {
-        display: none;
-        border: 1px black solid;
-        /* width: 700px;*/
-        height: 700px;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: white;
-        z-index: 10;
-        padding: 2em;
-        position: absolute;
-    }
-
-    .darken {
-        background: rgba(0, 0, 0, 0.7);
-    }
-
-    #iframe {
-        border: 0;
-    }
-
-    /*html, body, #page { height: 100%;}*/
-
-    /* 100% Image Width on Smaller Screens */
-    @media only screen and (max-width: 700px) {
-        .modal-content {
-            width: 100%;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        .img-zoom-container {
-            position: relative;
-        }
-
-        .img-zoom-lens {
-            position: absolute;
-            border: 1px solid #d4d4d4;
-            /*set the size of the lens:*/
-            width: 40px;
-            height: 40px;
-        }
-
-        .img-zoom-result {
-            border: 1px solid #d4d4d4;
-            /*set the size of the result div:*/
-            width: 300px;
-            height: 300px;
-        }
-    }
-    #controls{
-        position: fixed;
-        left: 20%;
-        width: 30px;
-        height: 30px;
-        top:85%;
-    }
-    #lftrot{
-        top: 30px;
-        left : 400px;
-        position: absolute;
-    }
-    #rftrot{
-        top:30px;
-        position: absolute;
-        left: 440px;
-    }
-    #overlap{
-        top: 30px;
-        left:480px;
-        position: absolute;
-    }
-    #zoomplus {
-        top: 30px;
-        left: 0px;
-        position: absolute;
-    }
-    #zoomminus{
-        top: 30px;
-        left:40px;
-        position: absolute;
-    }
-    #zoomplus:hover, #zoomplus:focus{
-        background-color: #ffffff;
-        height: 35px;
-        width: 35px;
-    }
-    #zoomminus:hover, #zoomminus:focus{
-        background-color: #ffffff;
-        height: 35px;
-        width: 35px;
-    }
-    #rftrot:hover, #rftrot:focus{
-        background-color: #ffffff;
-        height: 35px;
-        width: 35px;
-    }
-    #lftrot:hover, #lftrot:focus{
-        background-color: #ffffff;
-        height: 35px;
-        width: 35px;
-    }
-    #overlap:hover, #overlap:focus{
-        background-color: #ffffff;
-        height: 35px;
-        width: 35px;
-    }
-    #original{
-        top: 30px;
-        left:520px;
-        position: absolute;
-    }
-    #original:hover, #original:focus{
-        background-color: #ffffff;
-        height: 35px;
-        width: 35px;
-    }
-    .secondary{
-        color: #1f4380;
-    }
-
-
-/*
-MYLOADER*/
-    .loaderWrapper { position: fixed;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background: #fff;
-        z-index: 1000;
-        pointer-events: none;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        animation: fadeLoader 0.6s 10s ease forwards; }
-
-    .loader {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        z-index: 999;
-    }
-
-    .loader .bar
-    {
-        width: 10px;
-        height: 5px;
-        background: #000000;
-        margin: 2px;
-        animation: bar 1s infinite linear;
-    }
-
-    .loader .bar:nth-child(1) {
-        animation-delay: 0s;
-    }
-    .loader .bar:nth-child(2)
-    { animation-delay: 0.25s;
-    }
-    .loader .bar:nth-child(3)
-    {
-        animation-delay: 0.5s;
-    }
-    @keyframes bar
-    {
-        0% {
-            transform: scaleY(1) scaleX(0.5);
-        } 50% {
-                      transform: scaleY(10) scaleX(1);
-                  }
-        100% { transform: scaleY(1) scaleX(0.5); }
-    }
-    @keyframes fadeLoader { to { opacity: 0; } }
-
-
-</style>
 
 
 
 <script>
 
-
-    <%--    jQuery(document).ready(function($) {--%>
-    <%--        // if (window.history && window.history.pushState) {--%>
-    <%--        //     alert('Back button ');--%>
-    <%--            window.history.pushState('forward', null, './resetProcrssStatus');--%>
-    <%--        alert('Back button ');--%>
-    <%--        // document.getElementById('leveloneform').action = '/resetProcrssStatus';--%>
-    <%--        // document.getElementById('leveloneform').submit();--%>
-    <%--            $(window).on('popstate', function() {--%>
-    <%--                // alert('Back button ');--%>
-    <%--                alert('Back button was pressed.');--%>
-    <%--                document.getElementById('leveloneform').action = '/resetProcrssStatus';--%>
-    <%--                document.getElementById('leveloneform').submit();--%>
-    <%--                // document.getElementById('leveloneform').action = '/resetProcrssStatus?sno=' + id ;--%>
-    <%--                // document.getElementById('leveloneform').submit();--%>
-    <%--            });--%>
-    <%--        // }--%>
-    <%--    });--%>
-
-
-
-    function imageZoom(imgID, resultID) {
+function imageZoom(imgID, resultID) {
         var img, lens, result, cx, cy;
         img = document.getElementById(imgID);
         result = document.getElementById(resultID);
@@ -498,6 +565,25 @@ MYLOADER*/
                 }
             });
     }
+
+</script>
+
+<script>
+    // Step 1: Push a state into the browser history when the page loads
+    window.history.pushState(null, null, window.location.href);
+
+    // Step 2: Prevent back button by listening to the popstate event
+    window.onpopstate = function (event) {
+        window.history.pushState(null, null, window.location.href); // Push the same URL again
+    };
+
+    // Simulate page load
+    window.onload = function() {
+        // Step 3: After the page is fully loaded, stop preventing back navigation
+        setTimeout(() => {
+            window.onpopstate = null; // Allow back navigation
+        }, 3000); // Adjust this timeout to match your page load time
+    };
 
 </script>
 
@@ -650,92 +736,6 @@ function addClass(){
     //     element.classList.remove("loaderWrapper");
     // }
 </script>
-<style>
-
-
-    .frame {
-        width: 250px;
-        height: 200px;
-        border: 2px solid #4080bf;
-        background: white;
-        margin: auto;
-        padding: 10px 10px;
-
-    }
-
-    img {
-        width: 100%;
-        height: 100%;
-    }
-
-    .photo {
-        border-radius: 6px;
-        border: 2px solid #4080bf;
-        width: 200px;
-        height: 200px;
-        margin-top: 10px;
-        margin-left: 10px;
-        float: left;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .photo1 {
-        border-radius: 6px;
-        border: 2px solid #4080bf;
-        width: 150px;
-        height: 150px;
-        margin-top: 10px;
-        margin-left: 10px;
-        float: left;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .photo-name {
-        /*margin-top: 245px;*/
-        /*padding: 0.5em;*/
-        position: absolute;
-        width: 100%;
-        text-align: left;
-        background-color: #4080bf;
-    }
-
-    .box-text {
-        margin-top: 50px;
-        position: absolute;
-        width: 100%;
-        text-align: center;
-        font-weight: bold;
-        font-size: 40px;
-        color: black;
-    }
-
-    .post {
-        border-bottom: 1px solid #adb5bd;
-        color: white;
-        margin-bottom: 15px;
-        padding-bottom: 15px;
-    }
-
-    .color-font {
-        color: #1f4380;
-
-    }
-
-    .center {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-        width: 50%;
-    }
-    .color-fonts{
-        padding-left: 400px;
-    }
-    .values{
-        float:right;
-    }
-</style>
 
 <section class="content-header">
     <div class="container-fluid">
@@ -1881,5 +1881,8 @@ function addClass(){
             modalImg2.style.filter = "opacity(100%)";
         }
     }
+
 </script>
+
 <!-- /.content -->
+</html>

@@ -49,7 +49,7 @@ public class ReportsController {
         try {
             HttpSession session = request.getSession();
             if (session.getAttribute("userID") == null) {
-                return "redirect:loginPage";
+                return "redirect:redirectlogin";
             }
         }
         catch(Exception e){
@@ -64,7 +64,7 @@ public class ReportsController {
         try {
             HttpSession session = request.getSession();
             if (session.getAttribute("userID") == null) {
-                return "redirect:loginPage";
+                return "redirect:redirectlogin";
             }
         }
         catch(Exception e){
@@ -102,7 +102,7 @@ public class ReportsController {
         try {
             HttpSession session = request.getSession();
             if (session.getAttribute("userID") == null) {
-                return "redirect:loginPage";
+                return "redirect:redirectlogin";
             }
         }
         catch(Exception e){
@@ -149,7 +149,7 @@ public class ReportsController {
         try {
             HttpSession session = request.getSession();
             if (session.getAttribute("userID") == null) {
-                return "redirect:loginPage";
+                return "redirect:redirectlogin";
             }
         }
         catch(Exception e){

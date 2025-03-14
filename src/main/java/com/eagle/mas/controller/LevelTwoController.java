@@ -31,12 +31,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -101,7 +99,7 @@ public class LevelTwoController {
         try {
             HttpSession session = request.getSession();
             if (session.getAttribute("userID") == null) {
-                return "redirect:loginPage";
+                return "redirect:redirectlogin";
             }
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
             System.out.println("UserID :" + user.getUserid());
@@ -125,13 +123,13 @@ public class LevelTwoController {
                     mvs.removeProcessedCaseForUser(user.getUserid());
                     redirectAttributes.addFlashAttribute("successMessage", "case is submitted");
                 }else {
-                    redirectAttributes.addFlashAttribute("faliureMessage", "please process all the cases before submission");
+                    redirectAttributes.addFlashAttribute("failureMessage", "please process all the cases before submission");
                 }
                 System.out.println("result size : " + result.size());
 
 
             }else{
-                redirectAttributes.addFlashAttribute("faliureMessage","late submission is not allowed");
+                redirectAttributes.addFlashAttribute("failureMessage","late submission is not allowed");
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -147,7 +145,7 @@ public class LevelTwoController {
             HttpSession session = request.getSession();
             session.setAttribute("viewType","cluster");
             if(session.getAttribute("userID")==null){
-                return "redirect:loginPage";
+                return "redirect:redirectlogin";
             }
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
             System.out.println("user---->" + user.getUserid());
@@ -175,7 +173,6 @@ public class LevelTwoController {
             return "redirect:errorPage";
 
         }
-
         return "levelTwoClusterSearch";
 
     }
@@ -185,7 +182,7 @@ public class LevelTwoController {
         try {
             HttpSession session = request.getSession();
             if(session.getAttribute("userID")==null){
-                return "redirect:loginPage";
+                return "redirect:redirectlogin";
             }
             session.setAttribute("viewType","master");
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
@@ -302,7 +299,7 @@ public class LevelTwoController {
         if (redirectAttributes.equals(true)) {
             redirectAttributes.addFlashAttribute("successMessage", "APPROVED SUCCESSFULLY");
         } else {
-            redirectAttributes.addFlashAttribute("faliureMessage", "REJECTED SUCCESSFULLY");
+            redirectAttributes.addFlashAttribute("failureMessage", "REJECTED SUCCESSFULLY");
         }
 
         return "leveltwodetails";
@@ -313,8 +310,9 @@ public class LevelTwoController {
     public String leveltwoSearchByName(ModelMap model, HttpServletRequest request, @RequestParam("id") String id, @RequestParam("probe") String probe,
                                        @RequestParam("candidate") String candidate,@RequestParam("requestId") String requestId,@RequestParam("op1Comment")String op1Comment,
                                        @RequestParam("op1verifyStatus") String op1verifyStatus,@RequestParam("op2verifyStatus") String op2verifyStatus,@RequestParam("op2Comment")String op2Comment,
-                                       @RequestParam("caseListNo") String caseListNo, @RequestParam("typeOfView") String typeOfView
+                                       @RequestParam("caseListNo") String caseListNo, @RequestParam("typeOfView") String typeOfView, RedirectAttributes redirectAttributes
     ) {
+        System.out.println("-------leveltwoSearchByName-------");
 
         HttpSession session = request.getSession();
         session.setAttribute("regId",probe );
@@ -323,7 +321,7 @@ public class LevelTwoController {
 
         try {
             if (session.getAttribute("userID") == null) {
-                return "redirect:loginPage";
+                return "redirect:redirectlogin";
             }
         }catch (Exception e){
             System.out.println(e.toString());
@@ -1204,8 +1202,20 @@ public class LevelTwoController {
         model.addAttribute("psnGenerated",psnGenerated);
         model.addAttribute("probeid",probe);
         model.addAttribute("canid",candidate);
-        return "mvsLevelTwoDetail";
 
+//        redirectAttributes.addFlashAttribute("LevelTwoSearchByNameModel", new HashMap<>(model));
+        request.getSession().setAttribute("LevelTwoSearchByNameModel", new HashMap<>(model));
+        return "redirect:levelTwoDetailPage";
+
+    }
+
+    @RequestMapping(value = "/levelTwoDetailPage")
+    public String redirectingLevelTwoDetail(Model model, HttpServletRequest request) {
+//        Map<String, Object> details = (Map<String, Object>) model.getAttribute("LevelTwoSearchByNameModel");
+        Map<String, Object> details = (Map<String, Object>) request.getSession().getAttribute("LevelTwoSearchByNameModel");
+
+        model.addAllAttributes(details);
+        return "mvsLevelTwoDetail";  // Loads the JSP page
     }
 
     private String jsondatavalue(String jsondata){

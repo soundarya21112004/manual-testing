@@ -88,6 +88,15 @@ public class DBConfiguration {
 			ConstantValue.clientId=resource.getString("clientId");
 			ConstantValue.secretKey=resource.getString("secretKey");
 			ConstantValue.IDENTITY=resource.getString("IDENTITY");
+			ConstantValue.KERNELAUTHMANAGERAPI=resource.getString("KERNELAUTHMANAGERAPI");
+			ConstantValue.BIOAPI=resource.getString("BIOAPI");
+			ConstantValue.METAINFOAPI=resource.getString("METAINFOAPI");
+			ConstantValue.DOCUMENTAPI=resource.getString("DOCUMENTAPI");
+			ConstantValue.SEARCHFIELDAPI=resource.getString("SEARCHFIELDAPI");
+			ConstantValue.AUDITAPI=resource.getString("AUDITAPI");
+			ConstantValue.TokenAppId=resource.getString("TokenAppId");
+			ConstantValue.TokenRequestSecretKey=resource.getString("TokenRequestSecretKey");
+			ConstantValue.TokenClientId=resource.getString("TokenClientId");
 			ConstantValue.elapsedHours=Long.parseLong(resource.getString("case.unassign.time.limit"));
 			ConstantValue.MAXRESULT =Integer.parseInt(resource.getString("search.filter.max.result"));
 			dataSource.setDriverClassName(resource.getString("db.driver"));

@@ -41,7 +41,7 @@ public class AccessControlController {
 		try {
 			HttpSession session = request.getSession();
 			if(session.getAttribute("userID")==null){
-				return "redirect:loginPage";
+				return "redirect:redirectlogin";
 			}
 			System.out.println("createUserGroup test1********" );
 			Iterable<String> mainMenu = rolesAccessService.findRoleName();

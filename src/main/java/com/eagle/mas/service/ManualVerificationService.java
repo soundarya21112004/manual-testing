@@ -142,7 +142,7 @@ import com.eagle.mas.model.UserCaseAssignment;
 import com.eagle.mas.repository.RegManualVerificationRepository;
 import com.eagle.mas.repository.UserCaseAssignmentRepo;
 import com.eagle.mas.service.impl.CredentialAPI;
-import com.eagle.mas.service.impl.TokenGenerator;
+//import com.eagle.mas.service.impl.TokenGenerator;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -174,8 +174,8 @@ public class ManualVerificationService {
 	@Autowired
 	CredentialAPI api;
 
-	@Autowired
-	TokenGenerator tokenGenerator;
+//	@Autowired
+//	TokenGenerator tokenGenerator;
 
 	@Autowired
 	UinRepo uinRepo;
@@ -352,7 +352,6 @@ public class ManualVerificationService {
 	}
 
 	public  List<RegisterManualVerification> retreiveCaseForUser(String reqId){
-
 		System.out.println("retrieve case for user : ");
 		return repo.clusterOfRids(reqId);
 	}
@@ -392,16 +391,11 @@ public class ManualVerificationService {
 				List<RegisterManualVerification> cases = repo.clusterOfRids(e.getRequestId());
 				List<RegisterManualVerification> finalList = cases.stream().filter(t -> {
 					if (t.getOp1userId() != null && t.getOp1userId().equals(e.getUserId())) {
-						System.out.println("Schedulor if");
-						System.out.println( "sno"+ t.getSno());
-						System.out.println("reqid"+ t.getReqid());
 						resetOp1Decisions(t);
 					} else if (t.getOp2userId() != null && t.getOp2userId().equals(e.getUserId())) {
 						resetOp2Decisions(t);
-						System.out.println("Schedulor else if 1");
 					} else if (t.getUserId() != null && t.getUserId().equals(e.getUserId())) {
 						resetSupervisorDecisions(t);
-						System.out.println("Schedulor else if 1");
 					}
 					return false;
 				}).collect(Collectors.toList());
@@ -671,4 +665,11 @@ public class ManualVerificationService {
 	}
 
 
+	public RegisterManualVerification findBySerialNumber(int sno) {
+		return repo.findBySno(sno);
+	}
+
+	public int updateFinIndi(int sno){
+		return repo.updateFinalIndi(sno);
+	}
 }

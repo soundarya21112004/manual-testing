@@ -1,10 +1,11 @@
-package com.eagle.mas.service.impl;
+package com.eagle.mas.util;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.eagle.mas.config.ConstantValue;
 import com.eagle.mas.dto.ClientIdSecretKeyRequestDto;
 import com.eagle.mas.dto.NewTokenRequestDto;
+import com.eagle.mas.service.impl.DateUtils;
 import com.google.gson.Gson;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -17,6 +18,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -30,10 +32,6 @@ import java.time.ZonedDateTime;
 
 @Component
 public class TokenGenerator {
-
-
-
-
 
     @Autowired
     Environment environment;
@@ -49,11 +47,7 @@ public class TokenGenerator {
      */
 
     public String getToken() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, IOException {
-
-
         generateToken(setRequestDto());
-//        System.out.println(AUTHORIZATION+token);
-
     return AUTHORIZATION+token;
 
     }
@@ -87,7 +81,7 @@ public class TokenGenerator {
                     .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
                     .build();
 
-            HttpPost post = new HttpPost(ConstantValue.KERNELAUTHMANAGER);
+            HttpPost post = new HttpPost(ConstantValue.KERNELAUTHMANAGERAPI);
             try {
                 StringEntity postingString = new StringEntity(gson.toJson(tokenRequest));
                 post.setEntity(postingString);
@@ -111,8 +105,8 @@ public class TokenGenerator {
 
     public ClientIdSecretKeyRequestDto setRequestDto() {
         ClientIdSecretKeyRequestDto request = new ClientIdSecretKeyRequestDto();
-        request.setAppId(ConstantValue.appId);
-        request.setClientId(ConstantValue.clientId);
+        request.setAppId(ConstantValue.TokenAppId);
+        request.setClientId(ConstantValue.TokenClientId);
         request.setSecretKey(ConstantValue.secretKey);
         return request;
     }

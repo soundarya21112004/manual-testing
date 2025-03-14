@@ -125,3 +125,4 @@
 
 <script type='text/javascript'
 		src='js/plugins/jquery-validation/jquery.validate.js'></script>
+</html>

@@ -27,7 +27,7 @@
     <!-- Theme style -->
     <link rel="stylesheet" href="dist/css/adminlte.min.css">
     <script src="plugins/sweetalert2/sweetalert2.js"></script>
-    <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.js">
+<%--    <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.js">--%>
 
 
 
@@ -227,7 +227,7 @@
 <c:if test="${errorMessage != null}">
 <script>
     Swal.fire({
-        title: 'Faliure!',
+        title: 'failure!',
         text: '${errorMessage}',
         confirmButtonText: 'OK'
     });
@@ -353,4 +353,5 @@
     <script src="<%=request.getContextPath()%>/js/admin.js"></script>
     <script src="<%=request.getContextPath()%>/js/pages/examples/sign-in.js"></script>
     <!--</body>-->
+</html>
 

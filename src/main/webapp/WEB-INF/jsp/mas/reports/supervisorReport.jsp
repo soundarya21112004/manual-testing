@@ -51,11 +51,11 @@
     });
 </script>
 </c:if>
-<c:if test="${faliureMessage != null}">
+<c:if test="${failureMessage != null}">
 <script>
     Swal.fire({
-        title: 'Faliure!',
-        text: '${faliureMessage}',
+        title: 'failure!',
+        text: '${failureMessage}',
         confirmButtonText: 'OK'
     });
 </script>
@@ -63,13 +63,13 @@
 <%--if(request.getAttribute("error")!=null){--%>
 <%--<c:if test="${error != null}">--%>
 
-<c:if test="${faliureMessage != null}">
+<c:if test="${failureMessage != null}">
 
 <script>
 
     Swal.fire({
         title: 'error!',
-        text: '${faliureMessage}',
+        text: '${failureMessage}',
         confirmButtonText: 'OK'
     });
 </script></c:if>
@@ -135,3 +135,4 @@
     <!-- /.container-fluid -->
 </section>
 
+</html>

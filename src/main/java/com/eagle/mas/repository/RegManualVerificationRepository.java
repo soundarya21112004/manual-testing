@@ -157,17 +157,17 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
 
     @Modifying
     @Query(value = "update public.register_manual_verification set operator1_verify_status=null,operator1_upd_date=null,\n" +
-            "operator1_upd_by=null,operator1_comment=null,operator1_user_id=null, process_code = '0' where req_id =:reqId and sno =:sno",nativeQuery = true)
+            "operator1_upd_by=null,operator1_comment=null,operator1_user_id=null, process_code ='0' where req_id =:reqId and sno =:sno",nativeQuery = true)
     void resetOp1CaseDecisions(@Param("reqId") String reqId,@Param("sno") int sno);
 
     @Modifying
     @Query(value = "update public.register_manual_verification set operator2_verify_status=null,operator2_upd_date=null,\n" +
-            "operator2_upd_by=null,operator2_comment=null,operator2_user_id=null, process_code = '0' where req_id =:reqId and sno =:sno",nativeQuery = true)
+            "operator2_upd_by=null,operator2_comment=null,operator2_user_id=null, process_code ='0', status_code ='0' where req_id =:reqId and sno =:sno",nativeQuery = true)
     void resetOp2CaseDecisions(@Param("reqId") String reqId,@Param("sno") int sno);
 
     @Modifying
     @Query(value = "update public.register_manual_verification set supervisor_verify_status=null,supervisor_upd_date=null,\n" +
-            "supervisor_upd_by=null,supervisor_comment=null,user_id=null, process_code = '0' where req_id =:reqId and sno =:sno" ,nativeQuery = true)
+            "supervisor_upd_by=null,supervisor_comment=null,user_id=null, process_code = '0', status_code='1' where req_id =:reqId and sno =:sno" ,nativeQuery = true)
     void resetSupervisorCaseDecisions(@Param("reqId") String reqId,@Param("sno") int sno);
 
     @Query(value = "SELECT t1 FROM RegisterManualVerification t1 where t1.reqid = :reqId and t1.regId <> t1.matchedRefId order by t1.sno")
@@ -323,5 +323,9 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
     @Query(value = "SELECT c.probeString FROM RegManualVerification c  where c.regId=:regid and c.matchedRefId=:mid")
     public String fileDataProb(@Param("regid") String regid,@Param("mid") String mid);*/
 
+    RegisterManualVerification findBySno(int sno);
 
+    @Modifying
+    @Query(value = "update RegisterManualVerification t1  set t1.finindi=null where t1.sno=:sno")
+    int updateFinalIndi(int sno);
 }

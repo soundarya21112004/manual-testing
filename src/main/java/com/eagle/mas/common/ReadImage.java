@@ -1,18 +1,29 @@
 package com.eagle.mas.common;
 
-import nu.pattern.OpenCV;
+
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Base64;
 
 public class ReadImage {
 
+    static {
+        try {
+            nu.pattern.OpenCV.loadLocally();
+            System.out.println("----------------OPENCV lOADED SUCCESSFULLY");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load OpenCV", e);
+        }
+    }
+
     public String covertasImage(byte[] imageData,int headerSize){
         StringBuffer buffer = new StringBuffer(asHexString(imageData));
         String headerRemoved = buffer.delete(0,headerSize).toString();
-        OpenCV.loadShared();
+//        OpenCV.loadShared();
         MatOfByte byteArr = new MatOfByte(toByteArray(headerRemoved));
         MatOfByte matOfByte = new MatOfByte();
         Mat imageFile = Imgcodecs.imdecode(byteArr,Imgcodecs.IMREAD_ANYCOLOR);

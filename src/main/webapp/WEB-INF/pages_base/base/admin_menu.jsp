@@ -17,7 +17,7 @@
 <%--            </div>--%>
             <div class="info">
                 <a href="#" class="d-block">Welcome ${userdetails.firstnameEn} !</a>
-                <a href="logout" class="d-block">Logout</a>
+                <a href="logout1" class="d-block">Logout</a>
             </div>
         </div>
 

@@ -14,7 +14,7 @@
 
 <!-- CSS INCLUDE -->
 	<script src="plugins/sweetalert2/sweetalert2.js"></script>
-	<link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.js">
+<%--	<link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.js">--%>
 <script type="text/javascript" src="js/plugins/jquery/jquery.min.js"></script>
 <script type="text/javascript" src="js/plugins/jquery/jquery-ui.min.js"></script>
 <script type="text/javascript"

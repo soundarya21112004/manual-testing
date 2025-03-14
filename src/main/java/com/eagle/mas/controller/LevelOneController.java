@@ -21,10 +21,12 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -74,7 +76,7 @@ public class LevelOneController {
         try {
             HttpSession session = request.getSession();
             if (session.getAttribute("userID") == null) {
-                return "redirect:loginPage";
+                return "redirect:redirectlogin";
             }
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
             System.out.println("UserID :" + user.getUserid());
@@ -107,10 +109,10 @@ public class LevelOneController {
                     mvs.removeProcessedCaseForUser(user.getUserid());
                     redirectAttributes.addFlashAttribute("successMessage", "case is submitted");
                 } else {
-                    redirectAttributes.addFlashAttribute("faliureMessage", "please process all the cases before submission");
+                    redirectAttributes.addFlashAttribute("failureMessage", "please process all the cases before submission");
                 }
             }else{
-                redirectAttributes.addFlashAttribute("faliureMessage","late subimission is not allowed");
+                redirectAttributes.addFlashAttribute("failureMessage","late submission is not allowed");
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -123,7 +125,7 @@ public class LevelOneController {
         try {
             HttpSession session = request.getSession();
             if (session.getAttribute("userID") == null) {
-                return "redirect:loginPage";
+                return "redirect:redirectlogin";
             }
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
             System.out.println("UserID :" + user.getUserid());
@@ -168,9 +170,10 @@ public class LevelOneController {
                                        @RequestParam("requestId") String requestId,
                                        @RequestParam("caseListNo") String caseListNo
     ) throws URISyntaxException {
-        System.out.println("LevelOneController.leveloneSearchByName().id="+id);
-        System.out.println("LevelOneController.leveloneSearchByName().probe="+probe);
-        System.out.println("LevelOneController.leveloneSearchByName().candidate="+candidate);
+        System.out.println("-------leveloneSearchByName-------");
+
+        Map<String, Object> flashAttributes = new HashMap<>();
+
         String processStatusExist ="";
         boolean psnGenerated =false;
 
@@ -191,13 +194,12 @@ public class LevelOneController {
             System.out.println("UserID :" + user.getUserid());
             UserCaseAssignment userCase= mvs.userCaseDetails(user.getUserid());
             if(userCase == null){
-                redirectAttributes.addFlashAttribute("faliureMessage","case processing time has expired for this request id");
+                redirectAttributes.addFlashAttribute("failureMessage","case processing time has expired for this request id");
                 return "redirect:levelOneSearch";
             }
         }catch(Exception e){
            e.printStackTrace();
         }
-        String nextPage ="mvsLevelOneDetail";
 //        try {
 //             processStatusExist = mvs.proStatus(probe, candidate,requestId);
 //        }catch(Exception e){
@@ -206,6 +208,7 @@ public class LevelOneController {
 //        }
 //        if(processStatusExist==null || processStatusExist.equalsIgnoreCase("0"))
 //        {
+        try{
             int string_id = Integer.parseInt(id);
 //            int modify_process_status =mvs.modify_process_status(string_id); // can omit return
 //            HttpSession session = request.getSession();
@@ -235,19 +238,19 @@ public class LevelOneController {
                 String pdfFileE = null;
                 String pdfFile =null;
                 /*
-                * Getting bioscores from JSON
-                * getting ABIS Response JSON based on RID (PROBE)
-                * retrives score based on BIOREF ID of Candidate
-                * */
+                 * Getting bioscores from JSON
+                 * getting ABIS Response JSON based on RID (PROBE)
+                 * retrives score based on BIOREF ID of Candidate
+                 * */
                 try{
                     System.out.println("Candidate :"+candidate);
                     BioScore score = bioRepository.findFirstByRegIDAndMatchedRefIdAndResponseTextNotNull(probe,probe);
                     BioScore getBioRefID = bioRepository.findFirstByMatchedRefIdAndBioRefIdIsNotNull(candidate);
 
-                   // score.setResponseText("{\"id\":\"mosip.abis.identify\",\"requestId\":\"bc9b3ddb-8ee0-4c1a-ab4c-8fec48c66ef2\",\"returnValue\":\"1\",\"responsetime\":\"2022-07-14T10:29:39.284Z\",\"candidateList\":{\"count\":\"1\",\"candidates\":[{\"referenceId\":\"84240b4d-f61b-42fc-979f-94d99b7f2949\",\"analytics\":{\"internalScore\":\"22130.0\",\"rank\":\"2\"},\"modalities\":[{\"biometricType\":\"IIR\",\"analytics\":{\"internalScore\":\"16635.0\"}},{\"biometricType\":\"FIR\",\"analytics\":{\"internalScore\":\"22280.0\"}}]}]}}");
+                    // score.setResponseText("{\"id\":\"mosip.abis.identify\",\"requestId\":\"bc9b3ddb-8ee0-4c1a-ab4c-8fec48c66ef2\",\"returnValue\":\"1\",\"responsetime\":\"2022-07-14T10:29:39.284Z\",\"candidateList\":{\"count\":\"1\",\"candidates\":[{\"referenceId\":\"84240b4d-f61b-42fc-979f-94d99b7f2949\",\"analytics\":{\"internalScore\":\"22130.0\",\"rank\":\"2\"},\"modalities\":[{\"biometricType\":\"IIR\",\"analytics\":{\"internalScore\":\"16635.0\"}},{\"biometricType\":\"FIR\",\"analytics\":{\"internalScore\":\"22280.0\"}}]}]}}");
                     //score.setResponseText("{\"id\":\"mosip.abis.identify\",\"requestId\":\"bc39a755-ab30-4d54-b0fb-1a050d0d4112\",\"returnValue\":\"1\",\"responsetime\":\"2021-01-22T00:37:50.679Z\",\"candidateList\":{\"count\":\"1\",\"candidates\":[{\"referenceId\":\"825e5ec4-b990-408f-93b5-faf6f9a0de28\",\"analytics\":{\"internalScore\":\"3145.0\",\"rank\":\"2\"},\"modalities\":[{\"biometricType\":\"IIR\",\"analytics\":{\"internalScore\":\"3295.0\"}}]}]},\"analytics\":{\"wasAdjudicated\":true,\"candidates\":[{\"referenceId\":\"825e5ec4-b990-408f-93b5-faf6f9a0de28\",\"internalScore\":\"3145.0\",\"consistency\":\"Consistent\",\"adjudicationDetails\":[{\"decision\":\"NO_HIT\",\"operator\":\"soquindo\",\"comment\":\"Both Iris and fingerprints of the probe and candidate were found to be different\"},{\"decision\":\"NO_HIT\",\"operator\":\"ncabauatan\",\"comment\":\"Both Iris and fingerprints of the probe and candidate were found to be different\"}]}]}}");
                     System.out.println("Response Text :"+score.getResponseText());
-                   // getBioRefID.setBioRefId("84240b4d-f61b-42fc-979f-94d99b7f2949");
+                    // getBioRefID.setBioRefId("84240b4d-f61b-42fc-979f-94d99b7f2949");
                     //getBioRefID.setBioRefId("825e5ec4-b990-408f-93b5-faf6f9a0de28");
                     System.out.println("BIOref_id :"+getBioRefID.getBioRefId());
                     org.json.JSONObject matchedScore = new org.json.JSONObject(score.getResponseText());
@@ -291,7 +294,6 @@ public class LevelOneController {
                                 org.json.JSONObject matchedDetails1 = adjudicationDetailsComment.getJSONObject(1);
                                 String comment1 = (String) matchedDetails1.get("comment");
                                 model.addAttribute("comment1ABIS",comment1);
-                                model.addAttribute("commentABIS",comment);
 
                                 // }
                             }
@@ -310,7 +312,7 @@ public class LevelOneController {
                     String pathname1 = new FileSystemResource("").getFile().getAbsolutePath();
 
 
-                    try  {
+                    try{
                         JSONObject jsonObject1 = (JSONObject) jsonParser1.parse(mvJsonService.getProbJson(probe,requestId));
 
 
@@ -323,9 +325,9 @@ public class LevelOneController {
                             if(jsonObject1.get("documents")!=null) {
                                 JSONObject jsonObjectResponse = (JSONObject) ((JSONObject) jsonObject1).get("documents");
                                 if(jsonObjectResponse.get("proofOfIdentity")!=null) {
-                                     base64StringPOI = (String) jsonObjectResponse.get("proofOfIdentity");
+                                    base64StringPOI = (String) jsonObjectResponse.get("proofOfIdentity");
 //                                     pdfFileI = "data:application/pdf;base64," + base64StringPOI;
-                                     pdfFileI = base64StringPOI;
+                                    pdfFileI = base64StringPOI;
                                 }
                                 if(jsonObjectResponse.get("proofOfAddress")!=null) {
                                     base64StringPOA = (String) jsonObjectResponse.get("proofOfAddress");
@@ -668,6 +670,10 @@ public class LevelOneController {
                 }
 
             }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
 
             if (candidate != null) {
 
@@ -709,7 +715,6 @@ public class LevelOneController {
                     String pathname1 = new FileSystemResource("").getFile().getAbsolutePath();
 
                     try  {
-//                        String jsonString=
                         JSONObject jsonObject1 = (JSONObject) jsonParser1.parse(mvJsonService.getJson(probe,candidate,requestId));
                         /*Reading Document from JSON CANDIDATE Start*/
                         try{
@@ -867,7 +872,7 @@ public class LevelOneController {
                             beanCan.setMonthOfBirth(monthOfBirth);
                             beanCan.setDayOfBirth(dayOfBirth);
                             beanCan.setYearOfBirth(yearOfBirth);}
-                    model.addAttribute("CanDemoFields", beanCan);
+                        model.addAttribute("CanDemoFields", beanCan);
 
                         byte[] decodedBytes = Base64.getUrlDecoder().decode((String) jsonObject1.get("biometrics"));
                         String decodedBioXml = new String(decodedBytes);
@@ -1035,10 +1040,12 @@ public class LevelOneController {
 
                     }
                     catch (Exception e){
+                        e.printStackTrace();
                         logger.error(logger("LevelOneController","leveloneSearchByName",getUtcTime(), e.toString()));
                     }
                 }
                 catch (Exception e) {
+                    e.printStackTrace();
                     logger.error(logger("LevelOneController","leveloneSearchByName",getUtcTime(), e.toString()));
                 }
             }
@@ -1046,15 +1053,18 @@ public class LevelOneController {
         model.addAttribute("probeid",probe);
         model.addAttribute("canid",candidate);
         System.out.println("checking candi and probe id in jsp : "+ probe + " : " +candidate);
-            nextPage="mvsLevelOneDetail";
-//        } else {
-//            System.out.println("Processing ");
-//            // redirectAttributes.addFlashAttribute("faliureMessage", "ERROR WHILE UPDATING.");
-//            redirectAttributes.addFlashAttribute("errorMessage", "this record is being processed by another operator....");
-//            nextPage="redirect:levelOneSearch";
-//        }
 
-        return nextPage;
+//        redirectAttributes.addFlashAttribute("LevelOneSearchByNameModel", new HashMap<>(model));
+        request.getSession().setAttribute("LevelOneSearchByNameModel", new HashMap<>(model));
+        return "redirect:levelOneDetail";
+    }
+
+    @RequestMapping(value = "/levelOneDetail")
+    public String redirectingLevelOneDetail(Model model, HttpServletRequest request) {
+//        Map<String, Object> details = (Map<String, Object>) model.getAttribute("LevelOneSearchByNameModel");
+        Map<String, Object> details = (Map<String, Object>) request.getSession().getAttribute("LevelOneSearchByNameModel");
+        model.addAllAttributes(details);
+        return "mvsLevelOneDetail";
     }
 
     private String jsondatavalue(String jsondata) {
@@ -1145,13 +1155,13 @@ public class LevelOneController {
         try {
             HttpSession session = request.getSession();
             if(session.getAttribute("userID")==null){
-                return "redirect:loginPage";
+                return "redirect:redirectlogin";
             }
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
             System.out.println("UserID :" + user.getUserid());
             UserCaseAssignment userCase= mvs.userCaseDetails(user.getUserid());
             if(userCase == null){
-                redirectAttributes.addFlashAttribute("faliureMessage","case processing time has expired for this request id");
+                redirectAttributes.addFlashAttribute("failureMessage","case processing time has expired for this request id");
                 return "redirect:levelOneSearch";
             }
           String probe= (String) session.getAttribute("regId");
@@ -1161,22 +1171,42 @@ public class LevelOneController {
             session.getAttribute("regId");
             session.getAttribute("candidate");
 
-//            logger.info(logger("LevelOneController", "saveMVSL1ResultDetail",getUtcTime(),"Status"+status));
-
             String Statuscoment= mvs.getStatuscomment(Integer.parseInt(mvsResultRequestDto.getSno()));
             System.out.println("StatusComment"+Statuscoment);
+
+
+            RegisterManualVerification reg = mvs.findBySerialNumber(Integer.parseInt(mvsResultRequestDto.getSno()));
 
             int out=0;
             int UINGen=0;
            // int op2Out=0;
+           /* if(Statuscoment==null || Statuscoment.equalsIgnoreCase("")){
+                out = mvs.updateRID(Integer.parseInt(mvsResultRequestDto.getSno()), mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(),user.getUserid(), user.getFirstnameEn(),mvsResultRequestDto.getRequestId(), "0");
+            }
+             if(Statuscoment !=null) {
+                out = mvs.updateRIDstatus2(Integer.parseInt(mvsResultRequestDto.getSno()), mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(), user.getUserid(),user.getFirstnameEn(), mvsResultRequestDto.getRequestId(),"1");
+            }*/
+                // this code for restrict operator from taking 2 decisions
             if(Statuscoment==null || Statuscoment.equalsIgnoreCase("")){
                 out = mvs.updateRID(Integer.parseInt(mvsResultRequestDto.getSno()), mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(),user.getUserid(), user.getFirstnameEn(),mvsResultRequestDto.getRequestId(), "0");
             }
-            else if(Statuscoment!=null){
+            else if(user.getUserid().equals(reg.getOp1userId())){
+                System.out.println("op1 userid "+ reg.getOp1userId());
+                System.out.println("op1 userid  session"+ user.getUserid());
+                out = mvs.updateRID(Integer.parseInt(mvsResultRequestDto.getSno()), mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(),user.getUserid(), user.getFirstnameEn(),mvsResultRequestDto.getRequestId(), "0");
+            }
+            else if(user.getUserid().equals(reg.getOp2userId()) ){
+                System.out.println("op2 userid "+ reg.getOp2userId());
+                System.out.println("op2 userid  session"+ user.getUserid());
                 out = mvs.updateRIDstatus2(Integer.parseInt(mvsResultRequestDto.getSno()), mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(), user.getUserid(),user.getFirstnameEn(), mvsResultRequestDto.getRequestId(),"1");
             }
-//            mvs.modifyProcessStatus(Integer.parseInt(id));
-// need to comment and implement while submitting
+            else {
+                System.out.println("op2 userid--->"+ reg.getOp2userId());
+                System.out.println("op2 userid--->  session"+ user.getUserid());
+                out = mvs.updateRIDstatus2(Integer.parseInt(mvsResultRequestDto.getSno()), mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(), user.getUserid(),user.getFirstnameEn(), mvsResultRequestDto.getRequestId(),"1");
+            }
+
+
             int nhCase = mvs.operatorVerifiedNohit(Integer.parseInt(mvsResultRequestDto.getSno()));
             int hCase = mvs.operatorVerifiedHit(Integer.parseInt(mvsResultRequestDto.getSno()));
             System.out.println("check for boolean value"+nhCase);
@@ -1188,6 +1218,20 @@ public class LevelOneController {
             if(hCase == 1){
                 hitUpdate = mvs.operatorUpdateHit(Integer.parseInt(mvsResultRequestDto.getSno()));
             }
+
+            // this code for restrict operator from taking 2 decision
+        /*    if(nhCase == 1){
+                noHitUpdate = mvs.operatorUpdateNohit(Integer.parseInt(mvsResultRequestDto.getSno()));
+            }
+            else if(hCase == 1){
+                hitUpdate = mvs.operatorUpdateHit(Integer.parseInt(mvsResultRequestDto.getSno()));
+            }
+            else {
+                mvs.updateFinIndi(Integer.parseInt(mvsResultRequestDto.getSno()));
+                UINGen = 0;
+            }*/
+
+
 
             if(hitUpdate == 1 || noHitUpdate == 1){
                // String ReqId = mvs.getReqId(Integer.parseInt(id));
@@ -1206,7 +1250,6 @@ public class LevelOneController {
                    else{
                        req.responseRequest(mvsResultRequestDto.getRequestId(),regId,0);
                    }
-
                }
             }
 
@@ -1218,21 +1261,16 @@ public class LevelOneController {
                 }
 
             } else {
-                redirectAttributes.addFlashAttribute("faliureMessage", "ERROR WHILE UPDATING.");
+                redirectAttributes.addFlashAttribute("failureMessage", "ERROR WHILE UPDATING.");
 
             }
             logger.info(logger("LevelOneController","saveMVSL1ResultDetail",getUtcTime(),
                     "OperatorName:"+user.getFirstnameEn()+","+"Command :"+mvsResultRequestDto.getStatusComment()+","+"Status :"+mvsResultRequestDto.getVerifyStatus()+","+"regId :"+probe+","+"matchedRefId  :"+candidate));
 
-
-
-
-
-
         } catch (Exception e) {
             e.printStackTrace();
             logger.error(logger("LevelOneController","saveMVSL1ResultDetail",getUtcTime(), e.toString()));
-            redirectAttributes.addFlashAttribute("faliureMessage", "ERROR WHILE UPDATING.");
+            redirectAttributes.addFlashAttribute("failureMessage", "ERROR WHILE UPDATING.");
         }
 
         return "redirect:levelOneSearch";
@@ -1256,11 +1294,11 @@ public class LevelOneController {
 //        if (out == 1) {
 //            redirectAttributes.addFlashAttribute("successMessage", "DETAILS UPDATED SUCCESSFULLY");
 //        } else {
-//            redirectAttributes.addFlashAttribute("faliureMessage", "ERROR WHILE UPDATING.");
+//            redirectAttributes.addFlashAttribute("failureMessage", "ERROR WHILE UPDATING.");
 //        }
 //    } catch (Exception e) {
 //        e.printStackTrace();
-//        redirectAttributes.addFlashAttribute("faliureMessage", "ERROR WHILE UPDATING.");
+//        redirectAttributes.addFlashAttribute("failureMessage", "ERROR WHILE UPDATING.");
 //    }
 //    return "redirect:levelOneSearch";
 //}

@@ -28,6 +28,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -176,7 +177,7 @@ return "sample";
         try{
             HttpSession session = request.getSession();
             if(session.getAttribute("userID")==null) {
-                return "redirect:loginPage";
+                return "redirect:redirectlogin";
             }
         }
         catch(Exception e){
@@ -279,7 +280,7 @@ return "sample";
         if (redirectAttributes.equals(true)) {
             redirectAttributes.addFlashAttribute("successMessage", "APPROVED SUCCESSFULLY");
         } else {
-            redirectAttributes.addFlashAttribute("faliureMessage", "REJECTED SUCCESSFULLY");
+            redirectAttributes.addFlashAttribute("failureMessage", "REJECTED SUCCESSFULLY");
         }
 
         return "levelthreedetails";
@@ -290,21 +291,20 @@ return "sample";
     public String levelthreeSearchByName(ModelMap model, HttpServletRequest request, @RequestParam("id") String id, @RequestParam("probe") String probe,
                                          @RequestParam("candidate") String candidate,@RequestParam("requestId") String requestId,@RequestParam("op1Comment")String op1Comment,
                                          @RequestParam("op1verifyStatus") String op1verifyStatus,@RequestParam("op2Comment") String op2Comment,@RequestParam("op2verifyStatus")String op2verifyStatus,
-            @RequestParam("supervisorComment") String supervisorComment,@RequestParam("supervisorVerifyStatus")String supervisorVerifyStatus
+            @RequestParam("supervisorComment") String supervisorComment,@RequestParam("supervisorVerifyStatus")String supervisorVerifyStatus, RedirectAttributes redirectAttributes
     ) {
+        System.out.println("-------levelthreeSearchByName-------");
 
         try{
             HttpSession session = request.getSession();
             if(session.getAttribute("userID")==null){
-                return "redirect:loginPage";
+                return "redirect:redirectlogin";
             }
 
         }catch(Exception e){
             System.out.println(e.toString());
         }
-
-        System.out.println("supercomment====================================================================================="+supervisorComment);
-        model.addAttribute("Can", candidate);
+         model.addAttribute("Can", candidate);
         model.addAttribute("Prob", probe);
         model.addAttribute("id", id);
         model.addAttribute("requestId", requestId);
@@ -1141,9 +1141,21 @@ return "sample";
             }
 
         }
-        return "mvsLevelThreeDetail";
+//        redirectAttributes.addFlashAttribute("LevelThreeSearchByNameModel", new HashMap<>(model));
+        request.getSession().setAttribute("LevelThreeSearchByNameModel", new HashMap<>(model));
+        return "redirect:levelThreeDetail";
 
     }
+
+    @RequestMapping(value = "/levelThreeDetail")
+    public String redirectingLevelThreeDetail(Model model, HttpServletRequest request) {
+//        Map<String, Object> details = (Map<String, Object>) model.getAttribute("LevelThreeSearchByNameModel");
+        Map<String, Object> details = (Map<String, Object>) request.getSession().getAttribute("LevelThreeSearchByNameModel");
+
+        model.addAllAttributes(details);
+        return "mvsLevelThreeDetail";
+    }
+
     private String jsondatavalue(String jsondata){
         JSONObject fn=new JSONObject();
         try {
@@ -1233,13 +1245,13 @@ return "sample";
             if (out == 1) {
                 redirectAttributes.addFlashAttribute("successMessage", "DETAILS UPDATED SUCCESSFULLY");
             } else {
-                redirectAttributes.addFlashAttribute("faliureMessage", "ERROR WHILE UPDATING.");
+                redirectAttributes.addFlashAttribute("failureMessage", "ERROR WHILE UPDATING.");
 
 
             }
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("faliureMessage", "ERROR WHILE UPDATING.");
+            redirectAttributes.addFlashAttribute("failureMessage", "ERROR WHILE UPDATING.");
 
         }
         return "redirect:/levelthreeSearch";

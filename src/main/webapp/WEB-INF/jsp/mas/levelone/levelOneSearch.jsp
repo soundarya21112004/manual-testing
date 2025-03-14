@@ -10,7 +10,6 @@
 
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
 
-
 <script>
     $(document).ready(function() {
         const table = $('#caseAssign').DataTable({
@@ -176,12 +175,12 @@
     });
 </script>
 </c:if>
-<c:if test="${faliureMessage != null}">
+<c:if test="${failureMessage != null}">
 <script>
     Swal.fire({
         // icon: "error",
-        title: 'Faliure!',
-        text: '${faliureMessage}',
+        title: 'failure!',
+        text: '${failureMessage}',
         confirmButtonText: 'OK',
         customClass: {
             icon: "icon-size"
@@ -200,6 +199,7 @@
     });
 </script>
 </c:if>
+
 
 <section class="content">
     <div class="container-fluid">
@@ -238,19 +238,24 @@
                                                     <fmt:formatDate value="${emp.createdDate}" type="date"
                                                                     pattern="dd-MMM-yyyy"/></td>
                                                 <td style="align-items: center; justify-content: center;">
-                                                   
-                                                    <c:choose>
-                                                        <c:when test="${emp.op1userId != userid && emp.op2userId != userid}">
-                                                            <a href="<c:url value="leveloneSearchByName">hover
-                                                         <c:param name="id" value="${emp.sno}"></c:param>
-                                                         <c:param name="probe" value="${emp.regId}"></c:param>
-                                                         <c:param name="candidate" value="${emp.matchedRefId}"></c:param>
-                                                        <c:param name="requestId" value="${emp.reqid}"></c:param>
-                                                        <c:param name="caseListNo" value="${counter.count} of ${galleryList.size()}"></c:param>
-                                                          </c:url>">
-                                                                <i class="nav-icon fas fa-edit fa-2x" aria-hidden="true"></i>
-                                                            </a>
 
+                                                    <c:choose>
+                                                       <c:when test="${emp.op1userId != userid && emp.op2userId != userid}">
+                                                                   <a href="<c:url value="leveloneSearchByName">
+                                                               <c:param name="id" value="${emp.sno}"></c:param>
+                                                               <c:param name="probe" value="${emp.regId}"></c:param>
+                                                               <c:param name="candidate" value="${emp.matchedRefId}"></c:param>
+                                                              <c:param name="requestId" value="${emp.reqid}"></c:param>
+                                                              <c:param name="caseListNo" value="${counter.count} of ${galleryList.size()}"></c:param>
+                                                                </c:url>">
+                                                                      <i class="nav-icon fas fa-edit fa-2x" aria-hidden="true"></i>
+                                                                  </a>
+                                                           <%--
+
+                                                        <a href="javascript:void(0);" onclick="handleLevelOneSearchByName('${emp.sno}', '${emp.regId}', '${emp.matchedRefId}', '${emp.reqid}', '${counter.count}', '${galleryList.size()}');">
+                                                            <i class="nav-icon fas fa-edit fa-2x" aria-hidden="true"></i>
+                                                        </a>
+--%>
 
                                                         </c:when>
                                                         <c:when test="${emp.op2verifyStatus == 'nohit'}">
@@ -299,3 +304,4 @@
         </form>
     </div>
 </section>
+</html>

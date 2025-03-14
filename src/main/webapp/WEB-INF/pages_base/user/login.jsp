@@ -16,41 +16,12 @@
   <!-- Theme style -->
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
   <script src="plugins/sweetalert2/sweetalert2.js"></script>
-    <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.js">
+<%--    <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.js">--%>
 
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 </head>
 
-<script>
-  function click(){
-
-    alert("hi magesh");
-      // var myHeaders = new Headers();
-      // myHeaders.append("Content-Type", "application/json");
-      //
-      // var raw = JSON.stringify({"username":"TestUser","password":"pwd"});
-      //
-      // var requestOptions = {
-      //     method: 'POST',
-      //     headers: myHeaders,
-      //     body: raw,
-      //     redirect: 'follow'
-      // };
-  }
-
-</script>
-<%--<script>--%>
-<%--  $().ready(function() {--%>
-<%--    if(document.referrer != 'http://localhost:8181/'){--%>
-<%--      history.pushState(null, null, 'login');--%>
-<%--      window.addEventListener('popstate', function () {--%>
-<%--        history.pushState(null, null, 'login');--%>
-<%--      });--%>
-<%--    }--%>
-<%--  });--%>
-<%--</script>--%>
 
 <c:if test="${successMessage != null}">
   <script>
@@ -173,10 +144,10 @@
 <!-- /.login-box -->
 
 <!-- jQuery -->
-<script src="../../plugins/jquery/jquery.min.js"></script>
+<script src="${pageContext.request.contextPath}/plugins/jquery/jquery.min.js"></script>
 <!-- Bootstrap 4 -->
-<script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="${pageContext.request.contextPath}/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE App -->
-<script src="../../dist/js/adminlte.min.js"></script>
+<script src="${pageContext.request.contextPath}/dist/js/adminlte.min.js"></script>
 </body>
 </html>

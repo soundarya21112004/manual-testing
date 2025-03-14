@@ -28,8 +28,7 @@
     <!-- Theme style -->
     <link rel="stylesheet" href="dist/css/adminlte.min.css">
     <script src="plugins/sweetalert2/sweetalert2.js"></script>
-    <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.js">
-<%--    <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.css">--%>
+<%--    <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.js">--%>
 <%--    <script src="sweetalert2.min.js"></script>--%>
 <%--    <link rel="stylesheet" href="sweetalert2.min.css">--%>
 
@@ -404,3 +403,4 @@
 <%--<script src="<%=request.getContextPath()%>/js/pages/examples/sign-in.js"></script>--%>
 <%--<!--</body>-->--%>
 
+</html>

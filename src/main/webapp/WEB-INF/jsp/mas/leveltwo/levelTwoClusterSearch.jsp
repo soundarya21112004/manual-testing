@@ -143,11 +143,11 @@
     });
 </script>
 </c:if>
-<c:if test="${faliureMessage != null}">
+<c:if test="${failureMessage != null}">
 <script>
     Swal.fire({
         title : 'Failure!',
-        text : '${faliureMessage}',
+        text : '${failureMessage}',
         confirmButtonText : 'OK'
     });
 </script>
@@ -174,8 +174,8 @@
                                     <th>Registration Id</th>
                                     <th>Candidate Reference Id</th>
                                     <th>Reason</th>
-                                    <th>Verified By Operator</th>
-                                    <th>Verified By Operator</th>
+                                    <th>Verified By Operator 1</th>
+                                    <th>Verified By Operator 2</th>
                                     <th>Verified Date</th>
                                     <th>Action</th>
 

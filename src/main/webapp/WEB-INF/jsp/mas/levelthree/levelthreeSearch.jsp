@@ -378,11 +378,11 @@
     });
 </script>
 </c:if>
-<c:if test="${faliureMessage != null}">
+<c:if test="${failureMessage != null}">
 <script>
     Swal.fire({
         title: 'Failure!',
-        text: '${faliureMessage}',
+        text: '${failureMessage}',
         confirmButtonText: 'OK'
     });
 </script>
