@@ -33,8 +33,8 @@ public class RestTemplateConfig {
                     .setSSLContext(sslContext)
                     .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE) // Disable hostname verification
                     .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectTimeout(5000)
-                            .setSocketTimeout(5000)
+                            .setConnectTimeout(240000)
+                            .setSocketTimeout(240000)
                             .build())
                     .build();
 

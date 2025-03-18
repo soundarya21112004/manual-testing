@@ -37,11 +37,16 @@ public class JwtFilterChain extends OncePerRequestFilter {
     @Value("${base.context.path}")
     private String basePath ;
 
+    private final static String AUTHORIZATIONBEARER = "MvsToken";
+
 
     public String extractTokenFromCookies(HttpServletRequest request) {
         if (request.getCookies() != null) {
+
             for (Cookie cookie : request.getCookies()) {
-                if ("Authorization".equals(cookie.getName())) {
+                System.out.println("COOKIE" + cookie.getName());
+                if (AUTHORIZATIONBEARER.equals(cookie.getName())) {
+                    System.out.println("COOKIE VALLUE "+cookie.getValue());
                     return cookie.getValue();
                 }
             }
@@ -60,6 +65,7 @@ public class JwtFilterChain extends OncePerRequestFilter {
                 request.getRequestURI().startsWith(basePath+"redirectLogin") ||
                 request.getRequestURI().startsWith(basePath+"redirectlogin") ||
                 request.getRequestURI().startsWith(basePath+"loginPage") ||
+                request.getRequestURI().startsWith(basePath+"logout1") ||
                 request.getRequestURI().startsWith(basePath+"changePasswordDetails")
         ) {
             filterChain.doFilter(request, response);
@@ -73,7 +79,6 @@ public class JwtFilterChain extends OncePerRequestFilter {
                     System.out.println(token);
                     userName = jwtService.extractUsername(token);
                     System.out.println("AUTHENTICATION username: "+userName);
-                    System.out.println("AUTHENTICATION: "+SecurityContextHolder.getContext().getAuthentication());
                     if (userName != null) {
                         Userdetails user = userdetailsRepository.findUserdetailsByEmail(userName);
                         if (user != null) {

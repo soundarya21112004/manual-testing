@@ -21,6 +21,10 @@ public class ConstantValue {
     public static  String TokenClientId;
     public static  int MAXRESULT;
     public static  long elapsedHours;
+    public static int corePoolSize;
+    public static int maximumPoolSize;
+    public static int keepAliveTime;
+
 
 
 

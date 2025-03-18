@@ -2,6 +2,7 @@ package com.eagle.mas;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.PropertyResourceBundle;
@@ -76,12 +77,13 @@ public class DBConfiguration {
 	}
 	@Primary
 	@Bean(name = "dataSource")
-	public DataSource dataSource() {
+	public DataSource dataSource() throws IOException {
 		OSCheck();
 		System.out.println("Data Source");
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
+		InputStream in = null;
 		try{
-			InputStream in = new FileInputStream(propertyFile);
+			in = new FileInputStream(propertyFile);
 			ResourceBundle resource = new PropertyResourceBundle(in);
 			ConstantValue.KERNELAUTHMANAGER=resource.getString("KERNELAUTHMANAGER");
 			ConstantValue.appId=resource.getString("appId");
@@ -99,6 +101,9 @@ public class DBConfiguration {
 			ConstantValue.TokenClientId=resource.getString("TokenClientId");
 			ConstantValue.elapsedHours=Long.parseLong(resource.getString("case.unassign.time.limit"));
 			ConstantValue.MAXRESULT =Integer.parseInt(resource.getString("search.filter.max.result"));
+			ConstantValue.corePoolSize = Integer.parseInt(resource.getString("corePoolSize"));
+			ConstantValue.maximumPoolSize = Integer.parseInt(resource.getString("maximumPoolSize"));
+			ConstantValue.keepAliveTime = Integer.parseInt(resource.getString("keepAliveTime"));
 			dataSource.setDriverClassName(resource.getString("db.driver"));
 			dataSource.setUrl(resource.getString("db.url"));
 			System.out.println("url ---> " + resource.getString("db.url"));
@@ -108,7 +113,9 @@ public class DBConfiguration {
 		catch (Exception e){
 			e.printStackTrace();
 		}
-
+		finally {
+			in.close();
+		}
 		return dataSource;
 	}
 	@Primary

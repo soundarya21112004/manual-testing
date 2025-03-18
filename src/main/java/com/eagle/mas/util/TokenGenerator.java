@@ -37,7 +37,7 @@ public class TokenGenerator {
     Environment environment;
     public static String token =null;
     private final static String AUTHORIZATION = "Authorization=";
-
+    public static String validToken;
 
     /**
      * This method gets the token for the user details present in config server.
@@ -46,9 +46,9 @@ public class TokenGenerator {
      * @throws IOException
      */
 
-    public String getToken() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, IOException {
+    public void getToken() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, IOException {
         generateToken(setRequestDto());
-    return AUTHORIZATION+token;
+    validToken = AUTHORIZATION+token;
 
     }
     public void generateToken(ClientIdSecretKeyRequestDto dto) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {

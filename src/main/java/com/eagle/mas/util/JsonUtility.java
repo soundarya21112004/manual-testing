@@ -9,37 +9,21 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.google.gson.Gson;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.TrustAllStrategy;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.util.EntityUtils;
 
+import org.apache.tomcat.util.bcel.Const;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Component
 public class JsonUtility {
@@ -74,6 +58,16 @@ public class JsonUtility {
     public static List<String> fields;
 
     private static Logger logger = LoggerFactory.getLogger(JsonUtility.class);
+
+//    private ExecutorService executor = Executors.newFixedThreadPool(5);
+    ThreadPoolExecutor executor = new ThreadPoolExecutor(
+            ConstantValue.corePoolSize,
+            ConstantValue.maximumPoolSize,
+            ConstantValue.keepAliveTime,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(), // Unbounded queue to prevent rejection
+            new ThreadPoolExecutor.CallerRunsPolicy() // Handles rejected tasks
+    );
 
     @Autowired
     ObjectMapper obj;
@@ -123,157 +117,180 @@ public class JsonUtility {
         );
     }
 
+    private <T> ResponseDto makePostRequest(T requestBody, String url) {
+        try {
 
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Cookie", TokenGenerator.validToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
+            HttpEntity<T> entity = new HttpEntity<>(requestBody, headers);
+            ResponseEntity<ResponseDto> response = restTemplate.exchange(url, HttpMethod.POST, entity, ResponseDto.class);
 
-    public LocalDateTime getUTCCurrentDateTime() {
-        return ZonedDateTime.now(ZoneOffset.UTC).toLocalDateTime();
-    }
-
-    private <T> ResponseDto makePostRequest(T requestBody, String url) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Cookie", tokenGenerator.getToken());
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<T> entity = new HttpEntity<>(requestBody, headers);
-
-        ResponseEntity<ResponseDto> response = restTemplate.exchange(url, HttpMethod.POST, entity, ResponseDto.class);
-
-        return response.getBody();
+            return response.getBody();
+        } catch (Exception e) {
+            throw new RuntimeException("Error calling API: " + url, e);
+        }
     }
 
     private <T> RequestDto createRequestDto(T requestDetails) {
-        Map<String, Object> metadata = new HashMap<>();
-        metadata.put("", ""); // Add actual metadata if needed
-
-        return new RequestDto(
-                "",  // ID (Set dynamically)
-                metadata,
-                requestDetails,
-                LocalDateTime.now(),
-                ""   // Version (Set dynamically)
-        );
+        return new RequestDto("", new HashMap<>(), requestDetails, LocalDateTime.now(), "");
     }
 
-    public ResponseDto getAudits(String rid) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        AuditRequestDto auditRequestDto = new AuditRequestDto();
-        auditRequestDto.setId(rid);
-        auditRequestDto.setProcess("NEW");
-        auditRequestDto.setBypassCache(true);
-        auditRequestDto.setSource("REGISTRATION_CLIENT");
-        return makePostRequest(createRequestDto(auditRequestDto), ConstantValue.AUDITAPI);
+    // Asynchronous API calls using CompletableFuture
+    public CompletableFuture<ResponseDto> getAuditsAsync(String rid) {
+        return CompletableFuture.supplyAsync(() -> {
+            AuditRequestDto auditRequestDto = new AuditRequestDto();
+            auditRequestDto.setId(rid);
+            auditRequestDto.setProcess("NEW");
+            auditRequestDto.setBypassCache(true);
+            auditRequestDto.setSource("REGISTRATION_CLIENT");
+            return makePostRequest(createRequestDto(auditRequestDto), ConstantValue.AUDITAPI);
+        }, executor);
     }
 
-    public ResponseDto getBiometrics(String rid) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        BiometricRequestDto biometricRequestDto = new BiometricRequestDto();
-        biometricRequestDto.setId(rid);
-        biometricRequestDto.setBypassCache(true);
-        biometricRequestDto.setProcess("NEW");
-        biometricRequestDto.setSource("REGISTRATION_CLIENT");
-        biometricRequestDto.setModalities(new ArrayList<>());
-        biometricRequestDto.setPerson("individualBiometrics");
-        return makePostRequest(createRequestDto(biometricRequestDto), ConstantValue.BIOAPI);
+    public CompletableFuture<ResponseDto> getBiometricsAsync(String rid) {
+        return CompletableFuture.supplyAsync(() -> {
+            BiometricRequestDto biometricRequestDto = new BiometricRequestDto();
+            biometricRequestDto.setId(rid);
+            biometricRequestDto.setBypassCache(true);
+            biometricRequestDto.setProcess("NEW");
+            biometricRequestDto.setSource("REGISTRATION_CLIENT");
+            biometricRequestDto.setModalities(new ArrayList<>());
+            biometricRequestDto.setPerson("individualBiometrics");
+            return makePostRequest(createRequestDto(biometricRequestDto), ConstantValue.BIOAPI);
+        }, executor);
     }
 
-    public ResponseDto getDocument(String rid, String dType) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        DocumentRequestDto documentRequestDto = new DocumentRequestDto();
-        documentRequestDto.setId(rid);
-        documentRequestDto.setSource("REGISTRATION_CLIENT");
-        documentRequestDto.setProcess("NEW");
-        documentRequestDto.setDocumentName(dType);
-        return makePostRequest(createRequestDto(documentRequestDto), ConstantValue.DOCUMENTAPI);
+    public CompletableFuture<ResponseDto> getDocumentAsync(String rid, String dType) {
+        return CompletableFuture.supplyAsync(() -> {
+            DocumentRequestDto documentRequestDto = new DocumentRequestDto();
+            documentRequestDto.setId(rid);
+            documentRequestDto.setSource("REGISTRATION_CLIENT");
+            documentRequestDto.setProcess("NEW");
+            documentRequestDto.setDocumentName(dType);
+            return makePostRequest(createRequestDto(documentRequestDto), ConstantValue.DOCUMENTAPI);
+        }, executor);
     }
 
-    public ResponseDto getIdentity(String rid) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        IdentityRequestDto searchFieldRequestDto = new IdentityRequestDto();
-        searchFieldRequestDto.setId(rid);
-        searchFieldRequestDto.setFields(fields);
-        searchFieldRequestDto.setSource("REGISTRATION_CLIENT");
-        searchFieldRequestDto.setProcess("NEW");
-        searchFieldRequestDto.setBypassCache(true);
-
-        return makePostRequest(createRequestDto(searchFieldRequestDto), ConstantValue.SEARCHFIELDAPI);
+    public CompletableFuture<ResponseDto> getIdentityAsync(String rid) {
+        return CompletableFuture.supplyAsync(() -> {
+            IdentityRequestDto searchFieldRequestDto = new IdentityRequestDto();
+            searchFieldRequestDto.setId(rid);
+            searchFieldRequestDto.setFields(fields);
+            searchFieldRequestDto.setSource("REGISTRATION_CLIENT");
+            searchFieldRequestDto.setProcess("NEW");
+            searchFieldRequestDto.setBypassCache(true);
+            return makePostRequest(createRequestDto(searchFieldRequestDto), ConstantValue.SEARCHFIELDAPI);
+        }, executor);
     }
 
-    public ResponseDto getMetaInfo(String rid) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        MetaInfoRequestDto metaInfoRequestDto = new MetaInfoRequestDto();
-        metaInfoRequestDto.setId(rid);
-        metaInfoRequestDto.setProcess("NEW");
-        metaInfoRequestDto.setSource("REGISTRATION_CLIENT");
-        metaInfoRequestDto.setBypassCache(true);
-        return makePostRequest(createRequestDto(metaInfoRequestDto), ConstantValue.METAINFOAPI);
+    public CompletableFuture<ResponseDto> getMetaInfoAsync(String rid) {
+        return CompletableFuture.supplyAsync(() -> {
+            MetaInfoRequestDto metaInfoRequestDto = new MetaInfoRequestDto();
+            metaInfoRequestDto.setId(rid);
+            metaInfoRequestDto.setProcess("NEW");
+            metaInfoRequestDto.setSource("REGISTRATION_CLIENT");
+            metaInfoRequestDto.setBypassCache(true);
+            return makePostRequest(createRequestDto(metaInfoRequestDto), ConstantValue.METAINFOAPI);
+        }, executor);
     }
 
-    public MvJsonResponseDto getMVJson(String rid) throws Exception{
-
+    // Fetch MV JSON Data with parallel execution
+    public MvJsonResponseDto getMVJson(String rid) throws Exception {
         MvJsonResponseDto res = new MvJsonResponseDto();
-        ResponseDto auditResponse = getAudits(rid);
-        if(auditResponse != null && auditResponse.getResponse() != null) {
+
+        tokenGenerator.getToken();
+
+        // Fetch audit and other responses in parallel
+        CompletableFuture<ResponseDto> auditFuture = getAuditsAsync(rid);
+        CompletableFuture<ResponseDto> metaInfoFuture = getMetaInfoAsync(rid);
+        CompletableFuture<ResponseDto> identityFuture = getIdentityAsync(rid);
+        CompletableFuture<ResponseDto> bioFuture = getBiometricsAsync(rid);
+
+        // Fetch documents in parallel
+        List<String> documentTypes = Arrays.asList("proofOfAddress", "proofOfIdentity", "proofOfEvidence");
+        Map<String,String> docMap = new HashMap<>();
+        List<CompletableFuture<Map<String, String>>> documentFutures = documentTypes.stream()
+                .map(dType -> getDocumentAsync(rid, dType).thenApply(docResponse -> {
+                    if (docResponse != null && docResponse.getResponse() != null) {
+                        try {
+                            com.eagle.mas.dto.Document doc = obj.readValue(
+                                    obj.writeValueAsString(docResponse.getResponse()), com.eagle.mas.dto.Document.class);
+                             docMap.put(dType, Base64.getEncoder().encodeToString(doc.getDocument()));
+                            return docMap;
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException("Error processing document response", e);
+                        }
+                    }
+                    return null;
+                }))
+                .collect(Collectors.toList());
+
+        // Wait for all async operations to complete
+        CompletableFuture.allOf(auditFuture, metaInfoFuture, identityFuture, bioFuture)
+                .thenRun(() -> logger.info("All API calls completed"))
+                .join();
+
+        // Process audit response
+        ResponseDto auditResponse = auditFuture.get();
+        if (auditResponse != null && auditResponse.getResponse() != null) {
             res.setAudits(obj.writeValueAsString(auditResponse.getResponse()));
-        }
-        else{
+            logger.info("------------------------------Audit Success------------------------------");
+        } else {
             throw new Exception("Audit Response not available");
         }
 
-        logger.info("-----------AUDIT----------");
-        File f = new File("audit.txt");
-        FileWriter fw = new FileWriter(f);
-        fw.write(res.getAudits());
-        fw.flush();
-
-        Map<String,String> docs = new HashMap<>();
-        List<String> dl = Arrays.asList("proofOfAddress","proofOfIdentity","proofOfEvidence");
-        for(String d : dl){
-            ResponseDto documentResponse = getDocument(rid,d);
-            if(documentResponse != null && documentResponse.getResponse() != null) {
-                com.eagle.mas.dto.Document dts = obj.readValue(obj.writeValueAsString(documentResponse.getResponse()), com.eagle.mas.dto.Document.class);
-                docs.put(d, (Base64.getEncoder().encodeToString(dts.getDocument())));
-                res.setDocuments(docs);
+        // Process documents
+       /* Map<String, String> docs = new HashMap<>();
+        for (CompletableFuture<Map<String, String>> docFuture : documentFutures) {
+            Map<String, String> docEntry = docFuture.get();
+            if (docEntry != null) {
+                docs.put(docEntry.getKey(), docEntry.getValue());
             }
-
-            if(docs.isEmpty()){
-                throw new Exception("Document Response not available");
-            }
-
         }
+        if (docs.isEmpty()) {
+            throw new Exception("Document Response not available");
+        }*/
+        res.setDocuments(docMap);
 
-
-        logger.info("------------DOCUMENT------------");
-
-        ResponseDto metaInfoResponse = getMetaInfo(rid);
-        JsonNode responseNode = obj.valueToTree(metaInfoResponse.getResponse());  // Converts the response to a JsonNode
+        // Process meta info
+        ResponseDto metaInfoResponse = metaInfoFuture.get();
+        JsonNode responseNode = obj.valueToTree(metaInfoResponse.getResponse());
         JsonNode fieldsNode = responseNode.path("fields");
-
         if (!fieldsNode.isMissingNode()) {
             res.setMetaInfo(fieldsNode.toString());
+            logger.info("------------------------------MetaInfo Success------------------------------");
+
         } else {
             throw new Exception("MetaInfo Response not available");
         }
 
-        logger.info("-------------META INFO-------------");
-
-        ResponseDto identityResponse = getIdentity(rid);
-        if(identityResponse != null && identityResponse.getResponse() != null) {
-            FieldResponseDto fieldResponseDto = obj.readValue(javaObjectToJsonString(identityResponse.getResponse()), FieldResponseDto.class);
+        // Process identity
+        ResponseDto identityResponse = identityFuture.get();
+        if (identityResponse != null && identityResponse.getResponse() != null) {
+            FieldResponseDto fieldResponseDto = obj.readValue(
+                    javaObjectToJsonString(identityResponse.getResponse()), FieldResponseDto.class);
             res.setIdentity(fieldResponseDto.getFields());
-        }
-        else {
+            logger.info("------------------------------Identity Success------------------------------");
+
+        } else {
             throw new Exception("Identity Response not available");
         }
 
-        logger.info("------------IDENTITY--------------");
+        // Process biometrics
+        ResponseDto bioResponse = bioFuture.get();
+        if (bioResponse != null && bioResponse.getResponse() != null) {
+            byte[] bio = xmlString(bioResponse.getResponse());
+            String bioEncode = Base64.getUrlEncoder().encodeToString(bio);
+            res.setBiometrics(bioEncode);
+            logger.info("------------------------------Biometric Success------------------------------");
 
-        ResponseDto bioResponse = getBiometrics(rid);
-        if(bioResponse != null && bioResponse.getResponse() != null) {
-           byte[] bio =  xmlString(bioResponse.getResponse());
-           String bioEncode = Base64.getUrlEncoder().encodeToString(bio);
-           res.setBiometrics(bioEncode);
-        }
-        else {
-            throw new Exception("Identity Response not available");
+        } else {
+            throw new Exception("Biometric Response not available");
         }
 
-        logger.info("---------------BIOMETRIC---------------");
+        executor.shutdown();
         return res;
     }
 

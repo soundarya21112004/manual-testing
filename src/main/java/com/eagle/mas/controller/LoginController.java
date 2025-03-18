@@ -62,6 +62,9 @@ public class LoginController {
 
 	public static Logger logger = LoggerFactory.getLogger(LoginController.class);
 
+	private final static String AUTHORIZATIONBEARER = "MvsToken";
+
+
 
 public String getUtcTime(){
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss'Z'");
@@ -83,7 +86,13 @@ public String getUtcTime(){
 //}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public String showLoginPage(ModelMap model) {
+	public String showLoginPage(HttpServletResponse response) {
+		Cookie cookie = new Cookie(AUTHORIZATIONBEARER, "");
+		cookie.setMaxAge(0);
+		cookie.setPath("/MVS");
+		cookie.setSecure(true);
+		cookie.setHttpOnly(true);
+		response.addCookie(cookie);
 		System.out.println("------Redirecting to login page------");
 		return "login";
 	}
@@ -100,7 +109,7 @@ public String getUtcTime(){
 
 	@RequestMapping("/redirectLogin")
 	public String tokenExpired(ModelMap model, RedirectAttributes redirectAttributes, HttpServletRequest request,HttpServletResponse response) {
-		model.addAttribute("errorMessage", "Token is invalid redirect to loginPage");
+		model.addAttribute("errorMessage", "Session is expired redirect to loginPage");
 		return "login";
 	}
 
@@ -311,8 +320,9 @@ else if(usertype.equalsIgnoreCase("SUPERVISOR")){
 						tokenRepository.flush();
 					}
 
-					Cookie cookie = new Cookie("Authorization",token);
+					Cookie cookie = new Cookie(AUTHORIZATIONBEARER,token);
 					cookie.setHttpOnly(true);
+					cookie.setPath("/MVS");
 					cookie.setSecure(true);
 					response.addCookie(cookie);
 					return "redirect:dashBoard";

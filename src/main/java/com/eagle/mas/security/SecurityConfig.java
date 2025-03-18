@@ -31,9 +31,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new JwtFilterChain(handlerExceptionResolver);
     }
 
-    @Value("${base.context.path}")
-    private String basePath ;
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
