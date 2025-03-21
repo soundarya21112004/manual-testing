@@ -1,12 +1,8 @@
 package com.eagle.mas.config;
 
 public class ConstantValue {
-
-
     public static  String KERNELAUTHMANAGER;
-
     public static  String appId;
-
     public static  String clientId;
     public static  String secretKey;
     public static  String IDENTITY;
@@ -24,8 +20,7 @@ public class ConstantValue {
     public static int corePoolSize;
     public static int maximumPoolSize;
     public static int keepAliveTime;
-
-
-
-
+    public static int connectTimeout;
+    public static int socketTimeout;
+    public static int executorShutdown;
 }

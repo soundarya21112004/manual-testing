@@ -263,7 +263,7 @@ public class LevelTwoController {
             Date start = sdf.parse(startDate);
             Date end = sdf.parse(endDate);
             // Process the data here and return a response
-            System.out.println("naveen------------------------------->>>>" + start +" - "+ end);
+
             System.out.println("oper1" + operator1);
             System.out.println("oper2" + operator2);
             System.out.println("startDate" + startDate);

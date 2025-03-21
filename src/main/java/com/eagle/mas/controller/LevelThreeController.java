@@ -243,8 +243,6 @@ return "sample";
             Date start = sdf.parse(startDate);
             Date end = sdf.parse(endDate);
             // Process the data here and return a response
-
-            System.out.println("naveen------------------------------->>>>" + start +""+ end+""+ ""+operator1+""+ operator2);
             System.out.println("Opt1--->"+ operator1.isEmpty());
             System.out.println("Opt2--->"+ operator2.isEmpty());
 

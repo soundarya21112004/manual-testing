@@ -148,7 +148,7 @@ public class LevelOneController {
 //                System.out.println("List of roles"+roles.get(i).toString());
 //
 //            }
-            System.out.println("my list  " + roles);
+//            System.out.println("my list  " + roles);
 
             model.addAttribute("galleryList", roles);
             model.addAttribute("userid",user.getUserid());

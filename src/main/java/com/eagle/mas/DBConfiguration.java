@@ -104,6 +104,9 @@ public class DBConfiguration {
 			ConstantValue.corePoolSize = Integer.parseInt(resource.getString("corePoolSize"));
 			ConstantValue.maximumPoolSize = Integer.parseInt(resource.getString("maximumPoolSize"));
 			ConstantValue.keepAliveTime = Integer.parseInt(resource.getString("keepAliveTime"));
+			ConstantValue.connectTimeout = Integer.parseInt(resource.getString("connectTimeout"));
+			ConstantValue.socketTimeout = Integer.parseInt(resource.getString("socketTimeout"));
+			ConstantValue.executorShutdown = Integer.parseInt(resource.getString("executorShutdown"));
 			dataSource.setDriverClassName(resource.getString("db.driver"));
 			dataSource.setUrl(resource.getString("db.url"));
 			System.out.println("url ---> " + resource.getString("db.url"));

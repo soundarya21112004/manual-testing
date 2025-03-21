@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
-import org.apache.tomcat.util.bcel.Const;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,23 +27,6 @@ import java.util.stream.Collectors;
 @Component
 public class JsonUtility {
 
-   /* @Value("${KEYBASEDTOKENAPI}")
-    public String authUrl;
-
-    @Value("${BIOAPI}")
-    public String bioUrl;
-
-    @Value("${METAINFOAPI}")
-    public String metaInfoUrl;
-
-    @Value("${DOCUMENTAPI}")
-    public String documentUrl;
-
-    @Value("${SEARCHFIELDAPI}")
-    public String searchFieldUrl;
-
-    @Value("${AUDITAPI}")
-    public String auditUrl;*/
 
     @Autowired
     Environment environment;
@@ -59,15 +41,9 @@ public class JsonUtility {
 
     private static Logger logger = LoggerFactory.getLogger(JsonUtility.class);
 
-//    private ExecutorService executor = Executors.newFixedThreadPool(5);
-    ThreadPoolExecutor executor = new ThreadPoolExecutor(
-            ConstantValue.corePoolSize,
-            ConstantValue.maximumPoolSize,
-            ConstantValue.keepAliveTime,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(), // Unbounded queue to prevent rejection
-            new ThreadPoolExecutor.CallerRunsPolicy() // Handles rejected tasks
-    );
+    //    private ExecutorService executor = Executors.newFixedThreadPool(5);
+
+    public static ThreadPoolExecutor executor = null;
 
     @Autowired
     ObjectMapper obj;
@@ -117,16 +93,29 @@ public class JsonUtility {
         );
     }
 
+    private static void initializeExecutor() {
+
+
+       executor = new ThreadPoolExecutor(
+                ConstantValue.corePoolSize,
+                ConstantValue.maximumPoolSize,
+                ConstantValue.keepAliveTime,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(), // Unbounded queue to prevent rejection
+                new ThreadPoolExecutor.CallerRunsPolicy() // Handles rejected tasks
+        );
+    }
+
     private <T> ResponseDto makePostRequest(T requestBody, String url) {
         try {
-
+            logger.info("Calling Url : "+ url);
             HttpHeaders headers = new HttpHeaders();
             headers.set("Cookie", TokenGenerator.validToken);
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<T> entity = new HttpEntity<>(requestBody, headers);
             ResponseEntity<ResponseDto> response = restTemplate.exchange(url, HttpMethod.POST, entity, ResponseDto.class);
-
+            logger.info("Response Time :" + url);
             return response.getBody();
         } catch (Exception e) {
             throw new RuntimeException("Error calling API: " + url, e);
@@ -146,7 +135,8 @@ public class JsonUtility {
             auditRequestDto.setBypassCache(true);
             auditRequestDto.setSource("REGISTRATION_CLIENT");
             return makePostRequest(createRequestDto(auditRequestDto), ConstantValue.AUDITAPI);
-        }, executor);
+//        }, executor);
+        }, executor).orTimeout(ConstantValue.executorShutdown, TimeUnit.SECONDS);
     }
 
     public CompletableFuture<ResponseDto> getBiometricsAsync(String rid) {
@@ -159,7 +149,8 @@ public class JsonUtility {
             biometricRequestDto.setModalities(new ArrayList<>());
             biometricRequestDto.setPerson("individualBiometrics");
             return makePostRequest(createRequestDto(biometricRequestDto), ConstantValue.BIOAPI);
-        }, executor);
+//        }, executor);
+        }, executor).orTimeout(ConstantValue.executorShutdown, TimeUnit.SECONDS);
     }
 
     public CompletableFuture<ResponseDto> getDocumentAsync(String rid, String dType) {
@@ -170,7 +161,8 @@ public class JsonUtility {
             documentRequestDto.setProcess("NEW");
             documentRequestDto.setDocumentName(dType);
             return makePostRequest(createRequestDto(documentRequestDto), ConstantValue.DOCUMENTAPI);
-        }, executor);
+//        }, executor);
+        }, executor).orTimeout(ConstantValue.executorShutdown, TimeUnit.SECONDS);
     }
 
     public CompletableFuture<ResponseDto> getIdentityAsync(String rid) {
@@ -182,7 +174,8 @@ public class JsonUtility {
             searchFieldRequestDto.setProcess("NEW");
             searchFieldRequestDto.setBypassCache(true);
             return makePostRequest(createRequestDto(searchFieldRequestDto), ConstantValue.SEARCHFIELDAPI);
-        }, executor);
+//        }, executor);
+        }, executor).orTimeout(ConstantValue.executorShutdown, TimeUnit.SECONDS);
     }
 
     public CompletableFuture<ResponseDto> getMetaInfoAsync(String rid) {
@@ -193,13 +186,15 @@ public class JsonUtility {
             metaInfoRequestDto.setSource("REGISTRATION_CLIENT");
             metaInfoRequestDto.setBypassCache(true);
             return makePostRequest(createRequestDto(metaInfoRequestDto), ConstantValue.METAINFOAPI);
-        }, executor);
+        }, executor).orTimeout(ConstantValue.executorShutdown, TimeUnit.SECONDS);
+//        }, executor);
     }
 
     // Fetch MV JSON Data with parallel execution
     public MvJsonResponseDto getMVJson(String rid) throws Exception {
+        logger.info("Inside MVJson ");
         MvJsonResponseDto res = new MvJsonResponseDto();
-
+        initializeExecutor();
         tokenGenerator.getToken();
 
         // Fetch audit and other responses in parallel
@@ -210,14 +205,14 @@ public class JsonUtility {
 
         // Fetch documents in parallel
         List<String> documentTypes = Arrays.asList("proofOfAddress", "proofOfIdentity", "proofOfEvidence");
-        Map<String,String> docMap = new HashMap<>();
+        Map<String, String> docMap = new HashMap<>();
         List<CompletableFuture<Map<String, String>>> documentFutures = documentTypes.stream()
                 .map(dType -> getDocumentAsync(rid, dType).thenApply(docResponse -> {
                     if (docResponse != null && docResponse.getResponse() != null) {
                         try {
                             com.eagle.mas.dto.Document doc = obj.readValue(
                                     obj.writeValueAsString(docResponse.getResponse()), com.eagle.mas.dto.Document.class);
-                             docMap.put(dType, Base64.getEncoder().encodeToString(doc.getDocument()));
+                            docMap.put(dType, Base64.getEncoder().encodeToString(doc.getDocument()));
                             return docMap;
                         } catch (JsonProcessingException e) {
                             throw new RuntimeException("Error processing document response", e);
@@ -227,10 +222,19 @@ public class JsonUtility {
                 }))
                 .collect(Collectors.toList());
 
+
         // Wait for all async operations to complete
         CompletableFuture.allOf(auditFuture, metaInfoFuture, identityFuture, bioFuture)
-                .thenRun(() -> logger.info("All API calls completed"))
+                .thenRun(() -> {
+                    logger.info("All API calls completed");
+
+                })
                 .join();
+
+
+        logger.info("Bypassed completeablefuture all of");
+
+        System.out.println("Executor terminated.");
 
         // Process audit response
         ResponseDto auditResponse = auditFuture.get();
@@ -290,7 +294,6 @@ public class JsonUtility {
             throw new Exception("Biometric Response not available");
         }
 
-        executor.shutdown();
         return res;
     }
 
