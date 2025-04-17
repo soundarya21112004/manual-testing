@@ -187,11 +187,8 @@ public class LevelTwoController {
             session.setAttribute("viewType","master");
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
             System.out.println("user" + user.getUserid());
-
 //            ArrayList<RegisterManualVerification> roles = (ArrayList<RegisterManualVerification>) mvs.listOfRidsForL2();
             Set<String> operators = userdetailsService.getOperator();
-
-
             model.addAttribute("operators", operators);
             model.addAttribute("typeOfView","listView");
 //            model.addAttribute("galleryList", roles);
@@ -1340,7 +1337,6 @@ public class LevelTwoController {
                     redirectAttributes.addFlashAttribute("successMessage", "CASE SENT FOR PSN ISSUANCE");
                 }
                 else{
-
                     redirectAttributes.addFlashAttribute("successMessage", "DETAILS UPDATED SUCCESSFULLY");
                 }
             } else {

@@ -138,7 +138,7 @@ public class AccessControlController {
 			e.printStackTrace();
 		}
 		//return "redirect:/createUserGroup";
-		return "userGroupCreation";
+		return "redirect:userGroupCreation";
 	}
 	
 	@RequestMapping(value = "/editUserGroup", method = RequestMethod.GET)

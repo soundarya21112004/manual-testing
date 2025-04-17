@@ -399,7 +399,6 @@ public class ManualVerificationService {
 					}
 					return false;
 				}).collect(Collectors.toList());
-
 				System.out.println("print final list : " + finalList.size());
 			});
 

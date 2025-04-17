@@ -1,14 +1,10 @@
 package com.eagle.mas.controller;
-
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
 import com.eagle.mas.model.TokenDetails;
 import com.eagle.mas.security.jwt.JwtService;
 import com.eagle.mas.repository.TokenRepository;
@@ -25,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import com.eagle.mas.common.MacAddress;
 import com.eagle.mas.dao.LoginDAO;
 import com.eagle.mas.dao.UserManagementDAO;
@@ -37,6 +32,7 @@ import com.eagle.mas.model.Userdetails;
 public class LoginController {
 	@Autowired
 	LoginDAO logindao;
+
 	@Autowired
 	RolesService roleservice;
 //	@Autowired

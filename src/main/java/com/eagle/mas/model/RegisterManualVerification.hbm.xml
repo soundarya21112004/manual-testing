@@ -23,6 +23,7 @@
         <property name="regId" type="java.lang.String">
             <column name="reg_id" length="39"/>
         </property>
+
         <property name="matchedRefId" type="java.lang.String">
             <column name="matched_ref_id" length="39"/>
         </property>
@@ -30,7 +31,6 @@
         <property name="statusCode" type="java.lang.String">
             <column name="status_code" length="40"/>
         </property>
-
 
         <property name="proStatus" type="java.lang.String">
             <column name="process_code" length="50"/>
@@ -74,7 +74,6 @@
         <property name="op2verifyStatus" type="java.lang.String">
             <column name="operator2_verify_status" length="36"/>
         </property>
-
 
         <property name="supervisorComment" type="java.lang.String">
             <column name="supervisor_comment" length="256"/>
