@@ -11,6 +11,8 @@ import java.util.Base64;
 
 public class ReadImage {
 
+    Logger logger = LoggerFactory.getLogger(ReadImage.class);
+
     static {
         try {
             nu.pattern.OpenCV.loadLocally();
@@ -21,13 +23,32 @@ public class ReadImage {
     }
 
     public String covertasImage(byte[] imageData,int headerSize){
+        try{
+            StringBuffer buffer = new StringBuffer(asHexString(imageData));
+            String headerRemoved = buffer.delete(0,headerSize).toString();
+//        OpenCV.loadShared();
+            MatOfByte byteArr = new MatOfByte(toByteArray(headerRemoved));
+            MatOfByte matOfByte = new MatOfByte();
+            Mat imageFile = Imgcodecs.imdecode(byteArr,Imgcodecs.IMREAD_ANYCOLOR);
+            Imgcodecs.imencode(".jpg",imageFile,matOfByte);
+            logger.info("Image converted by using header size");
+            return "data:image/jpg;base64,"+ Base64.getEncoder().encodeToString(matOfByte.toArray());
+        }
+        catch (Exception e){
+          return  ConvertingasImage(imageData);
+        }
+
+    }
+
+    public String ConvertingasImage(byte[] imageData){
         StringBuffer buffer = new StringBuffer(asHexString(imageData));
-        String headerRemoved = buffer.delete(0,headerSize).toString();
+        String headerRemoved = buffer.delete(0, buffer.indexOf("0000000C6A5020200D0A870A".toLowerCase())).toString();
 //        OpenCV.loadShared();
         MatOfByte byteArr = new MatOfByte(toByteArray(headerRemoved));
         MatOfByte matOfByte = new MatOfByte();
         Mat imageFile = Imgcodecs.imdecode(byteArr,Imgcodecs.IMREAD_ANYCOLOR);
         Imgcodecs.imencode(".jpg",imageFile,matOfByte);
+        logger.info("Image converted by using jp2 magic number(iso standard)");
         return "data:image/jpg;base64,"+ Base64.getEncoder().encodeToString(matOfByte.toArray());
     }
 

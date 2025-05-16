@@ -369,6 +369,30 @@ public class ManualVerificationService {
 		return list;
 	}
 
+	public synchronized List<RegisterManualVerification>  listOfRidsHigherPriority(String userid) {
+		List<RegisterManualVerification> list = repo.clusterOfRids(repo.getRequestIdHigherPriority(userid));
+
+		if(!list.isEmpty()){
+			list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
+			repo.saveAll(list);
+			repo.flush();
+			setCaseForUser(list.get(0).getReqid(),userid);
+		}
+		return list;
+	}
+
+	public synchronized List<RegisterManualVerification>  listOfRidsHigherPriority1(String userid, String priority) {
+		List<RegisterManualVerification> list = repo.clusterOfRids(repo.getRequestIdHigherPriority1(userid, priority));
+
+		if(!list.isEmpty()){
+			list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
+			repo.saveAll(list);
+			repo.flush();
+			setCaseForUser(list.get(0).getReqid(),userid);
+		}
+		return list;
+	}
+
 	@Transactional()
 	public synchronized UserCaseAssignment userCaseDetails(String userId){
 		if(caseRepo.existsById(userId)){
@@ -671,4 +695,5 @@ public class ManualVerificationService {
 	public int updateFinIndi(int sno){
 		return repo.updateFinalIndi(sno);
 	}
+
 }

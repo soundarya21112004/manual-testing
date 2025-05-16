@@ -22,10 +22,16 @@ public interface MvJsonRepository  extends CrudRepository<MvJson, BigInteger> {
     @Query(value = "SELECT t1 from MvJson t1 where t1.regId=:probe and t1.matchedRefId=:probe and t1.reqId=:requestId")
     public MvJson getProbJson(@Param("probe") String probe,@Param("requestId")String requestId);*/
 
-    @Query(value = "SELECT t1 from MvJson t1 where t1.regId=:probe and t1.matchedRefId=:candidate and (t1.mvReqJson<>'' and t1.mvReqJson is not null)")
+/*    @Query(value = "SELECT t1 from MvJson t1 where t1.regId=:probe and t1.matchedRefId=:candidate and (t1.mvReqJson<>'' and t1.mvReqJson is not null)")
     List<MvJson> getJson(@Param("probe") String probe, @Param("candidate") String candidate, Pageable pageable);
 
     @Query(value = "SELECT t1 from MvJson t1 where t1.regId=:probe and t1.matchedRefId=:probe and (t1.mvReqJson<>'' and t1.mvReqJson is not null)")
+    List<MvJson> getProbJson(@Param("probe") String probe, Pageable pageable);*/
+
+    @Query(value = "SELECT t1 from MvJson t1 where t1.matchedRefId=:candidate and (t1.mvReqJson<>'' and t1.mvReqJson is not null)")
+    List<MvJson> getJson( @Param("candidate") String candidate, Pageable pageable);
+
+    @Query(value = "SELECT t1 from MvJson t1 where t1.matchedRefId=:probe and (t1.mvReqJson<>'' and t1.mvReqJson is not null)")
     List<MvJson> getProbJson(@Param("probe") String probe, Pageable pageable);
 
     @Transactional

@@ -16,6 +16,8 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.PageRequest;
@@ -63,7 +65,9 @@ public class LevelOneController {
 
     @Autowired
     BioScoreRepository bioRepository;
-    Logger logger = LoggerFactory.getLogger(LoginController.class);
+
+
+    private static final Logger logger = LoggerFactory.getLogger(LevelOneController.class);
     File catalinaBase = new File(System.getProperty("catalina.base")).getAbsoluteFile();
     public String getUtcTime(){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss'Z'");
@@ -76,10 +80,11 @@ public class LevelOneController {
         try {
             HttpSession session = request.getSession();
             if (session.getAttribute("userID") == null) {
+                logger.warn("Session expired or user not logged in. Redirecting to login.");
                 return "redirect:redirectlogin";
             }
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
-            System.out.println("UserID :" + user.getUserid());
+            logger.info("refreshNewCase - UserID: {}", user.getUserid());
             UserCaseAssignment userCaseRequest = mvs.userCaseDetails(user.getUserid());
             if(userCaseRequest != null) {
                 List<RegisterManualVerification> list = mvs.retreiveCaseForUser(userCaseRequest.getRequestId());
@@ -92,6 +97,9 @@ public class LevelOneController {
                         return false;
                     }
                 }).collect(Collectors.toList());
+
+                logger.info("Verification complete entries count: {}/{}", result.size(), list.size());
+
 //                int reqCount = mvs.getReqIdCount(userCaseRequest.getRequestId());
                /* int reqCount = list.size();
                 int finalIndicateCount = mvs.getFinIndicate(userCaseRequest.getRequestId());
@@ -100,22 +108,24 @@ public class LevelOneController {
                     regManualVerificationRepository.saveAll(list);
                 }*/
 
-
                 System.out.println("result size : " + result.size());
                 if (result.size() == list.size()) {
+                    logger.info("All cases processed. Submitting...");
                     list.stream().filter(e -> "DUP".equals(e.getFinindi())).forEach(e -> e.setCaseEvaluationComplete(1));
                     regManualVerificationRepository.saveAll(list);
                     mvs.resetProcessStatus(userCaseRequest.getRequestId());
                     mvs.removeProcessedCaseForUser(user.getUserid());
                     redirectAttributes.addFlashAttribute("successMessage", "case is submitted");
                 } else {
+                    logger.warn("Some cases are not yet processed.");
                     redirectAttributes.addFlashAttribute("failureMessage", "please process all the cases before submission");
                 }
             }else{
+                logger.warn("No active case found or late submission attempted.");
                 redirectAttributes.addFlashAttribute("failureMessage","late submission is not allowed");
             }
         }catch (Exception e){
-            e.printStackTrace();
+            logger.error("Exception in refreshNewCase: ", e);
         }
         return "redirect:levelOneSearch";
     }
@@ -125,15 +135,34 @@ public class LevelOneController {
         try {
             HttpSession session = request.getSession();
             if (session.getAttribute("userID") == null) {
+                logger.warn("Session expired or user not logged in. Redirecting to login.");
                 return "redirect:redirectlogin";
             }
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
+            logger.info("showHomePage - UserID: {}", user.getUserid());
             System.out.println("UserID :" + user.getUserid());
             Pageable page = PageRequest.of(0, 1);
             UserCaseAssignment userCaseRequest = mvs.userCaseDetails(user.getUserid());
-            ArrayList<RegisterManualVerification> roles = new ArrayList<>();
-            if(userCaseRequest == null) {
-                roles= (ArrayList<RegisterManualVerification>) mvs.listOfRidsPriority(user.getUserid());
+            List<RegisterManualVerification> roles = new ArrayList<>();
+           /*     String[] priorites = {"2","1","0"};
+        if(userCaseRequest == null){
+                for (String priority : priorites ){
+                    System.out.println("priority : "+ priority);
+                    roles = (ArrayList<RegisterManualVerification>) mvs.listOfRidsHigherPriority1(user.getUserid(), priority);
+                    if (!roles.isEmpty() && roles !=null){
+                        break;
+                    }
+                }
+            }
+            else {
+                roles = (ArrayList<RegisterManualVerification>) mvs.retreiveCaseForUser(userCaseRequest.getRequestId());
+            }*/
+
+           /* if(userCaseRequest == null) {
+                roles = (ArrayList<RegisterManualVerification>) mvs.listOfRidsHigherPriority(user.getUserid());
+                if (roles.isEmpty() || roles == null){
+                    roles= (ArrayList<RegisterManualVerification>) mvs.listOfRidsPriority(user.getUserid());
+                }
                 if (roles == null || roles.isEmpty()) {
                     // in this step first load operator 2 list, for this we need new query . if it is null then run this below query
                     roles = (ArrayList<RegisterManualVerification>) mvs.listOfRids(user.getUserid());
@@ -141,22 +170,38 @@ public class LevelOneController {
 
             }else{
                 roles = (ArrayList<RegisterManualVerification>) mvs.retreiveCaseForUser(userCaseRequest.getRequestId());
+            }*/
+
+            if (userCaseRequest == null) {
+                logger.info("No case assigned to user. Searching for new cases by priority...");
+                String[] priorities = {"2", "1"};
+                for (String priority : priorities) {
+                    logger.info("Checking for cases with priority: {}", priority);
+                    System.out.println("priority: " + priority);
+                    roles = mvs.listOfRidsHigherPriority1(user.getUserid(), priority);
+                    if (roles != null && !roles.isEmpty()) {
+                        logger.info("Cases found for priority: {}", priority);
+                        break;
+                    }
+                }
+
+                // Fallback if all priority calls return empty
+                if (roles == null || roles.isEmpty()) {
+                    logger.info("No cases found in priority list. Loading fallback list...");
+                    roles = mvs.listOfRids(user.getUserid());
+                }
+            } else {
+                logger.info("Case already assigned. RequestID: {}", userCaseRequest.getRequestId());
+                roles = mvs.retreiveCaseForUser(userCaseRequest.getRequestId());
             }
-//            for(int i=0; i<roles.size();i++)
-//            {
-//                System.out.println(roles);
-//                System.out.println("List of roles"+roles.get(i).toString());
-//
-//            }
-//            System.out.println("my list  " + roles);
+
 
             model.addAttribute("galleryList", roles);
             model.addAttribute("userid",user.getUserid());
             logger.info(logger("LevelOneController", "showHomePage", getUtcTime(), "UserId :" + user.getUserid()));
         }
         catch (Exception e){
-            System.out.println("Error occured in LevelOneController.showHomePage()....");
-            logger.error(logger("LevelOneController","showHomePage",getUtcTime(), e.toString()));
+            logger.error("Exception in showHomePage: ", e);
  			return "redirect:errorPage";
         }
         return "levelOneSearch";
@@ -170,12 +215,14 @@ public class LevelOneController {
                                        @RequestParam("requestId") String requestId,
                                        @RequestParam("caseListNo") String caseListNo
     ) throws URISyntaxException {
-        System.out.println("-------leveloneSearchByName-------");
+        logger.info("Entering leveloneSearchByName method with params: id={}, probe={}, candidate={}, requestId={}, caseListNo={}",
+                id, probe, candidate, requestId, caseListNo);
 
         Map<String, Object> flashAttributes = new HashMap<>();
 
         String processStatusExist ="";
         boolean psnGenerated =false;
+        logger.debug("Session attributes set: regId={}, matchRegId={}", probe, candidate);
 
         HttpSession session = request.getSession();
         session.setAttribute("regId",probe);
@@ -188,17 +235,19 @@ public class LevelOneController {
 //        session.getAttribute(candidate);
         try{
             if(session.getAttribute("userID")==null){
+                logger.warn("User session expired or invalid. Redirecting to error page.");
                 return "redirect:errorPage";
             }
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
-            System.out.println("UserID :" + user.getUserid());
+            logger.info("User ID: {}", user.getUserid());
             UserCaseAssignment userCase= mvs.userCaseDetails(user.getUserid());
             if(userCase == null){
+                logger.warn("Case processing time expired for request ID {}. Redirecting to levelOneSearch.", requestId);
                 redirectAttributes.addFlashAttribute("failureMessage","case processing time has expired for this request id");
                 return "redirect:levelOneSearch";
             }
         }catch(Exception e){
-           e.printStackTrace();
+            logger.error("Error in processing user case details: {}", e.getMessage(), e);
         }
 //        try {
 //             processStatusExist = mvs.proStatus(probe, candidate,requestId);
@@ -212,10 +261,15 @@ public class LevelOneController {
             int string_id = Integer.parseInt(id);
 //            int modify_process_status =mvs.modify_process_status(string_id); // can omit return
 //            HttpSession session = request.getSession();
+            logger.debug("Parsed string_id: {}", string_id);
+
             model.addAttribute("probefilename", probe);
             model.addAttribute("originalfilename", probe);
             model.addAttribute("id", id);
             model.addAttribute("requestId",requestId);
+
+            logger.debug("Processing documents for probe: {}", probe);
+
             String pathname = new FileSystemResource("").getFile().getAbsolutePath();
             if (probe != null) {
 //                int count = mvs.countAllByRegId(probe);
@@ -243,38 +297,43 @@ public class LevelOneController {
                  * retrives score based on BIOREF ID of Candidate
                  * */
                 try{
-                    System.out.println("Candidate :"+candidate);
-                    BioScore score = bioRepository.findFirstByRegIDAndMatchedRefIdAndResponseTextNotNull(probe,probe);
+                    logger.info("Candidate: {}", candidate);
+                    BioScore score = bioRepository.findFirstByRegIDAndMatchedRefIdAndResponseTextNotNullOrderByCrTimesRegIdDesc(probe,probe);
                     BioScore getBioRefID = bioRepository.findFirstByMatchedRefIdAndBioRefIdIsNotNull(candidate);
 
                     // score.setResponseText("{\"id\":\"mosip.abis.identify\",\"requestId\":\"bc9b3ddb-8ee0-4c1a-ab4c-8fec48c66ef2\",\"returnValue\":\"1\",\"responsetime\":\"2022-07-14T10:29:39.284Z\",\"candidateList\":{\"count\":\"1\",\"candidates\":[{\"referenceId\":\"84240b4d-f61b-42fc-979f-94d99b7f2949\",\"analytics\":{\"internalScore\":\"22130.0\",\"rank\":\"2\"},\"modalities\":[{\"biometricType\":\"IIR\",\"analytics\":{\"internalScore\":\"16635.0\"}},{\"biometricType\":\"FIR\",\"analytics\":{\"internalScore\":\"22280.0\"}}]}]}}");
                     //score.setResponseText("{\"id\":\"mosip.abis.identify\",\"requestId\":\"bc39a755-ab30-4d54-b0fb-1a050d0d4112\",\"returnValue\":\"1\",\"responsetime\":\"2021-01-22T00:37:50.679Z\",\"candidateList\":{\"count\":\"1\",\"candidates\":[{\"referenceId\":\"825e5ec4-b990-408f-93b5-faf6f9a0de28\",\"analytics\":{\"internalScore\":\"3145.0\",\"rank\":\"2\"},\"modalities\":[{\"biometricType\":\"IIR\",\"analytics\":{\"internalScore\":\"3295.0\"}}]}]},\"analytics\":{\"wasAdjudicated\":true,\"candidates\":[{\"referenceId\":\"825e5ec4-b990-408f-93b5-faf6f9a0de28\",\"internalScore\":\"3145.0\",\"consistency\":\"Consistent\",\"adjudicationDetails\":[{\"decision\":\"NO_HIT\",\"operator\":\"soquindo\",\"comment\":\"Both Iris and fingerprints of the probe and candidate were found to be different\"},{\"decision\":\"NO_HIT\",\"operator\":\"ncabauatan\",\"comment\":\"Both Iris and fingerprints of the probe and candidate were found to be different\"}]}]}}");
-                    System.out.println("Response Text :"+score.getResponseText());
+                    if(score != null){
+                        logger.info("Score Response Text: {}", score.getResponseText());
+                    }
+                    if(getBioRefID != null ){
+                        logger.info("getBioRefID: {}", getBioRefID);
+                    }
                     // getBioRefID.setBioRefId("84240b4d-f61b-42fc-979f-94d99b7f2949");
                     //getBioRefID.setBioRefId("825e5ec4-b990-408f-93b5-faf6f9a0de28");
-                    System.out.println("BIOref_id :"+getBioRefID.getBioRefId());
+//                    System.out.println("BIOref_id :"+getBioRefID.getBioRefId());
                     org.json.JSONObject matchedScore = new org.json.JSONObject(score.getResponseText());
                     org.json.JSONObject matchedCandidatesList = matchedScore.getJSONObject("candidateList");
                     org.json.JSONArray matchedCandidates = matchedCandidatesList.getJSONArray("candidates");
                     for (int i=0; i < matchedCandidates.length(); i++){
                         org.json.JSONObject getCandidate = matchedCandidates.getJSONObject(i);
                         if (getBioRefID.getBioRefId().equals(getCandidate.get("referenceId"))){
-                            System.out.println("Test refid :" +getCandidate.get("referenceId"));
+                            logger.info("Test refid: {}", getCandidate.get("referenceId"));
                             org.json.JSONArray modalities = getCandidate.getJSONArray("modalities");
                             for (int j=0; j < modalities.length(); j++){
                                 org.json.JSONObject matchedDetails = modalities.getJSONObject(j);
                                 org.json.JSONObject analytics = matchedDetails.getJSONObject("analytics");
                                 if (matchedDetails.get("biometricType") != null && matchedDetails.get("biometricType").equals("FIR")){
                                     model.addAttribute("fir",analytics.get("internalScore"));
-                                    System.out.println("FIR :"+analytics.get("internalScore"));
+                                    logger.info("FIR: {}", analytics.get("internalScore"));
                                 }
                                 if (matchedDetails.get("biometricType") != null && matchedDetails.get("biometricType").equals("IIR")){
                                     model.addAttribute("iir",analytics.get("internalScore"));
-                                    System.out.println("IIR :"+analytics.get("internalScore"));
+                                    logger.info("IIR: {}", analytics.get("internalScore"));
                                 }
                                 if (matchedDetails.get("biometricType") != null && matchedDetails.get("biometricType").equals("FID")){
                                     model.addAttribute("fid",analytics.get("internalScore"));
-                                    System.out.println("FID :"+analytics.get("internalScore"));
+                                    logger.info("FID: {}", analytics.get("internalScore"));
                                 }
                             }
                         }
@@ -285,15 +344,18 @@ public class LevelOneController {
                         for (int i=0; i < matchedCommentCandidates.length(); i++){
                             org.json.JSONObject getCCandidate = matchedCommentCandidates.getJSONObject(i);
                             if (getBioRefID.getBioRefId().equals(getCCandidate.get("referenceId"))){
-                                System.out.println("Test refid comment section:" +getCCandidate.get("referenceId"));
+                                logger.info("Test refid comment section: {}", getCCandidate.get("referenceId"));
                                 org.json.JSONArray adjudicationDetailsComment = getCCandidate.getJSONArray("adjudicationDetails");
                                 // for (int j=0; j < adjudicationDetailsComment.length(); j++){
                                 //   org.json.JSONObject matchedDetails = adjudicationDetailsComment.getJSONObject(j);
                                 org.json.JSONObject matchedDetails = adjudicationDetailsComment.getJSONObject(0);
                                 String comment =(String) matchedDetails.get("comment");
+                                logger.info("Adjudication Details Comment : " + comment);
                                 org.json.JSONObject matchedDetails1 = adjudicationDetailsComment.getJSONObject(1);
                                 String comment1 = (String) matchedDetails1.get("comment");
-                                model.addAttribute("comment1ABIS",comment1);
+                                logger.info("Adjudication Details Comment 1 : " + comment1);
+                                model.addAttribute("`comment1ABIS`",comment1);
+                                model.addAttribute("`commentABIS`",comment);
 
                                 // }
                             }
@@ -1151,16 +1213,17 @@ public class LevelOneController {
     @RequestMapping(value = "/saveMVSL1Result")
     public String saveMVSL1ResultDetail(ModelMap model, HttpServletRequest request,
                                         RedirectAttributes redirectAttributes, SaveMvsResultRequestDto mvsResultRequestDto) {
-        System.out.println("Successssslevel1");
         try {
             HttpSession session = request.getSession();
             if(session.getAttribute("userID")==null){
+                logger.warn("Session expired or user not logged in. Redirecting to login.");
                 return "redirect:redirectlogin";
             }
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
-            System.out.println("UserID :" + user.getUserid());
+            logger.info("saveMVSL1ResultDetail - UserID: {}, OperatorName: {}", user.getUserid(), user.getFirstnameEn());
             UserCaseAssignment userCase= mvs.userCaseDetails(user.getUserid());
             if(userCase == null){
+                logger.warn("Case processing time expired for requestId: {}", mvsResultRequestDto.getRequestId());
                 redirectAttributes.addFlashAttribute("failureMessage","case processing time has expired for this request id");
                 return "redirect:levelOneSearch";
             }
@@ -1172,7 +1235,7 @@ public class LevelOneController {
             session.getAttribute("candidate");
 
             String Statuscoment= mvs.getStatuscomment(Integer.parseInt(mvsResultRequestDto.getSno()));
-            System.out.println("StatusComment"+Statuscoment);
+            logger.info("PreviousStatusComment for SerialNumber {}: {}", mvsResultRequestDto.getSno(), Statuscoment);
 
 
             RegisterManualVerification reg = mvs.findBySerialNumber(Integer.parseInt(mvsResultRequestDto.getSno()));
@@ -1189,21 +1252,28 @@ public class LevelOneController {
                 // this code for restrict operator from taking 2 decisions
             if(Statuscoment==null || Statuscoment.equalsIgnoreCase("")){
                 out = mvs.updateRID(Integer.parseInt(mvsResultRequestDto.getSno()), mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(),user.getUserid(), user.getFirstnameEn(),mvsResultRequestDto.getRequestId(), "0");
+                logger.info("Operator 1 decision by operator. Update result: {}", out);
+
             }
             else if(user.getUserid().equals(reg.getOp1userId())){
                 System.out.println("op1 userid "+ reg.getOp1userId());
                 System.out.println("op1 userid  session"+ user.getUserid());
                 out = mvs.updateRID(Integer.parseInt(mvsResultRequestDto.getSno()), mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(),user.getUserid(), user.getFirstnameEn(),mvsResultRequestDto.getRequestId(), "0");
+                logger.info("Operator 1 updated existing decision. Update result: {}", out);
+
             }
             else if(user.getUserid().equals(reg.getOp2userId()) ){
                 System.out.println("op2 userid "+ reg.getOp2userId());
                 System.out.println("op2 userid  session"+ user.getUserid());
                 out = mvs.updateRIDstatus2(Integer.parseInt(mvsResultRequestDto.getSno()), mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(), user.getUserid(),user.getFirstnameEn(), mvsResultRequestDto.getRequestId(),"1");
+                logger.info("Operator 2 updated existing decision. Update result: {}", out);
+
             }
             else {
                 System.out.println("op2 userid--->"+ reg.getOp2userId());
                 System.out.println("op2 userid--->  session"+ user.getUserid());
                 out = mvs.updateRIDstatus2(Integer.parseInt(mvsResultRequestDto.getSno()), mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(), user.getUserid(),user.getFirstnameEn(), mvsResultRequestDto.getRequestId(),"1");
+                logger.info("Operator 2 time decision by operator. Update result: {}", out);
             }
 
 
@@ -1230,7 +1300,7 @@ public class LevelOneController {
                 mvs.updateFinIndi(Integer.parseInt(mvsResultRequestDto.getSno()));
                 UINGen = 0;
             }*/
-
+            logger.info("Hit/NoHit flags - nhCase: {}, hCase: {}, nhUpdate: {}, hitUpdate: {}", nhCase, hCase, noHitUpdate, hitUpdate);
 
 
             if(hitUpdate == 1 || noHitUpdate == 1){
@@ -1242,7 +1312,7 @@ public class LevelOneController {
                if(reqCount == finalIndicateCount ){
                    int NHCount=mvs.getCountforResponse(mvsResultRequestDto.getRequestId());
                    String regId=mvs.getRegId(Integer.parseInt(mvsResultRequestDto.getSno()),mvsResultRequestDto.getRequestId());
-                   System.out.println("NHCount:"+NHCount+"TotalCount:"+reqCount);
+                   logger.info("Final verification counts - Total: {}, NoHit: {}", reqCount, NHCount);
                    if(reqCount==NHCount){
                        UINGen=1;
                        req.responseRequest(mvsResultRequestDto.getRequestId(),regId,1);
@@ -1255,20 +1325,23 @@ public class LevelOneController {
 
             if (out == 1) {
                 if(UINGen == 1) {
+                    logger.info("Case submitted for PSN issuance.");
                     redirectAttributes.addFlashAttribute("successMessage", "CASE SENT FOR PSN ISSUANCE");
                 }else {
+                    logger.info("Verification result saved successfully.");
                     redirectAttributes.addFlashAttribute("successMessage", "DETAILS UPDATED SUCCESSFULLY");
                 }
 
             } else {
+                logger.error("Failed to update verification result.");
                 redirectAttributes.addFlashAttribute("failureMessage", "ERROR WHILE UPDATING.");
 
             }
-            logger.info(logger("LevelOneController","saveMVSL1ResultDetail",getUtcTime(),
-                    "OperatorName:"+user.getFirstnameEn()+","+"Command :"+mvsResultRequestDto.getStatusComment()+","+"Status :"+mvsResultRequestDto.getVerifyStatus()+","+"regId :"+probe+","+"matchedRefId  :"+candidate));
-
+            logger.info("AuditLog - Operator: {}, RequestID: {}, Serial: {}, VerifyStatus: {}, Comment: {}, regId: {}, matchedRefId: {}",
+                    user.getFirstnameEn(), mvsResultRequestDto.getRequestId(), mvsResultRequestDto.getSno(),
+                    mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(), probe, candidate);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception in saveMVSL1ResultDetail: ", e);
             logger.error(logger("LevelOneController","saveMVSL1ResultDetail",getUtcTime(), e.toString()));
             redirectAttributes.addFlashAttribute("failureMessage", "ERROR WHILE UPDATING.");
         }
@@ -1312,6 +1385,7 @@ public class LevelOneController {
             JSONObject status = null;
             // String https_url = "https://qa3.mosip.net/v1/authmanager/authenticate/useridPwd";
             String https_url = "https://register.philsys.gov.ph/v1/authmanager/authenticate/useridPwd";
+            logger.info("Sending request to authentication service at URL: {}", https_url);
 
            /* String jsonInputString = "{\r\n" + "  \"id\": \"string\",\r\n" + "  \"metadata\": {},\r\n"
                     + "  \"request\": {\r\n" + "    \"appId\": \"admin\",\r\n" + "    \"password\": \"mosip\",\r\n"
@@ -1327,6 +1401,9 @@ public class LevelOneController {
             urlConnection.setRequestProperty("Content-Type", "application/json");
             urlConnection.setRequestProperty("Accept", "application/json");
 
+            logger.info("Sending request body: {}", jsonInputString);
+
+
             ouputStream = urlConnection.getOutputStream();
             ouputStream.write(jsonInputString.getBytes());
             ouputStream.flush();
@@ -1339,6 +1416,7 @@ public class LevelOneController {
                 while ((tmpStr = reader.readLine()) != null) {
                     text = tmpStr;
                 }
+                logger.info("Response received from authentication service: {}", text);
 
               /*  text = "{\r\n" + "   \"id\":\"mosip.manual.verification.assignment\",\r\n"
                         + "   \"version\":\"1.0\",\r\n" + "   \"responsetime\":\"2019-02-14T12:40:59.768Z\",\r\n"
@@ -1360,7 +1438,7 @@ public class LevelOneController {
                 JSONObject array = (JSONObject) obj;
 
                 JSONObject jsonresponse = (JSONObject) array.get("response");// 1
-                System.out.println("jsonresponse"+jsonresponse);
+                logger.info("Authentication response details: {}", jsonresponse);
 
 //                JSONArray gallery = (JSONArray) jsonresponse.get("gallery");
 //
@@ -1373,11 +1451,15 @@ public class LevelOneController {
 //            }
 //
             }
+            else {
+                logger.warn("Failed to receive a valid response. Response Code: {}");
+
+            }
 
             //redirectAttributes.addFlashAttribute("successMessage", "APPROVED SUCCESSFULLY");
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception occurred in saveLevelOneData: ", e);
         }
 
         return "redirect:/levelonesearch";
@@ -1387,20 +1469,20 @@ public class LevelOneController {
     @RequestMapping(value = "/resetProcrssStatus")
     public String resetProcessStatus(ModelMap model, HttpServletRequest request,
                                      RedirectAttributes redirectAttributes, @RequestParam("sno") String id ){
-        System.out.println("resetProcrssStatus");
-        System.out.println(id);
+        logger.info("Resetting process status for sno: {}", id);
         int sample = mvs.modifyProcessStatus(Integer.parseInt(id));
-        System.out.println("sample123 :" +sample);
-        logger.info(logger("LevelOneController","saveMVSL1ResultDetail",getUtcTime(), "resetProcrssStatus"));
+        logger.info("Process status reset result: {}", sample);
         return "/home";
     }
+
     @RequestMapping(value = "/checkoldrecords")
     public String checkoldrecordsFn(ModelMap model, HttpServletRequest request) throws java.text.ParseException {
-        System.out.println("checkoldrecordsFunction");
+        logger.info("checkOldRecordsFn called");
         DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
         String inputText = "2022-07-23";
        // Date dateDep = inputFormat.parse(inputText);
         RegisterManualVerification reg= mvs.findFirst1BySnoLessThan(13);
+
         System.out.println(reg.getSno());
         System.out.println(reg.getReqid());
         req.responseForOldRecords(reg);

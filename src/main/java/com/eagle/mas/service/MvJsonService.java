@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +58,7 @@ public class MvJsonService {
 
     public String getJson(String probe, String candidate,String requestId) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 //        MvJson json= mvJsonRepository.getJson(probe,candidate,requestId);
-        List<MvJson> json= mvJsonRepository.getJson(probe,candidate, PageRequest.of(0, 1));
+        List<MvJson> json= mvJsonRepository.getJson(candidate, PageRequest.of(0, 1));
 //        if(json!=null && json.isEncryptionStatus()){
 //            logger.info("returning mvjson data decrypted");
 //            return decryptData.AESDecrypt(json.getMvReqJson());

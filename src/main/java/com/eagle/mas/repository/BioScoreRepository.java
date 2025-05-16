@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 public interface BioScoreRepository extends CrudRepository<BioScore,String> {
 
 //    @Query(value = "select b from BioScore b where b.regID =: reg_id and b.matchedRefId =: matched_refID ORDER BY b.regID desc limit 1")
-    public BioScore findFirstByRegIDAndMatchedRefIdAndResponseTextNotNull(String reg_id,String matched_refID);
+    public BioScore findFirstByRegIDAndMatchedRefIdAndResponseTextNotNullOrderByCrTimesRegIdDesc(String reg_id,String matched_refID);
 
     public BioScore findFirstByMatchedRefIdAndBioRefIdIsNotNull(String matched_refID);
 

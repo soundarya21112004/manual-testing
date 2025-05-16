@@ -183,6 +183,16 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
             " and (t1.regId <> t1.matchedRefId) and t1.priority= '1')")
     String getRequestIdPriority(@Param("userid") String userid);
 
+    @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 " +
+            "where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null )" +
+            " and (t1.regId <> t1.matchedRefId) and t1.priority='2')")
+    String getRequestIdHigherPriority(@Param("userid") String userid);
+
+    @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 " +
+            "where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null )" +
+            " and (t1.regId <> t1.matchedRefId) and t1.priority=:priority)")
+    String getRequestIdHigherPriority1(@Param("userid") String userid, @Param("priority") String priority);
+
     @Query(value="select t1.reqid from RegisterManualVerification t1 where (t1.statusCode='1')" +
             " and (t1.userId<>:userid or t1.userId is null ) and (t1.proStatus is null or t1.proStatus='0') and ((t1.op1verifyStatus='hit' AND t1.op2verifyStatus ='nohit') " +
             "OR (t1.op1verifyStatus='nohit' AND t1.op2verifyStatus='hit')) order by t1.createdDate asc")
@@ -234,15 +244,12 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
             "OR (t1.op1verifyStatus='nohit' AND t1.op2verifyStatus='hit')) and (t1.createdDate between :startDate and :endDate) and (t1.op2UpdBy =:operator2) order by t1.createdDate asc")
     List<RegisterManualVerification> listOfRidsForCreatedDateL2Op2(Date startDate, Date endDate, String operator2, Pageable pageable);
 
-
     @Query(value="select t1 from RegisterManualVerification t1 where (t1.statusCode='1')" +
             " and ((t1.op1verifyStatus='hit' AND t1.op2verifyStatus ='nohit') " +
             "OR (t1.op1verifyStatus='nohit' AND t1.op2verifyStatus='hit')) and (t1.createdDate between :startDate and :endDate) order by t1.createdDate asc")
     List<RegisterManualVerification> listOfRidsForCreatedDateL22(Date startDate, Date endDate, Pageable pageable);
 
-
     //      -----------------------------------------------------------------------------------------------------------------------
-
 
     @Query(value = "SELECT t1 FROM RegisterManualVerification t1 where t1.caseEvaluationComplete = 1 and ((t1.statusCode='2' and t1.supervisorVerifyStatus = 'hit') or (t1.statusCode='1' and (t1.op1verifyStatus='hit' AND t1.op2verifyStatus ='hit')))  and (t1.createdDate between :startDate and :endDate) and (t1.op1UpdBy =:operator1) and (t1.op2UpdBy =:operator2) AND NOT EXISTS (SELECT 1 FROM UserCaseAssignment t2 WHERE t1.reqid = t2.requestId) order by COALESCE(t1.supervisorUpdatedDate, t1.op2UpdatedDate) asc ")
     List<RegisterManualVerification> listOfRidsForCreatedDateL3(Date startDate, Date endDate, String operator1, String operator2, Pageable pageable);
@@ -274,7 +281,6 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
     List<RegisterManualVerification> listOfRidsForVerifiedDateL3Op2(Date startDate, Date endDate,String operator2, Pageable pageable);
 
     //      -----------------------------------------------------------------------------------------------------------------------
-
 
     @Query(value = "SELECT t1 FROM RegisterManualVerification t1 where t1.reqid=:reqid and (t1.regId <> t1.matchedRefId)")
     List listForCandiat(String reqid);

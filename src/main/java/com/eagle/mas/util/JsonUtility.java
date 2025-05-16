@@ -112,7 +112,6 @@ public class JsonUtility {
             HttpHeaders headers = new HttpHeaders();
             headers.set("Cookie", TokenGenerator.validToken);
             headers.setContentType(MediaType.APPLICATION_JSON);
-
             HttpEntity<T> entity = new HttpEntity<>(requestBody, headers);
             ResponseEntity<ResponseDto> response = restTemplate.exchange(url, HttpMethod.POST, entity, ResponseDto.class);
             logger.info("Response Time :" + url);
