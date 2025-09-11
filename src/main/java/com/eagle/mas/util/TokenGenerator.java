@@ -17,6 +17,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -39,6 +41,8 @@ public class TokenGenerator {
     private final static String AUTHORIZATION = "Authorization=";
     public static String validToken;
 
+    Logger logger = LoggerFactory.getLogger(TokenGenerator.class);
+
     /**
      * This method gets the token for the user details present in config server.
      *
@@ -47,7 +51,8 @@ public class TokenGenerator {
      */
 
     public void getToken() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, IOException {
-        generateToken(setRequestDto());
+    logger.info("Getting auth token");
+    generateToken(setRequestDto());
     validToken = AUTHORIZATION+token;
 
     }

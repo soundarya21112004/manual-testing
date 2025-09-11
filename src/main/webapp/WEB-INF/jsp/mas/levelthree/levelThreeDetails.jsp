@@ -1079,16 +1079,6 @@
 
 										<div class="row mb-3">
 
-
-
-												<%--											<div class='photo1'>--%>
-												<%--												<p class='photo-name'>--%>
-												<%--														&lt;%&ndash;                                                        ${rightfingerProb[1].url}- &ndash;%&gt;--%>
-												<%--														${rightfingerProb[1].score}</p>--%>
-												<%--												<img class="center" id="pr5" name="cr5"--%>
-												<%--													 src="${rightfingerProb[1].fingerImage}" alt="Photo"--%>
-												<%--													 onclick="displaymodal(this.id , this.name)">--%>
-												<%--											</div>--%>
 											<div class='photo1'>
 
 												<p class='photo-name'> ${rightfingerProb[0].url}

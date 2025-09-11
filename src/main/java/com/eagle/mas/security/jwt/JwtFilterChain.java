@@ -57,7 +57,7 @@ public class JwtFilterChain extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        log.info("REQUEST URI : "+ request.getRequestURI());
+//        log.info("REQUEST URI : "+ request.getRequestURI());
         if (request.getRequestURI().equals(basePath+"login") || request.getRequestURI().equals(basePath) ||
                 request.getRequestURI().startsWith(basePath+"plugins") || request.getRequestURI().startsWith(basePath+"dist") ||
                 request.getRequestURI().equals(basePath+"favicon.ico") || request.getRequestURI().startsWith(basePath+"forgotPasswordDetails") ||

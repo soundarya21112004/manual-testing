@@ -615,7 +615,6 @@ function addClass(){
   document.getElementById("spinner").style.display="block";
 }
 
-
     function submitHit() {
         const form = document.getElementById('leveloneform');
         form.action = "<c:url value='saveMVSL1Result'/>";//war

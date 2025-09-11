@@ -8,6 +8,12 @@ import com.eagle.mas.model.BioScore;
 import com.eagle.mas.model.RegisterManualVerification;
 import com.eagle.mas.model.ResponseMvs;
 import com.eagle.mas.model.Userdetails;
+import com.eagle.mas.regproc.model.AbisRequest;
+import com.eagle.mas.regproc.model.AbisResponse;
+import com.eagle.mas.regproc.model.RegBioRef;
+import com.eagle.mas.regproc.repo.AbisRequestRepo;
+import com.eagle.mas.regproc.repo.AbisResponseRepo;
+import com.eagle.mas.regproc.repo.BioRefRepo;
 import com.eagle.mas.repository.BioScoreRepository;
 import com.eagle.mas.repository.UserCaseAssignmentRepo;
 import com.eagle.mas.service.ManualVerificationService;
@@ -46,6 +52,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -71,6 +78,16 @@ public class LevelThreeController {
     MvJsonService mvJsonService;
 
     @Autowired
+    BioRefRepo regBioRef;
+
+    @Autowired
+    AbisResponseRepo abisResponseRepo;
+
+    @Autowired
+    AbisRequestRepo abisRequestRepo;
+
+
+    @Autowired
     UserCaseAssignmentRepo userCaseAssignmentRepo;
 
     private static final Logger logger = LoggerFactory.getLogger(LevelThreeController.class);
@@ -90,15 +107,13 @@ public class LevelThreeController {
         return convertDate;
     }
 
-//    @PostMapping("/testPose")
+    //    @PostMapping("/testPose")
 //    public String responseRequest(@RequestParam("ReqId") String ReqId,@RequestParam("regId") String regId,@RequestParam("result") int result){
     public String responseRequest(String ReqId,String regId,int result){
-            try {
-            System.out.println("response function: value of result:"+result);
+        try {
             JSONArray ja = new JSONArray();
             int i=0,j=0;
             ArrayList<RegisterManualVerification> roles = (ArrayList<RegisterManualVerification>) mvs.listForCandiat(ReqId);
-                System.out.println("roles :"+roles.get(0).toString());
 
             int count = 0;
             if(result==0){
@@ -129,17 +144,14 @@ public class LevelThreeController {
                 }
 
 
-                System.out.println("RS0Json :"+fraudJson);
                 ResponseMvs responseObj = new ResponseMvs();
                 int sno = ResponseMvsService.getResponseSno();
-                System.out.println(sno + "sno");
                 responseObj.setSno(sno);
                 responseObj.setOrid(regId);
                 responseObj.setResponse_Json(fraudJson.toString());
                 responseObj.setStatus("NEW");
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss'Z'");
                 String convertDate = dateFormat.format(new Date());
-                System.out.println("date" + convertDate);
                 Date date1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss'Z'").parse(convertDate);
                 responseObj.setCrDate(date1);
                 ResponseMvsDao.saveAll(responseObj);
@@ -156,24 +168,22 @@ public class LevelThreeController {
                 obj1.put("responsetime", getCurrentUtcTime());
                 obj1.put("returnValue", result);
                 obj1.put("candidateList", obj2);
-                System.out.println(sno + "sno");
                 responseObj .setSno(sno);
                 responseObj.setOrid(regId);
                 responseObj.setResponse_Json(obj1.toString());
                 responseObj.setStatus("NEW");
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss'Z'");
                 String convertDate = dateFormat.format(new Date());
-                System.out.println("date" + convertDate);
                 Date date1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss'Z'").parse(convertDate);
                 responseObj.setCrDate(date1);
                 ResponseMvsDao.saveAll(responseObj);
             }
         }
         catch(Exception e){
-            System.out.println(e.toString());
+            e.printStackTrace();
             return "redirect:errorPage";
         }
-return "sample";
+        return "sample";
     }
 
     @RequestMapping(value = "/levelthreeSearch", method = RequestMethod.GET)
@@ -270,7 +280,7 @@ return "sample";
             logger.info("Successfully fetched filtered data: {}", data.size());
             response.put("data", data);
         }
-         // Indicate if more data is available
+        // Indicate if more data is available
 
         return ResponseEntity.ok(response); // Properly return data with HTTP 200 status
     }
@@ -292,9 +302,8 @@ return "sample";
     public String levelthreeSearchByName(ModelMap model, HttpServletRequest request, @RequestParam("id") String id, @RequestParam("probe") String probe,
                                          @RequestParam("candidate") String candidate,@RequestParam("requestId") String requestId,@RequestParam("op1Comment")String op1Comment,
                                          @RequestParam("op1verifyStatus") String op1verifyStatus,@RequestParam("op2Comment") String op2Comment,@RequestParam("op2verifyStatus")String op2verifyStatus,
-            @RequestParam("supervisorComment") String supervisorComment,@RequestParam("supervisorVerifyStatus")String supervisorVerifyStatus, RedirectAttributes redirectAttributes
+                                         @RequestParam("supervisorComment") String supervisorComment,@RequestParam("supervisorVerifyStatus")String supervisorVerifyStatus, RedirectAttributes redirectAttributes
     ) {
-        System.out.println("-------levelthreeSearchByName-------");
 
         try{
             HttpSession session = request.getSession();
@@ -303,9 +312,9 @@ return "sample";
             }
 
         }catch(Exception e){
-            System.out.println(e.toString());
+            e.printStackTrace();
         }
-         model.addAttribute("Can", candidate);
+        model.addAttribute("Can", candidate);
         model.addAttribute("Prob", probe);
         model.addAttribute("id", id);
         model.addAttribute("requestId", requestId);
@@ -351,41 +360,59 @@ return "sample";
                 String base64StringPOE;
                 String pdfFileA = null;
                 String pdfFileE = null;
-             //   String pathname1 = new FileSystemResource("").getFile().getAbsolutePath();
+                //   String pathname1 = new FileSystemResource("").getFile().getAbsolutePath();
                 int count = mvs.countAllByRegId(probe);
                 model.addAttribute("count",count-1);
+
+                String responseText;
+                String bioRefID;
                 try{
                     BioScore score = bioRepository.findFirstByRegIDAndMatchedRefIdAndResponseTextNotNullOrderByCrTimesRegIdDesc(probe,probe);
                     BioScore getBioRefId = bioRepository.findFirstByMatchedRefIdAndBioRefIdIsNotNull(candidate);
 
 //                    score.setResponseText("{\"id\":\"mosip.abis.identify\",\"requestId\":\"bc39a755-ab30-4d54-b0fb-1a050d0d4112\",\"returnValue\":\"1\",\"responsetime\":\"2021-01-22T00:37:50.679Z\",\"candidateList\":{\"count\":\"1\",\"candidates\":[{\"referenceId\":\"825e5ec4-b990-408f-93b5-faf6f9a0de28\",\"analytics\":{\"internalScore\":\"3145.0\",\"rank\":\"2\"},\"modalities\":[{\"biometricType\":\"IIR\",\"analytics\":{\"internalScore\":\"3295.0\"}}]}]},\"analytics\":{\"wasAdjudicated\":true,\"candidates\":[{\"referenceId\":\"825e5ec4-b990-408f-93b5-faf6f9a0de28\",\"internalScore\":\"3145.0\",\"consistency\":\"Consistent\",\"adjudicationDetails\":[{\"decision\":\"NO_HIT\",\"operator\":\"soquindo\",\"comment\":\"Both Iris and fingerprints of the probe and candidate were found to be different\"},{\"decision\":\"NO_HIT\",\"operator\":\"ncabauatan\",\"comment\":\"Both Iris and fingerprints of the probe and candidate were found to be different\"}]}]}}");
-                    System.out.println("Response Text :"+score.getResponseText());
 //                    getBioRefId.setBioRefId("825e5ec4-b990-408f-93b5-faf6f9a0de28");
-                    System.out.println("BIOref_id :"+getBioRefId.getBioRefId());
-                    org.json.JSONObject matchedScore = new org.json.JSONObject(score.getResponseText());
-                    System.out.println("matchedScore"+matchedScore.toString());
+
+                    if(score != null && (!score.getResponseText().isEmpty() || score.getResponseText() != null)){
+//                        logger.info("Score Response Text: {}", score.getResponseText());
+                        responseText = score.getResponseText();
+                    }
+                    else{
+                        logger.info("Score is null! Fetching from RegProc and Abis");
+                        RegBioRef score1 = regBioRef.findFirstByRegIdAndBioRefIdIsNotNull(probe);
+                        AbisRequest abisRequest = abisRequestRepo.findIdByRefId(score1.getBioRefId());
+                        AbisResponse abisResponse = abisResponseRepo.findReqIdById(abisRequest.getId());
+                        responseText = new String(abisResponse.getRespText(), StandardCharsets.UTF_8);
+                    }
+                    if(getBioRefId != null ){
+                        logger.info("getBioRefID: {}", getBioRefId);
+                        bioRefID=getBioRefId.getBioRefId();
+                    }
+                    else{
+                        logger.info("Bio Ref Id is null! Fetching from RegProc");
+                        RegBioRef refId = regBioRef.findFirstByRegIdAndBioRefIdIsNotNull(candidate);
+                        bioRefID = refId.getBioRefId();
+                    }
+
+                    org.json.JSONObject matchedScore = new org.json.JSONObject(responseText);
                     org.json.JSONObject matchedCandidatesList = matchedScore.getJSONObject("candidateList");
                     org.json.JSONArray matchedCandidates = matchedCandidatesList.getJSONArray("candidates");
 
                     for (int i=0; i < matchedCandidates.length(); i++){
                         org.json.JSONObject getCandidate = matchedCandidates.getJSONObject(i);
-                        if (getBioRefId.getBioRefId().equals(getCandidate.get("referenceId"))){
-                            System.out.println("Test refid :" +getCandidate.get("referenceId"));
+                        if (bioRefID.equals(getCandidate.get("referenceId"))){
                             org.json.JSONArray modalities = getCandidate.getJSONArray("modalities");
                             for (int j=0; j < modalities.length(); j++){
                                 org.json.JSONObject matchedDetails = modalities.getJSONObject(j);
                                 org.json.JSONObject analytics = matchedDetails.getJSONObject("analytics");
                                 if (matchedDetails.get("biometricType") != null && matchedDetails.get("biometricType").equals("FIR")){
                                     model.addAttribute("fir",analytics.get("internalScore"));
-                                    System.out.println("FIR :"+analytics.get("internalScore"));
                                 }
                                 if (matchedDetails.get("biometricType") != null && matchedDetails.get("biometricType").equals("IIR")){
                                     model.addAttribute("iir",analytics.get("internalScore"));
-                                    System.out.println("IIR :"+analytics.get("internalScore"));
                                 }
                                 if (matchedDetails.get("biometricType") != null && matchedDetails.get("biometricType").equals("FID")){
                                     model.addAttribute("fid",analytics.get("internalScore"));
-                                    System.out.println("FID :"+analytics.get("internalScore"));
                                 }
                             }
                         }
@@ -397,37 +424,54 @@ return "sample";
                         for (int i=0; i < matchedCommentCandidates.length(); i++){
                             org.json.JSONObject getCCandidate = matchedCommentCandidates.getJSONObject(i);
                             if (getBioRefId.getBioRefId().equals(getCCandidate.get("referenceId"))){
-                                System.out.println("Test refid comment section:" +getCCandidate.get("referenceId"));
                                 org.json.JSONArray adjudicationDetailsComment = getCCandidate.getJSONArray("adjudicationDetails");
                                 // for (int j=0; j < adjudicationDetailsComment.length(); j++){
                                 //   org.json.JSONObject matchedDetails = adjudicationDetailsComment.getJSONObject(j);
                                 org.json.JSONObject matchedDetails = adjudicationDetailsComment.getJSONObject(0);
                                 String comment =(String) matchedDetails.get("comment");
+                                model.addAttribute("commentABIS",comment);
                                 org.json.JSONObject matchedDetails1 = adjudicationDetailsComment.getJSONObject(1);
                                 String comment1 = (String) matchedDetails1.get("comment");
                                 model.addAttribute("comment1ABIS",comment1);
-                                model.addAttribute("commentABIS",comment);
                                 // }
                             }
                         }
                     }
                 }catch (Exception e){
-                    System.out.println("Level 3 bioscore exception :"+e.toString());
+                    e.printStackTrace();
                 }
                 try  {
                     //                    String jsonString=;
-                    JSONObject jsonObject1 = (JSONObject) jsonParser1.parse(mvJsonService.getProbJson(probe,requestId));
+                    JSONObject jsonObject1 =mvJsonService.getJson(probe);
                     /*
                      * Getting documents from mvs Response JSON
                      * Start
                      * */
                     /*Reading Document from JSON PROBE Start*/
+
+                    /*List<String> documentsList = Arrays.asList("proofOfIdentity","proofOfAddress","proofOfException");
+                    Map<String, String> modelAttributeMap = Map.of(
+                            "proofOfIdentity", "reportPDFPOI",
+                            "proofOfAddress", "reportPDFPOA",
+                            "proofOfException", "reportPDFPOE"
+                    );
+                    try{
+                        Map<String, String> docResponse = (Map<String, String>) jsonObject1.get("documents");
+                        if(docResponse != null){
+                            documentsList.stream().filter(docResponse::containsKey).forEach(
+                                    key -> model.addAttribute(modelAttributeMap.get(key),
+                                            docResponse.get(key)));
+                        }
+                    }
+                    catch(Exception e){
+                        e.printStackTrace();
+                    }*/
                     try{
                         if(jsonObject1.get("documents")!=null) {
-                            JSONObject jsonObjectResponse = (JSONObject) ((JSONObject) jsonObject1).get("documents");
+                            JSONObject jsonObjectResponse = (JSONObject) jsonObject1.get("documents");
                             if(jsonObjectResponse.get("proofOfIdentity")!=null) {
                                 base64StringPOI = (String) jsonObjectResponse.get("proofOfIdentity");
-//                                System.out.println("base 64 poi   "+base64StringPOI);
+
 //                                pdfFileI = "data:application/pdf;base64," + base64StringPOI;
                                 pdfFileI = base64StringPOI;
                             }
@@ -467,7 +511,6 @@ return "sample";
                         JSONArray jsonArray = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject2 = (JSONObject) jsonArray.get(0);
                         valueFrm = (String) jsonObject2.get("value");
-//                        System.out.println("firstName" + valueFrm);
                         beanProbe.setFirstName(valueFrm);
                     }
                     if(jsonObj1.get("presentAddressLine1")!=null){
@@ -475,7 +518,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         jsonObject3 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject3.get("value");
-//                        System.out.println("presentAddressLine1"+valueFrm);
                         beanProbe.setPresentAddressLine1(valueFrm);
                     }
 
@@ -484,7 +526,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         jsonObject3 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject3.get("value");
-//                        System.out.println("presentBarangay"+valueFrm);
                         beanProbe.setPresentBarangay(valueFrm);}
 
                     if(jsonObj1.get("presentProvince")!=null){
@@ -492,7 +533,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("presentProvince"+valueFrm);
                         beanProbe.setPresentProvince(valueFrm);}
 
 
@@ -503,7 +543,6 @@ return "sample";
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
                         can_poa = valueFrm +", ";
-//                        System.out.println("pobCity"+valueFrm);
 //                            beanCan.setPobCountry(valueFrm);
                     }
 
@@ -512,7 +551,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("pobCountry"+valueFrm);
                         can_poa = can_poa + valueFrm;
                         beanProbe.setPobCountry(can_poa);}
 
@@ -521,7 +559,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("presentCountry"+valueFrm);
                         beanProbe.setPresentCountry(valueFrm);}
 
                     if(jsonObj1.get("gender")!=null){
@@ -529,7 +566,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("gender"+valueFrm);
                         beanProbe.setGender(valueFrm);}
 
                     if(jsonObj1.get("presentCity")!=null){
@@ -537,7 +573,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("presentCity"+valueFrm);
                         beanProbe.setPresentCity(valueFrm);}
 
                     if(jsonObj1.get("middleName")!=null){
@@ -545,7 +580,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("middleName"+valueFrm);
                         beanProbe.setMiddleName(valueFrm);}
 
                     if(jsonObj1.get("lastName")!=null){
@@ -553,7 +587,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("lastName"+valueFrm);
                         beanProbe.setLastName(valueFrm);}
 
                     if(jsonObj1.get("suffix")!=null){
@@ -561,19 +594,14 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("suffix"+valueFrm);
                         beanProbe.setSuffix(valueFrm);}
 
                     if(jsonObj1.get("dateOfBirth")!=null){
                         String data7 = (String) jsonObj1.get("dateOfBirth");
-//                        System.out.println("jsonDate******" + data7);
                         String[] split = data7.split("/");
                         String monthOfBirth = split[1].toString();
-//                        System.out.println("monthOfBirth" + monthOfBirth);
                         String dayOfBirth = split[2].substring(0, 2).toString();
-//                        System.out.println("dayOfBirth" + dayOfBirth);
                         String yearOfBirth = split[0].toString();
-//                        System.out.println("yearOfBirth" + yearOfBirth);
                         beanProbe.setMonthOfBirth(monthOfBirth);
                         beanProbe.setDayOfBirth(dayOfBirth);
                         beanProbe.setYearOfBirth(yearOfBirth);
@@ -585,15 +613,10 @@ return "sample";
                         valueFrm= (String) jsonObjmet.get("registrationId");
                         beanProbe.setRegistrationId(valueFrm);
                         String crDate= (String) jsonObjmet.get("creationDate");
-//                        System.out.println(crDate);
                         String[] dateprobe= crDate.split("T");
-//                        System.out.println("date"+dateprobe[0]);
-//                        System.out.println("time"+dateprobe[1]);
-                        System.out.println("---------------------------------------------------------------------------------------------------------------probe create date");
                         beanProbe.setCreationdate(dateprobe[0]);
                         beanProbe.setCreationtime("T"+dateprobe[1]);
                         data1 =  (String) jsonObjmet.get("operationsData");
-//                        System.out.println("Data"+data1);
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         String  officer= (String) jsonObject4.get("value");
@@ -611,8 +634,7 @@ return "sample";
 //                        //jsonObject = (JSONObject) jsonParser.pserarse(reader2);
 //
 //                        //String pathname = new FileSystemResource("").getFile().getAbsolutePath();
-//                        System.out.println("pathname"+pathname);
-//                        System.out.println("propery file name"+propertyFile);
+
 //                        OutputStream out = new FileOutputStream(pathname+"/"+"datajsonProgram.xml");
 //                      //  OutputStream out = new FileOutputStream(pathname+"/"+"/src/main/webapp/WEB-INF/jsondata/datajsonProgram.xml");
 //                        out.write(decodedBioXml.getBytes());
@@ -629,16 +651,14 @@ return "sample";
                     Document document = (Document) db.parse(new InputSource(new StringReader(decodedBioXml)));
 //                    Document document = (Document) db.parse(new InputSource(new StringReader(decodedBioXml)));
                     NodeList nodeList = document.getElementsByTagName("BIR");
-//                    System.out.println( " nodeListelement: "+nodeList);
                     for (int i = 0; i < nodeList.getLength(); ++i) {
                         Node node = nodeList.item(i);
-//                        System.out.println("\nNode Name :"
-//                                + node.getNodeName());
+
                         Element tElement = (Element)node;
                         String type=tElement.getElementsByTagName("Type").item(1).getTextContent();
                         if (type.equalsIgnoreCase("IRIS")) {
                             String Subtypeiris=tElement.getElementsByTagName("Subtype").item(0).getTextContent();
-//                            System.out.println("Subtypeiris: " + Subtypeiris);
+
                             String irisBiodata=(String)tElement.getElementsByTagName("BDB").item(0).getTextContent();
 
                             imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
@@ -675,7 +695,7 @@ return "sample";
                                 else if(irisProbScore.get(0).getUrl().equalsIgnoreCase("right"))
                                     irisProbScore.add(irscoresProb);
                             }
-                             else if(irscoresProb.getUrl().equalsIgnoreCase("right")){
+                            else if(irscoresProb.getUrl().equalsIgnoreCase("right")){
                                 if(irisProbScore.size()<1)
                                     irisProbScore.add(irscoresProb);
                                 else if(irisProbScore.get(0).getUrl().equalsIgnoreCase("left"))
@@ -683,7 +703,6 @@ return "sample";
                             }
                         }else if (type.equalsIgnoreCase("Finger")) {
                             String Subtype=tElement.getElementsByTagName("Subtype").item(0).getTextContent();
-                            System.out.println("Subtype: " + Subtype);
                             imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
                             imag = new ReadImage().covertasImage(imageData,138);
 
@@ -711,13 +730,13 @@ return "sample";
 
                             //  JSONObject qualityJson = (JSONObject) jsonObjValue.get("Quality");
                             //scoreProbe.setScore(qualityJson.get("Score").toString());
-                           // scoreProbe.setUrl(jsonObjValue.get("Subtype").toString());
+                            // scoreProbe.setUrl(jsonObjValue.get("Subtype").toString());
                             scoreProbe.setFingerImage(imag);
                             if (Subtype.contains("Left")) {
-                             leftfingerProb.add(scoreProbe);
-                                } else {
-                            rightfingerProb.add(scoreProbe);
-                                }
+                                leftfingerProb.add(scoreProbe);
+                            } else {
+                                rightfingerProb.add(scoreProbe);
+                            }
 
                         } else if (type.equalsIgnoreCase("FACE")) {
                             imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
@@ -759,7 +778,6 @@ return "sample";
         }
         if (candidate != null) {
             try {
-                System.out.println("candidate*********"+candidate);
                 List<GalleryBean> rightfingerCan = new ArrayList<GalleryBean>();
                 List<GalleryBean> leftfingerCan = new ArrayList<GalleryBean>();
                 List<GalleryBean> irisCanScore = new ArrayList<GalleryBean>();
@@ -784,12 +802,10 @@ return "sample";
                 String pdfFileCPOA = null;
                 String pdfFileCPOE = null;
                 JSONParser jsonParser1 = new JSONParser();
-               // String pathname = new FileSystemResource("").getFile().getAbsolutePath(); (FileReader reader = new FileReader(pathname+"/mvs/samplemv2.json"))
+                // String pathname = new FileSystemResource("").getFile().getAbsolutePath(); (FileReader reader = new FileReader(pathname+"/mvs/samplemv2.json"))
                 try  {
-                    System.out.println("candidate*********...............................................................................");
 //                    String jsonString=;
-                    JSONObject jsonObject1 = (JSONObject) jsonParser1.parse(mvJsonService.getJson(probe,candidate,requestId));
-//                    System.out.println("json1"+jsonObject1);
+                    JSONObject jsonObject1 =mvJsonService.getJson(candidate);
 
                     /*Reading Document from JSON CANDIDATE Start*/
                     try {
@@ -830,7 +846,6 @@ return "sample";
                         JSONArray jsonArray = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject2 = (JSONObject) jsonArray.get(0);
                         valueFrm = (String) jsonObject2.get("value");
-//                        System.out.println("firstName" + valueFrm);
                         beanCan.setFirstName(valueFrm);
                     }
                     if(jsonObj1.get("presentAddressLine1")!=null){
@@ -838,7 +853,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         jsonObject3 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject3.get("value");
-//                        System.out.println("presentAddressLine1"+valueFrm);
                         beanCan.setPresentAddressLine1(valueFrm);
                     }
 
@@ -847,7 +861,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         jsonObject3 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject3.get("value");
-//                        System.out.println("presentBarangay"+valueFrm);
                         beanCan.setPresentBarangay(valueFrm);}
 
                     if(jsonObj1.get("presentProvince")!=null){
@@ -855,7 +868,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("presentProvince"+valueFrm);
                         beanCan.setPresentProvince(valueFrm);}
 
                     String can_poa = "";
@@ -865,7 +877,6 @@ return "sample";
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
                         can_poa = valueFrm+", ";
-//                        System.out.println("pobCity"+valueFrm);
 //                        beanCan.setPobCountry(valueFrm);
                     }
 
@@ -874,7 +885,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("pobCountry"+valueFrm);
                         can_poa = can_poa + valueFrm;
                         beanCan.setPobCountry(can_poa);}
 
@@ -883,7 +893,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("presentCountry"+valueFrm);
                         beanCan.setPresentCountry(valueFrm);}
 
                     if(jsonObj1.get("gender")!=null){
@@ -891,7 +900,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("gender"+valueFrm);
                         beanCan.setGender(valueFrm);}
 
                     if(jsonObj1.get("presentCity")!=null){
@@ -899,7 +907,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("presentCity"+valueFrm);
                         beanCan.setPresentCity(valueFrm);}
 
                     if(jsonObj1.get("middleName")!=null){
@@ -907,7 +914,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("middleName"+valueFrm);
                         beanCan.setMiddleName(valueFrm);}
 
                     if(jsonObj1.get("lastName")!=null){
@@ -915,7 +921,6 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("lastName"+valueFrm);
                         beanCan.setLastName(valueFrm);}
 
                     if(jsonObj1.get("suffix")!=null){
@@ -923,44 +928,32 @@ return "sample";
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);
                         JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                         valueFrm= (String) jsonObject4.get("value");
-//                        System.out.println("suffix"+valueFrm);
                         beanCan.setSuffix(valueFrm);}
 
                     if(jsonObj1.get("dateOfBirth")!=null){
                         String data7 = (String) jsonObj1.get("dateOfBirth");
-//                        System.out.println("jsonDate******" + data7);
                         String[] split = data7.split("/");
                         String monthOfBirth = split[1].toString();
-//                        System.out.println("monthOfBirth" + monthOfBirth);
                         String dayOfBirth = split[2].substring(0, 2).toString();
-//                        System.out.println("dayOfBirth" + dayOfBirth);
                         String yearOfBirth = split[0].toString();
-//                        System.out.println("yearOfBirth" + yearOfBirth);
                         beanCan.setMonthOfBirth(monthOfBirth);
                         beanCan.setDayOfBirth(dayOfBirth);
                         beanCan.setYearOfBirth(yearOfBirth);}
 //                    model.addAttribute("CanDemoFields", beanCan);
                     if(jsonObject1.get("metaInfo")!=null){
                         data1 =  (String) jsonObject1.get("metaInfo");
-//                        System.out.println("Mta"+data1);
                         JSONObject jsonObjmet = (JSONObject) jsonParser1.parse(data1);
                         valueFrm= (String) jsonObjmet.get("registrationId");
                         beanCan.setRegistrationId(valueFrm);
-//                        System.out.println("registrationId************"+valueFrm);
 
                         String crDate= (String) jsonObjmet.get("creationDate");
 
-//                        System.out.println("creation date************"+crDate);
                         String[] dates= crDate.split("T");
-//                        System.out.println("date"+dates[0]);
-//                        System.out.println("time"+dates[1]);
-
                         beanCan.setCreationdate(crDate);
                         beanCan.setCreationdate(dates[0]);
                         beanCan.setCreationtime("T"+dates[1]);
 //                        beanCan.setOfficer("110011");
 //                        data1 = (String) jsonObjmet.get("operationsData");
-//                        //System.out.println("Data" + data1);
 //                        jsonArray1 = (JSONArray) jsonParser.parse(data1);
 //                        JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
 //                        JSONObject jsonObject5 = (JSONObject) jsonArray1.get(1);
@@ -968,19 +961,11 @@ return "sample";
 //                        String valueFrm4 = (String) jsonObject4.get("value");
 //                        String valueFrm5 = (String) jsonObject5.get("value");
 //                        String valueFrm6 = (String) jsonObject6.get("value");
-//                        System.out.println("Json4*****" + jsonObject4);
-//                        System.out.println("Json5*****" + jsonObject5);
-//                        System.out.println("Json6*****" + jsonObject6);
-//                        //System.out.println("officerId*****"+officer);
+
 //                        beanCan.setOfficer((String) jsonObject4.get("value"));
-
-//                        System.out.println("-----------------------------------------------------------------------------------------------------------------------------------------------check herer");
-
-
 
                         if(jsonObjmet.get("operationsData")!=null) {
                             data1 = (String) jsonObjmet.get("operationsData");
-                            //System.out.println("Data" + data1);
                             jsonArray1 = (JSONArray) jsonParser.parse(data1);
                             JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
                             JSONObject jsonObject5 = (JSONObject) jsonArray1.get(1);
@@ -988,12 +973,8 @@ return "sample";
                             String valueFrm4 = (String) jsonObject4.get("value");
                             String valueFrm5 = (String) jsonObject5.get("value");
                             String valueFrm6 = (String) jsonObject6.get("value");
-//                            System.out.println("Json4*****" + jsonObject4);
-//                            System.out.println("Json5*****" + jsonObject5);
-//                            System.out.println("Json6*****" + jsonObject6);
-//                            System.out.println("officerId*****"+officer);
+
                             beanCan.setOfficer((String) jsonObject4.get("value"));
-//                           System.out.println("--------------------------------------------------------------look here----------------------------------------------");
                         }
 
                         if( jsonObjmet.get("metaData") != null){
@@ -1020,25 +1001,19 @@ return "sample";
 //                    }
 //                    File file = new File(pathname+"/mvs/canjsonProgram.xml");
                     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-//                    System.out.println("Root getNodeName: ");
 
                     DocumentBuilder db = dbf.newDocumentBuilder();
                     Document document = db.parse(new InputSource(new StringReader(decodedBioXml)));
-//                    System.out.println("Root getNodeName: " + document.getDocumentElement().getNodeName());
                     NodeList nodeList = document.getElementsByTagName("BIR");
-//                    System.out.println( " nodeListelement: "+nodeList);
 
                     for (int i = 0; i < nodeList.getLength(); ++i) {
                         Node node = nodeList.item(i);
-//                        System.out.println("\nNode Name :"
-//                                + node.getNodeName());
+
                         //  if (node.getNodeType()== Node.ELEMENT_NODE) {
                         Element tElement = (Element)node;
                         String type=tElement.getElementsByTagName("Type").item(1).getTextContent();
-//                        System.out.println("Root type: " + type);
                         if (type.equalsIgnoreCase("IRIS")) {
                             String Subtypeiris=tElement.getElementsByTagName("Subtype").item(0).getTextContent();
-                            System.out.println("Subtypeiris: " + Subtypeiris);
 
                             imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
                             CanFaceImage = new ReadImage().covertasImage(imageData,146);
@@ -1075,7 +1050,6 @@ return "sample";
                             }
                         }else if (type.equalsIgnoreCase("Finger")) {
                             String Subtype=tElement.getElementsByTagName("Subtype").item(0).getTextContent();
-                            System.out.println("Subtype: " + Subtype);
 
                             imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
                             CanFaceImage = new ReadImage().covertasImage(imageData,138);
@@ -1230,10 +1204,9 @@ return "sample";
 
     @RequestMapping(value = "/saveMVSL3Result")
     public String saveMVSL3ResultDetail(ModelMap model, HttpServletRequest request,
-                                  RedirectAttributes redirectAttributes, @RequestParam("sno") String id,
-                                  @RequestParam("supervisorVerifyStatus") String statusthree,
-                                  @RequestParam("supervisorComment") String commentthree,@RequestParam("requestId")String requestId) {
-        System.out.println("Successssslevel3");
+                                        RedirectAttributes redirectAttributes, @RequestParam("sno") String id,
+                                        @RequestParam("supervisorVerifyStatus") String statusthree,
+                                        @RequestParam("supervisorComment") String commentthree,@RequestParam("requestId")String requestId) {
 
         try {
             HttpSession session = request.getSession();
@@ -1271,20 +1244,18 @@ return "sample";
             obj1.put("responsetime", getCurrentUtcTime());
             obj1.put("returnValue", 2);
             obj1.put("candidateList", obj2);
-            System.out.println(sno + "sno");
             responseObj.setSno(sno);
             responseObj.setOrid(reg.getRegId());
             responseObj.setResponse_Json(obj1.toString());
             responseObj.setStatus("NEW");
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss'Z'");
             String convertDate = dateFormat.format(new Date());
-            System.out.println("date" + convertDate);
             Date date1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss'Z'").parse(convertDate);
             responseObj.setCrDate(date1);
             ResponseMvsDao.saveAll(responseObj);
         }
         catch(Exception e){
-            System.out.println(e.toString());
+            e.printStackTrace();
         }
     }
 

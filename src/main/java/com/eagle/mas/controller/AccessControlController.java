@@ -37,7 +37,7 @@ public class AccessControlController {
 
 	@RequestMapping(value = "/userGroupCreation", method = RequestMethod.GET)
 	public String createUserGroup(ModelMap model, @ModelAttribute("mstRolesBean") MstRolesBean mstRolesBean,
-								  BindingResult result, HttpServletRequest request) {
+								  BindingResult result, HttpServletRequest request, RedirectAttributes redirectAttributes) {
 		try {
 			HttpSession session = request.getSession();
 			if(session.getAttribute("userID")==null){
@@ -51,9 +51,10 @@ public class AccessControlController {
 		for (MstRoles allname:allRoles) {
 				System.out.println("allRoles>>"+allname.getRoleDetails());
 			}
+			redirectAttributes.addFlashAttribute("successMessage", "USER GROUP CREATED SUCCESSFULLY");
 
 		} catch (Exception e) {
-
+			redirectAttributes.addFlashAttribute("failureMessage", "ERROR WHILE UPDATING.");
 			e.printStackTrace();
 		}
 		System.out.println("createUserGroup test1" );

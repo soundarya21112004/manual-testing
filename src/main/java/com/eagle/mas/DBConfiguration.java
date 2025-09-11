@@ -8,9 +8,12 @@ import java.util.Properties;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import com.eagle.mas.config.ConstantValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -47,10 +50,12 @@ public class DBConfiguration {
 	@Value("${hibernate.show_sql}")
 	private String SHOW_SQL;
 
+	Logger log = LoggerFactory.getLogger(DBConfiguration.class);
+
 //	@Value("${hibernate.hbm2ddl.auto}")
 //	private String HBM2DDL_AUTO;
 
-	@Value("com")
+	@Value("${entitymanager.packagesToScan}")
 	private String PACKAGES_TO_SCAN;
 
 
@@ -141,5 +146,10 @@ public class DBConfiguration {
 		HibernateTransactionManager transactionManager = new HibernateTransactionManager();
 		transactionManager.setSessionFactory(sessionFactory.getObject());
 		return transactionManager;
+	}
+
+	@PostConstruct
+	public void warDetials(){
+		log.info("Json exception handled for individual api calls and added completable feature for documents - 20.06.2025");
 	}
 }

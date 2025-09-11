@@ -1,55 +1,3 @@
-//package com.eagle.mas.repository;
-//
-//import com.eagle.mas.model.RegManualVerification;
-//import com.eagle.mas.model.TblAssigned;
-//import org.springframework.data.jpa.repository.Modifying;
-//import org.springframework.data.jpa.repository.Query;
-//import org.springframework.data.repository.CrudRepository;
-//import org.springframework.data.repository.query.Param;
-//import org.springframework.stereotype.Repository;
-//
-//import java.math.BigInteger;
-//import java.util.List;
-//
-//@Repository
-//public interface RegManualVerificationRepository extends CrudRepository<RegManualVerification, BigInteger> {
-//
-//    @Query(value = "SELECT t1 FROM RegManualVerification t1 where t1.statusCode='0'")
-//    public List listOfRids();
-//
-//    @Query(value = "SELECT t1 FROM RegManualVerification t1 where t1.statusCode='1'")
-//    public List listOfRidsForL2();
-//
-////    @Query(value = "SELECT t1 FROM RegManualVerification t1 where t1.statusCode='2'")
-//    @Query(value="select t1 from RegManualVerification t1 where (t1.statusCode='2')" +
-//            " and (t1.verifyStatus='hit' or t1.verifyStatusTwo ='nohit') " +
-//            "and (t1.verifyStatus='nohit' or t1.verifyStatusTwo='hit')")
-//    public List listOfRidsForL3();
-//
-//    @Modifying
-//    @Query(value = "update RegManualVerification t1 set t1.statusCode=:level,t1.statusComment=:comment,t1.verifyStatus=:status,t1.updatedBy=:userid," +
-//            "t1.updatedDate=now() where t1.sno=:id")
-//    public int  updateRID(@Param("id") int id,@Param("status") String status, @Param("comment") String comment,@Param("userid") String userid,@Param("level") String level);
-//
-//
-//    @Modifying
-//    @Query(value = "update RegManualVerification t1 set t1.statusCode=:level,t1.statusCommTwo=:comment,t1.verifyStatus=:status,t1.updatedByTwo=:userid," +
-//            "t1.updatedDateTwo=now() where t1.sno=:id")
-//    public int  updateRIDTwo(@Param("id") int id,@Param("status") String status, @Param("comment") String comment,@Param("userid") String userid,@Param("level") String level);
-//
-//    @Modifying
-//    @Query(value = "update RegManualVerification t1 set t1.statusCode=:level,t1.statusCommThree=:comment,t1.verifyStatus=:status,t1.updatedByThree=:userid," +
-//            "t1.updatedDateThree=now() where t1.sno=:id")
-//    public int  updateRIDThree(@Param("id") int id,@Param("status") String status, @Param("comment") String comment,@Param("userid") String userid,@Param("level") String level);
-//
-//
-//
-//    @Query(value = "SELECT c.fileDatas FROM RegManualVerification c  where c.regId=:regid and c.matchedRefId=:mid")
-//    public String fileDataCandidate(@Param("regid") String regid,@Param("mid") String mid);
-//
-//    @Query(value = "SELECT c.probeString FROM RegManualVerification c  where c.regId=:regid and c.matchedRefId=:mid")
-//    public String fileDataProb(@Param("regid") String regid,@Param("mid") String mid);
-//}
 package com.eagle.mas.repository;
 
 import com.eagle.mas.model.RegisterManualVerification;
@@ -155,7 +103,7 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
     @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId is null or t1.op2userId is null) and (t1.op1userId<>:userid or t1.op1userId is null) and (t1.op2userId<>:userid or t1.op2userId is null) and (t1.regId <> t1.matchedRefId) ) order by t1.createdDate asc ")
     List<String> getRequestIdOperator(@Param("userid") String userid, Pageable size);
 
-    @Modifying
+ /*   @Modifying
     @Query(value = "update public.register_manual_verification set operator1_verify_status=null,operator1_upd_date=null,\n" +
             "operator1_upd_by=null,operator1_comment=null,operator1_user_id=null, process_code ='0' where req_id =:reqId and sno =:sno",nativeQuery = true)
     void resetOp1CaseDecisions(@Param("reqId") String reqId,@Param("sno") int sno);
@@ -168,7 +116,18 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
     @Modifying
     @Query(value = "update public.register_manual_verification set supervisor_verify_status=null,supervisor_upd_date=null,\n" +
             "supervisor_upd_by=null,supervisor_comment=null,user_id=null, process_code = '0', status_code='1' where req_id =:reqId and sno =:sno" ,nativeQuery = true)
-    void resetSupervisorCaseDecisions(@Param("reqId") String reqId,@Param("sno") int sno);
+    void resetSupervisorCaseDecisions(@Param("reqId") String reqId,@Param("sno") int sno);*/
+
+
+    @Modifying @Query("UPDATE RegisterManualVerification r SET r.op1verifyStatus = null, r.op1updDate = null, r.op1UpdBy = null, r.op1Comment = null, r.op1userId = null, r.proStatus = '0' WHERE r.reqid = :reqId AND r.sno = :sno")
+    void resetOp1CaseDecisions(@Param("reqId") String reqId, @Param("sno") int sno);
+
+    @Modifying @Query("UPDATE RegisterManualVerification r SET r.op2verifyStatus = null, r.op2UpdatedDate = null, r.op2UpdBy = null, r.op2Comment = null, r.op2userId = null, r.proStatus = '0', r.statusCode = '0', r.finindi = null, r.caseEvaluationComplete = 0 WHERE r.reqid = :reqId AND r.sno = :sno")
+    void resetOp2CaseDecisions(@Param("reqId") String reqId, @Param("sno") int sno);
+
+    @Modifying @Query("UPDATE RegisterManualVerification r SET r.supervisorVerifyStatus = null, r.supervisorUpdatedDate = null, r.supervisorUpdBy = null, r.supervisorComment = null, r.userId = null, r.proStatus = '0', r.statusCode = '1', r.finindi = null, r.caseEvaluationComplete = 0 WHERE r.reqid = :reqId AND r.sno = :sno")
+    void resetSupervisorCaseDecisions(@Param("reqId") String reqId, @Param("sno") int sno);
+
 
     @Query(value = "SELECT t1 FROM RegisterManualVerification t1 where t1.reqid = :reqId and t1.regId <> t1.matchedRefId order by t1.sno")
     List<RegisterManualVerification> clusterOfRids(@Param("reqId") String reqId);

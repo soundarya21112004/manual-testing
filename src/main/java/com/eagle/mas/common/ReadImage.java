@@ -1,6 +1,5 @@
 package com.eagle.mas.common;
 
-
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -16,8 +15,8 @@ public class ReadImage {
     static {
         try {
             nu.pattern.OpenCV.loadLocally();
-            System.out.println("----------------OPENCV lOADED SUCCESSFULLY");
-        } catch (Exception e) {
+            System.out.println("-----------------OPENCV lOADED SUCCESSFULLY-----------------");
+        }catch (Exception e) {
             throw new RuntimeException("Failed to load OpenCV", e);
         }
     }
@@ -31,7 +30,6 @@ public class ReadImage {
             MatOfByte matOfByte = new MatOfByte();
             Mat imageFile = Imgcodecs.imdecode(byteArr,Imgcodecs.IMREAD_ANYCOLOR);
             Imgcodecs.imencode(".jpg",imageFile,matOfByte);
-            logger.info("Image converted by using header size");
             return "data:image/jpg;base64,"+ Base64.getEncoder().encodeToString(matOfByte.toArray());
         }
         catch (Exception e){

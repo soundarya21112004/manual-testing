@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class JsonUtility {
-
 
     @Autowired
     Environment environment;
@@ -93,8 +93,7 @@ public class JsonUtility {
         );
     }
 
-    private static void initializeExecutor() {
-
+    public static void initializeExecutor() {
 
        executor = new ThreadPoolExecutor(
                 ConstantValue.corePoolSize,
@@ -114,11 +113,15 @@ public class JsonUtility {
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<T> entity = new HttpEntity<>(requestBody, headers);
             ResponseEntity<ResponseDto> response = restTemplate.exchange(url, HttpMethod.POST, entity, ResponseDto.class);
-            logger.info("Response Time :" + url);
+//            logger.info("Response Time :" + url);
             return response.getBody();
         } catch (Exception e) {
-            throw new RuntimeException("Error calling API: " + url, e);
+            logger.info("Error calling API : " + url, e);
+//            throw new RuntimeException("Error calling API: " + url, e);
         }
+
+        return new ResponseDto<>();
+
     }
 
     private <T> RequestDto createRequestDto(T requestDetails) {
@@ -190,11 +193,14 @@ public class JsonUtility {
     }
 
     // Fetch MV JSON Data with parallel execution
-    public MvJsonResponseDto getMVJson(String rid) throws Exception {
-        logger.info("Inside MVJson ");
+   /* public MvJsonResponseDto getMVJson(String rid) throws Exception {
+
+        logger.info("`Inside MVJson for all api call ");
         MvJsonResponseDto res = new MvJsonResponseDto();
         initializeExecutor();
         tokenGenerator.getToken();
+
+
 
         // Fetch audit and other responses in parallel
         CompletableFuture<ResponseDto> auditFuture = getAuditsAsync(rid);
@@ -204,93 +210,268 @@ public class JsonUtility {
 
         // Fetch documents in parallel
         List<String> documentTypes = Arrays.asList("proofOfAddress", "proofOfIdentity", "proofOfEvidence");
-        Map<String, String> docMap = new HashMap<>();
-        List<CompletableFuture<Map<String, String>>> documentFutures = documentTypes.stream()
-                .map(dType -> getDocumentAsync(rid, dType).thenApply(docResponse -> {
-                    if (docResponse != null && docResponse.getResponse() != null) {
-                        try {
-                            com.eagle.mas.dto.Document doc = obj.readValue(
-                                    obj.writeValueAsString(docResponse.getResponse()), com.eagle.mas.dto.Document.class);
-                            docMap.put(dType, Base64.getEncoder().encodeToString(doc.getDocument()));
-                            return docMap;
-                        } catch (JsonProcessingException e) {
-                            throw new RuntimeException("Error processing document response", e);
+        List<CompletableFuture<Map<String, String>>> documentFutures = new ArrayList<>();
+        Map<String, String> docMap = new ConcurrentHashMap<>();
+        try{
+             documentFutures = documentTypes.stream()
+                    .map(dType -> getDocumentAsync(rid, dType).thenApply(docResponse -> {
+                        if (docResponse != null && docResponse.getResponse() != null) {
+                            try {
+                                com.eagle.mas.dto.Document doc = obj.readValue(
+                                        obj.writeValueAsString(docResponse.getResponse()), com.eagle.mas.dto.Document.class);
+                                docMap.put(dType, Base64.getEncoder().encodeToString(doc.getDocument()));
+                                logger.info("Successfully fetched documents");
+                                return docMap;
+                            } catch (JsonProcessingException e) {
+//                            throw new RuntimeException("Error processing document response", e);
+                                logger.info("Error while processing document response",e);
+                            }
                         }
-                    }
-                    return null;
-                }))
-                .collect(Collectors.toList());
+                        return null;
+                    }))
+                    .collect(Collectors.toList());
+
+                 CompletableFuture.allOf(auditFuture, metaInfoFuture, identityFuture, bioFuture,documentFutures.get(0),documentFutures.get(1), documentFutures.get(2))
+                    .thenRun(() -> {
+                        logger.info("All API calls completed");
+                    })
+                    .join();
+        }
+        catch (Exception e){
+            logger.info("Error while calling documents api");
+        }
 
 
         // Wait for all async operations to complete
-        CompletableFuture.allOf(auditFuture, metaInfoFuture, identityFuture, bioFuture)
-                .thenRun(() -> {
-                    logger.info("All API calls completed");
 
-                })
-                .join();
-
-
-        logger.info("Bypassed completeablefuture all of");
-
-        System.out.println("Executor terminated.");
-
-        // Process audit response
-        ResponseDto auditResponse = auditFuture.get();
-        if (auditResponse != null && auditResponse.getResponse() != null) {
-            res.setAudits(obj.writeValueAsString(auditResponse.getResponse()));
-            logger.info("------------------------------Audit Success------------------------------");
-        } else {
-            throw new Exception("Audit Response not available");
-        }
-
-        // Process documents
-       /* Map<String, String> docs = new HashMap<>();
-        for (CompletableFuture<Map<String, String>> docFuture : documentFutures) {
-            Map<String, String> docEntry = docFuture.get();
-            if (docEntry != null) {
-                docs.put(docEntry.getKey(), docEntry.getValue());
+        try{
+            ResponseDto auditResponse = auditFuture.get();
+            if (auditResponse != null && auditResponse.getResponse() != null) {
+                res.setAudits(obj.writeValueAsString(auditResponse.getResponse()));
+                logger.info("Successfully fetched audits");
+            } else {
+//            throw new Exception("Audit Response not available");
+                logger.info("Audit Response not available");
             }
         }
-        if (docs.isEmpty()) {
-            throw new Exception("Document Response not available");
-        }*/
-        res.setDocuments(docMap);
+        catch (Exception e){
+            logger.info("Error while Processing audit response",e);
+        }
+
+
+        try {
+            if (docMap != null && !docMap.isEmpty()) {
+                res.setDocuments(docMap);
+            } else {
+                logger.warn("Document map is empty");
+            }
+        } catch (Exception e) {
+            logger.error("Error while processing documents", e);
+        }
 
         // Process meta info
-        ResponseDto metaInfoResponse = metaInfoFuture.get();
-        JsonNode responseNode = obj.valueToTree(metaInfoResponse.getResponse());
-        JsonNode fieldsNode = responseNode.path("fields");
-        if (!fieldsNode.isMissingNode()) {
-            res.setMetaInfo(fieldsNode.toString());
-            logger.info("------------------------------MetaInfo Success------------------------------");
+        try{
+            ResponseDto metaInfoResponse = metaInfoFuture.get();
+            JsonNode responseNode = obj.valueToTree(metaInfoResponse.getResponse());
+            JsonNode fieldsNode = responseNode.path("fields");
+            if (!fieldsNode.isMissingNode()) {
+                res.setMetaInfo(fieldsNode.toString());
+                logger.info("Successfully fetched meta info");
 
-        } else {
-            throw new Exception("MetaInfo Response not available");
+            } else {
+//            throw new Exception("MetaInfo Response not available");
+                logger.info("MetaInfo Response not available");
+            }
         }
+        catch (Exception e){
+            logger.info("Error while processing MetaInfo response",e);
+        }
+
 
         // Process identity
-        ResponseDto identityResponse = identityFuture.get();
-        if (identityResponse != null && identityResponse.getResponse() != null) {
-            FieldResponseDto fieldResponseDto = obj.readValue(
-                    javaObjectToJsonString(identityResponse.getResponse()), FieldResponseDto.class);
-            res.setIdentity(fieldResponseDto.getFields());
-            logger.info("------------------------------Identity Success------------------------------");
 
-        } else {
-            throw new Exception("Identity Response not available");
+        try{
+            ResponseDto identityResponse = identityFuture.get();
+            if (identityResponse != null && identityResponse.getResponse() != null) {
+                FieldResponseDto fieldResponseDto = obj.readValue(
+                        javaObjectToJsonString(identityResponse.getResponse()), FieldResponseDto.class);
+                res.setIdentity(fieldResponseDto.getFields());
+                logger.info("Successfully fetched Identity");
+
+            } else {
+//            throw new Exception("Identity Response not available");
+                logger.info("Identity Response not available");
+            }
+        }
+        catch (Exception e){
+            logger.info("Error while processing Identity response",e);
         }
 
-        // Process biometrics
-        ResponseDto bioResponse = bioFuture.get();
-        if (bioResponse != null && bioResponse.getResponse() != null) {
-            byte[] bio = xmlString(bioResponse.getResponse());
-            String bioEncode = Base64.getUrlEncoder().encodeToString(bio);
-            res.setBiometrics(bioEncode);
-            logger.info("------------------------------Biometric Success------------------------------");
 
-        } else {
-            throw new Exception("Biometric Response not available");
+        // Process biometrics
+        try{
+            ResponseDto bioResponse = bioFuture.get();
+            if (bioResponse != null && bioResponse.getResponse() != null) {
+                byte[] bio = xmlString(bioResponse.getResponse());
+                String bioEncode = Base64.getUrlEncoder().encodeToString(bio);
+                res.setBiometrics(bioEncode);
+                logger.info("Successfully fetched biometrics");
+
+            } else {
+                logger.info("Biometric Response not available");
+            }
+        }
+        catch (Exception e){
+            logger.info("Error while processing biometrics response",e);
+        }
+
+        return res;
+    }*/
+
+
+
+    public MvJsonResponseDto getMVJson(String rid) {
+        logger.info("Inside MVJson for all api call");
+        MvJsonResponseDto res = new MvJsonResponseDto();
+
+        try {
+            initializeExecutor();
+            tokenGenerator.getToken();
+
+            // Fetch audit and other responses in parallel with exception handling
+            CompletableFuture<ResponseDto> auditFuture = getAuditsAsync(rid)
+                    .exceptionally(ex -> {
+                        logger.error("Error fetching audits", ex);
+                        return null;
+                    });
+
+            CompletableFuture<ResponseDto> metaInfoFuture = getMetaInfoAsync(rid)
+                    .exceptionally(ex -> {
+                        logger.error("Error fetching meta info", ex);
+                        return null;
+                    });
+
+            CompletableFuture<ResponseDto> identityFuture = getIdentityAsync(rid)
+                    .exceptionally(ex -> {
+                        logger.error("Error fetching identity", ex);
+                        return null;
+                    });
+
+            CompletableFuture<ResponseDto> bioFuture = getBiometricsAsync(rid)
+                    .exceptionally(ex -> {
+                        logger.error("Error fetching biometrics", ex);
+                        return null;
+                    });
+
+            // Fetch documents in parallel
+            List<String> documentTypes = Arrays.asList("proofOfAddress", "proofOfIdentity", "proofOfEvidence");
+            Map<String, String> docMap = new HashMap<>();
+
+            List<CompletableFuture<Void>> docFutures = documentTypes.stream()
+                    .map(dType -> getDocumentAsync(rid, dType)
+                            .thenAccept(docResponse -> {
+                                if (docResponse != null && docResponse.getResponse() != null) {
+                                    try {
+                                        com.eagle.mas.dto.Document doc = obj.readValue(
+                                                obj.writeValueAsString(docResponse.getResponse()),
+                                                com.eagle.mas.dto.Document.class);
+                                        docMap.put(dType, Base64.getEncoder().encodeToString(doc.getDocument()));
+                                    } catch (IOException e) {
+                                        logger.error("Error processing document response for {}", dType, e);
+                                    }
+                                }
+                            })
+                            .exceptionally(ex -> {
+                                logger.error("Error fetching document for {}", dType, ex);
+                                return null;
+                            }))
+                    .collect(Collectors.toList());
+
+            CompletableFuture.allOf(docFutures.toArray(new CompletableFuture[0]))
+                    .thenRun(() -> {
+                        res.setDocuments(docMap);
+                        logger.info("Successfully fetched documents");
+                    })
+                    .join();
+
+            // Combine all futures
+            List<CompletableFuture<?>> allFutures = new ArrayList<>();
+            allFutures.add(auditFuture);
+            allFutures.add(metaInfoFuture);
+            allFutures.add(identityFuture);
+            allFutures.add(bioFuture);
+
+            // Wait for all async operations to complete
+            CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[0])).thenRun(() -> {
+                        logger.info("All API calls completed");
+                    })
+                    .join();
+
+            // Process audit response
+            ResponseDto auditResponse = auditFuture.get();
+            if (auditResponse != null && auditResponse.getResponse() != null) {
+                try {
+                    res.setAudits(obj.writeValueAsString(auditResponse.getResponse()));
+                    logger.info("Successfully fetched audits");
+                } catch (JsonProcessingException e) {
+                    logger.error("Error processing audit response", e);
+                }
+            } else {
+                logger.warn("Audit Response not available");
+            }
+
+            // Process meta info
+            ResponseDto metaInfoResponse = metaInfoFuture.get();
+            if (metaInfoResponse != null && metaInfoResponse.getResponse() != null) {
+                try {
+                    JsonNode responseNode = obj.valueToTree(metaInfoResponse.getResponse());
+                    JsonNode fieldsNode = responseNode.path("fields");
+                    if (!fieldsNode.isMissingNode()) {
+                        res.setMetaInfo(fieldsNode.toString());
+                        logger.info("Successfully fetched meta info");
+                    } else {
+                        logger.warn("MetaInfo fields not found in response");
+                    }
+                } catch (Exception e) {
+                    logger.error("Error processing meta info response", e);
+                }
+            } else {
+                logger.warn("MetaInfo Response not available");
+            }
+
+            // Process identity
+            ResponseDto identityResponse = identityFuture.get();
+            if (identityResponse != null && identityResponse.getResponse() != null) {
+                try {
+                    FieldResponseDto fieldResponseDto = obj.readValue(
+                            javaObjectToJsonString(identityResponse.getResponse()),
+                            FieldResponseDto.class);
+                    res.setIdentity(fieldResponseDto.getFields());
+                    logger.info("Successfully fetched Identity");
+                } catch (Exception e) {
+                    logger.error("Error processing identity response", e);
+                }
+            } else {
+                logger.warn("Identity Response not available");
+            }
+
+            // Process biometrics
+            ResponseDto bioResponse = bioFuture.get();
+            if (bioResponse != null && bioResponse.getResponse() != null) {
+                try {
+                    byte[] bio = xmlString(bioResponse.getResponse());
+                    String bioEncode = Base64.getUrlEncoder().encodeToString(bio);
+                    res.setBiometrics(bioEncode);
+                    logger.info("Successfully fetched biometrics");
+                } catch (Exception e) {
+                    logger.error("Error processing biometrics response", e);
+                }
+            } else {
+                logger.warn("Biometric Response not available");
+            }
+
+        } catch (Exception e) {
+            logger.error("Error in getMVJson processing", e);
         }
 
         return res;

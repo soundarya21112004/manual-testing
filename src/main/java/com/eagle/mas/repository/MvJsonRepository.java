@@ -1,8 +1,6 @@
 package com.eagle.mas.repository;
 
-import com.eagle.mas.dto.MvJsonResponseDto;
 import com.eagle.mas.model.MvJson;
-import com.eagle.mas.model.RegisterManualVerification;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -28,8 +26,8 @@ public interface MvJsonRepository  extends CrudRepository<MvJson, BigInteger> {
     @Query(value = "SELECT t1 from MvJson t1 where t1.regId=:probe and t1.matchedRefId=:probe and (t1.mvReqJson<>'' and t1.mvReqJson is not null)")
     List<MvJson> getProbJson(@Param("probe") String probe, Pageable pageable);*/
 
-    @Query(value = "SELECT t1 from MvJson t1 where t1.matchedRefId=:candidate and (t1.mvReqJson<>'' and t1.mvReqJson is not null)")
-    List<MvJson> getJson( @Param("candidate") String candidate, Pageable pageable);
+    @Query(value = "SELECT t1 from MvJson t1 where t1.matchedRefId=:rid and (t1.mvReqJson<>'' and t1.mvReqJson is not null)")
+    List<MvJson> getJson( @Param("rid") String rid, Pageable pageable);
 
     @Query(value = "SELECT t1 from MvJson t1 where t1.matchedRefId=:probe and (t1.mvReqJson<>'' and t1.mvReqJson is not null)")
     List<MvJson> getProbJson(@Param("probe") String probe, Pageable pageable);

@@ -6,8 +6,10 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -21,10 +23,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
+@Slf4j
 //@EnableAutoConfiguration
-@EnableJpaRepositories(basePackages = "com.eagle.mas.idrepo.repo", entityManagerFactoryRef = "idrepoEntityManagerFactory",
-        transactionManagerRef = "idrepoTransactionManager")
-public class DBConfigurationIdRepo {
+@EnableJpaRepositories(basePackages = "com.eagle.mas.regproc.repo", entityManagerFactoryRef = "regProcEntityManagerFactory",
+        transactionManagerRef = "regProcTransactionManager")
+public class DBConfigurationRegProc {
     File propertyFile;
 
     @Value("${hibernate.dialect}")
@@ -32,6 +35,8 @@ public class DBConfigurationIdRepo {
 
     @Value("${hibernate.show_sql}")
     private String SHOW_SQL;
+
+
 
     public void OSCheck() {
         String command = "";
@@ -55,30 +60,29 @@ public class DBConfigurationIdRepo {
         }
     }
 
-    @Bean(name = "idrepoDataSource")
+    @Bean(name = "regProcDataSource")
     public DataSource dataSource() {
-       OSCheck();
+        OSCheck();
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         try {
             InputStream in = new FileInputStream(propertyFile);
             ResourceBundle resource = new PropertyResourceBundle(in);
-
-            dataSource.setDriverClassName(resource.getString("db2.driver"));
-            dataSource.setUrl(resource.getString("db2.url"));
-            dataSource.setUsername(resource.getString("db2.username"));
-            dataSource.setPassword(resource.getString("db2.password"));
+            dataSource.setDriverClassName(resource.getString("db3.driver"));
+            dataSource.setUrl(resource.getString("db3.url"));
+            dataSource.setUsername(resource.getString("db3.username"));
+            dataSource.setPassword(resource.getString("db3.password"));
         } catch (Exception e) {
             e.printStackTrace();
         }
         return dataSource;
     }
 
-//    @Qualifier("idrepoDataSource")
-    @Bean(name = "idrepoEntityManagerFactory")
-    public LocalSessionFactoryBean sessionFactory(@Qualifier("idrepoDataSource") DataSource dataSource) {
+    //    @Qualifier("idrepoDataSource")
+    @Bean(name = "regProcEntityManagerFactory")
+    public LocalSessionFactoryBean sessionFactory(@Qualifier("regProcDataSource") DataSource dataSource) {
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
         sessionFactory.setDataSource(dataSource);
-        sessionFactory.setPackagesToScan("com.eagle.mas.idrepo.model");
+        sessionFactory.setPackagesToScan("com.eagle.mas.regproc.model");
         Properties hibernateProperties = new Properties();
         hibernateProperties.put("hibernate.dialect", DIALECT);
         hibernateProperties.put("hibernate.show_sql", SHOW_SQL);
@@ -87,11 +91,12 @@ public class DBConfigurationIdRepo {
         return sessionFactory;
     }
 
-//    @Qualifier("idrepoEntityManagerFactory")
-    @Bean(name = "idrepoTransactionManager")
-    public HibernateTransactionManager transactionManager(@Qualifier("idrepoEntityManagerFactory") LocalSessionFactoryBean sessionFactory) {
+    //    @Qualifier("idrepoEntityManagerFactory")
+    @Bean(name = "regProcTransactionManager")
+    public HibernateTransactionManager transactionManager(@Qualifier("regProcEntityManagerFactory") LocalSessionFactoryBean sessionFactory) {
         HibernateTransactionManager transactionManager = new HibernateTransactionManager();
         transactionManager.setSessionFactory(sessionFactory.getObject());
         return transactionManager;
     }
+
 }

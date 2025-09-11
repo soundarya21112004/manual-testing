@@ -381,7 +381,7 @@ public class ManualVerificationService {
 		return list;
 	}
 
-	public synchronized List<RegisterManualVerification>  listOfRidsHigherPriority1(String userid, String priority) {
+	public synchronized List<RegisterManualVerification> listOfRidsHigherPriority1(String userid, String priority) {
 		List<RegisterManualVerification> list = repo.clusterOfRids(repo.getRequestIdHigherPriority1(userid, priority));
 
 		if(!list.isEmpty()){

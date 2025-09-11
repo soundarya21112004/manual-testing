@@ -303,7 +303,7 @@ else if(usertype.equalsIgnoreCase("SUPERVISOR")){
 						tokenDetails.setRefresh_token(refreshToken);
 						tokenRepository.save(tokenDetails);
 					}else{
-						tokenRepository.save(TokenDetails.builder()
+							tokenRepository.save(TokenDetails.builder()
 								.expired(false)
 								.revoked(false)
 								.token(token)
