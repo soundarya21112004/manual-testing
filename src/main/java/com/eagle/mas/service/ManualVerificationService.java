@@ -332,6 +332,7 @@ public class ManualVerificationService {
 			System.out.println("Set Process code equal to 0");
 			list.replaceAll(ad-> {ad.setProStatus("0"); return ad;});
 			repo.saveAll(list);
+			repo.flush();
 		}
 	}
 

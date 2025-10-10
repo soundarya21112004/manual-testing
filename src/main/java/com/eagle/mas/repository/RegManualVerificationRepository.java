@@ -100,7 +100,7 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
     /*@Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null ) and (t1.regId <> t1.matchedRefId) ) order by t1.createdDate asc ")
     List<String> getRequestIdOperator(@Param("userid") String userid, Pageable size);*/
 
-    @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId is null or t1.op2userId is null) and (t1.op1userId<>:userid or t1.op1userId is null) and (t1.op2userId<>:userid or t1.op2userId is null) and (t1.regId <> t1.matchedRefId) ) order by t1.createdDate asc ")
+    @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId is null or t1.op2userId is null) and (t1.op1userId<>:userid or t1.op1userId is null) and (t1.op2userId<>:userid or t1.op2userId is null) and (t1.regId <> t1.matchedRefId)) order by t1.createdDate asc ")
     List<String> getRequestIdOperator(@Param("userid") String userid, Pageable size);
 
  /*   @Modifying
@@ -147,9 +147,14 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
             " and (t1.regId <> t1.matchedRefId) and t1.priority='2')")
     String getRequestIdHigherPriority(@Param("userid") String userid);
 
-    @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 " +
+ /*   @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 " +
             "where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null )" +
             " and (t1.regId <> t1.matchedRefId) and t1.priority=:priority)")
+    String getRequestIdHigherPriority1(@Param("userid") String userid, @Param("priority") String priority);*/
+
+    @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0'))" +
+            " and (t1.op1userId is null or t1.op2userId is null) and (t1.op1userId<>:userid or t1.op1userId is null) and (t1.op2userId<>:userid or t1.op2userId is null) and (t1.regId <> t1.matchedRefId) and t1.priority=:priority) " +
+            " order by t1.createdDate asc ")
     String getRequestIdHigherPriority1(@Param("userid") String userid, @Param("priority") String priority);
 
     @Query(value="select t1.reqid from RegisterManualVerification t1 where (t1.statusCode='1')" +

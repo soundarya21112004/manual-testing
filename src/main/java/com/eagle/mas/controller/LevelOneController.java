@@ -209,10 +209,11 @@ public class LevelOneController {
 
             if (userCaseRequest == null) {
                 logger.info("No case assigned to user. Searching for new cases by priority...");
+
+
                 String[] priorities = {"2", "1"};
                 for (String priority : priorities) {
                     logger.info("Checking for cases with priority: {}", priority);
-
                     roles = mvs.listOfRidsHigherPriority1(user.getUserid(), priority);
                     if (roles != null && !roles.isEmpty()) {
                         logger.info("Cases found for priority: {}", priority);
@@ -1309,8 +1310,6 @@ public class LevelOneController {
 
             }
             else if(user.getUserid().equals(reg.getOp1userId())){
-
-
                 out = mvs.updateRID(Integer.parseInt(mvsResultRequestDto.getSno()), mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(),user.getUserid(), user.getFirstnameEn(),mvsResultRequestDto.getRequestId(), "0");
                 logger.info("Operator 1 updated existing decision. Update result: {}", out);
 
@@ -1323,7 +1322,6 @@ public class LevelOneController {
 
             }
             else {
-
 
                 out = mvs.updateRIDstatus2(Integer.parseInt(mvsResultRequestDto.getSno()), mvsResultRequestDto.getVerifyStatus(), mvsResultRequestDto.getStatusComment(), user.getUserid(),user.getFirstnameEn(), mvsResultRequestDto.getRequestId(),"1");
                 logger.info("Operator 2 time decision by operator. Update result: {}", out);
