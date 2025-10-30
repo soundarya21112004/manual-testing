@@ -240,7 +240,7 @@
                                                 <td style="align-items: center; justify-content: center;">
 
                                                     <c:choose>
-                                                       <c:when test="${emp.op1userId != userid && emp.op2userId != userid}">
+                                                       <c:when test="${emp.op1userId != userid && emp.op2userId != userid && (emp.op1userId == null || emp.op2userId == null)}">
                                                                    <a href="<c:url value="leveloneSearchByName">
                                                                <c:param name="id" value="${emp.sno}"></c:param>
                                                                <c:param name="probe" value="${emp.regId}"></c:param>

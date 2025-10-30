@@ -118,15 +118,17 @@ public class LevelTwoController {
                 List<RegisterManualVerification> list = mvs.retreiveCaseForUser(userCaseRequest.getRequestId());
                 List<RegisterManualVerification> result = list.stream().filter(e -> {
                     if (user.getUserid().equals(e.getUserId())) {
-                        return e.getSupervisorVerifyStatus() != null;
+                        return e.getSupervisorVerifyStatus() != null && !e.getSupervisorVerifyStatus().isEmpty();
                     } else {
                         return false;
                     }
                 }).collect(Collectors.toList());
-                logger.debug("Filtered result size: {}", result.size());
+                logger.info("Fetched list result size: {}", list.size());
 
                 int reqCount = list.size();
                 int finalIndicateCount = mvs.getFinIndicate(userCaseRequest.getRequestId());
+                logger.info("Final indication result size: {}", finalIndicateCount);
+
                 if(reqCount == finalIndicateCount){
                     list.forEach(li -> li.setCaseEvaluationComplete(1));
                     regManualVerificationRepository.saveAll(list);
@@ -138,7 +140,7 @@ public class LevelTwoController {
                     logger.warn("Not all cases processed before submission. Processed count: {}, Expected count: {}", reqCount, finalIndicateCount);
                     redirectAttributes.addFlashAttribute("failureMessage", "please process all the cases before submission");
                 }
-                logger.debug("Processed result size: {}", result.size());
+
             }else{
                 logger.warn("No user case found, late submission is not allowed.");
                 redirectAttributes.addFlashAttribute("failureMessage","late submission is not allowed");

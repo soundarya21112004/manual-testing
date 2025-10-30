@@ -150,6 +150,6 @@ public class DBConfiguration {
 
 	@PostConstruct
 	public void warDetials(){
-		log.info("Json exception handled for individual api calls and added completable feature for documents - 20.06.2025");
+		log.info("Third Operator Assignment Fix - 11.10.2025");
 	}
 }

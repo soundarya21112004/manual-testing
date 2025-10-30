@@ -11,7 +11,7 @@ import java.util.List;
 public interface UserCaseAssignmentRepo extends JpaRepository<UserCaseAssignment,String> {
 
 
-    public UserCaseAssignment findByUserId(String userId);
+    UserCaseAssignment findByUserId(String userId);
 
     @Query(value = "SELECT t1.requestId FROM UserCaseAssignment t1")
     List<String> getRequestIds();

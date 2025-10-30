@@ -609,15 +609,35 @@ public class ManualVerificationService {
 
 	public synchronized List getClusterForL2(String userid) {
 		List<String> reqId = repo.getReqIdForL2(userid, PageRequest.of(0,1));
+		System.out.println("Request id : "+reqId );
 		List<RegisterManualVerification> list = new ArrayList<>();
+		List<RegisterManualVerification> pendinglist = new ArrayList<>();
+
 		if(!reqId.isEmpty()) {
 			list = repo.clusterOfRids(reqId.get(0));
 		}
 		if(!list.isEmpty()){
-			list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
-			repo.saveAll(list);
-			repo.flush();
-			setCaseForUser(list.get(0).getReqid(),userid);
+			pendinglist = list.stream().filter(e -> {
+				return e.getOp1userId() == null || e.getOp2userId() == null;
+			}).collect(Collectors.toList());
+
+			if(!pendinglist.isEmpty()){
+				System.out.println("Pending list size : "+ pendinglist.size());
+				list.replaceAll(e ->{
+					e.setStatusCode("0");
+					return e;
+				});
+				repo.saveAll(list);
+				repo.flush();
+//				list.clear();
+				return getClusterForL2(userid);
+			}
+			else{
+				list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
+				repo.saveAll(list);
+				repo.flush();
+				setCaseForUser(list.get(0).getReqid(),userid);
+			}
 		}
 		return list;
 	}

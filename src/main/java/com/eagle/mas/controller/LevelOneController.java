@@ -125,11 +125,24 @@ public class LevelOneController {
                 List<RegisterManualVerification> list = mvs.retreiveCaseForUser(userCaseRequest.getRequestId());
                 List<RegisterManualVerification> result = list.stream().filter(e -> {
                     if (user.getUserid().equals(e.getOp1userId())) {
-                        return e.getOp1verifyStatus() != null;
+                        return e.getOp1verifyStatus() != null && !e.getOp1verifyStatus().isEmpty();
                     } else if (user.getUserid().equals(e.getOp2userId())) {
-                        return e.getOp2verifyStatus() != null;
-                    } else {
-                        return false;
+                        return e.getOp2verifyStatus() != null && !e.getOp2verifyStatus().isEmpty();
+                    }
+                    else {
+                            if (e.getOp1userId() == null || e.getOp1userId().isEmpty()) {
+                                // No OP1 yet ? current user becomes OP1
+                                return false; // Needs to fill OP1 fields
+                            } else if (e.getOp2userId() == null || e.getOp2userId().isEmpty()) {
+                                // OP1 already filled by someone else ? current user becomes OP2
+                                boolean op1Filled = e.getOp1verifyStatus() != null && !e.getOp1verifyStatus().isEmpty();
+                                // OP2 (current user) not yet filled ? allow submission
+                                return op1Filled;
+                            } else {
+                                // Both users already assigned ? no action needed
+                                return true;
+                            }
+
                     }
                 }).collect(Collectors.toList());
 
@@ -143,10 +156,10 @@ public class LevelOneController {
                     regManualVerificationRepository.saveAll(list);
                 }*/
 
-
                 if (result.size() == list.size()) {
                     logger.info("All cases processed. Submitting...");
                     list.stream().filter(e -> "DUP".equals(e.getFinindi())).forEach(e -> e.setCaseEvaluationComplete(1));
+                    list.stream().filter(e -> (e.getOp1userId() != null && !e.getOp1userId().isEmpty()) && (e.getOp2userId() != null) && !e.getOp2userId().isEmpty()).forEach(e -> e.setStatusCode("1"));
                     regManualVerificationRepository.saveAll(list);
                     mvs.resetProcessStatus(userCaseRequest.getRequestId());
                     mvs.removeProcessedCaseForUser(user.getUserid());
