@@ -135,9 +135,10 @@ public class LevelOneController {
                                 return false; // Needs to fill OP1 fields
                             } else if (e.getOp2userId() == null || e.getOp2userId().isEmpty()) {
                                 // OP1 already filled by someone else ? current user becomes OP2
-                                boolean op1Filled = e.getOp1verifyStatus() != null && !e.getOp1verifyStatus().isEmpty();
+//                                boolean op1Filled = e.getOp1verifyStatus() != null && !e.getOp1verifyStatus().isEmpty();
+                                return false;
                                 // OP2 (current user) not yet filled ? allow submission
-                                return op1Filled;
+//                                return op1Filled;
                             } else {
                                 // Both users already assigned ? no action needed
                                 return true;

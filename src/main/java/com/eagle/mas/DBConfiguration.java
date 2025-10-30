@@ -150,6 +150,6 @@ public class DBConfiguration {
 
 	@PostConstruct
 	public void warDetials(){
-		log.info("Third Operator Assignment Fix - 11.10.2025");
+		log.info("Supervisor submit fix - 30.10.2025");
 	}
 }
