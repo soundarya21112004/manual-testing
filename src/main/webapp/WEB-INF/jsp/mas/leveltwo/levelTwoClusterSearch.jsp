@@ -174,6 +174,7 @@
                                     <th>Registration Id</th>
                                     <th>Candidate Reference Id</th>
                                     <th>Reason</th>
+                                    <th>Registation Type</th>
                                     <th>Verified By Operator 1</th>
                                     <th>Verified By Operator 2</th>
                                     <th>Verified Date</th>
@@ -191,6 +192,7 @@
                                         <td>${emp.regId}</td>
                                         <td>${emp.matchedRefId} </td>
                                         <td>Biometric Potential Match</td>
+                                        <td>${emp.regType eq 'UPDATE' ? 'Update' : 'New'}</td>
                                         <td>${emp.op1UpdBy}</td>
                                         <td>${emp.op2UpdBy} </td>
                                         <td>

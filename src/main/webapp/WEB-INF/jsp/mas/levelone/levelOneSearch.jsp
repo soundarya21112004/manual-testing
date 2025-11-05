@@ -222,6 +222,7 @@
                                             <th>Registration Id</th>
                                             <th>Candidate Reference Id</th>
                                             <th>Reason</th>
+                                            <th>Registation Type</th>
                                             <th>Created Date</th>
                                             <th>Action</th>
                                          </tr>
@@ -234,6 +235,7 @@
                                                 <td>${emp.regId}</td>
                                                 <td>${emp.matchedRefId} </td>
                                                 <td>Biometric Potential Match</td>
+                                                <td>${emp.regType eq 'UPDATE' ? 'Update' : 'New'}</td>
                                                 <td>
                                                     <fmt:formatDate value="${emp.createdDate}" type="date"
                                                                     pattern="dd-MMM-yyyy"/></td>

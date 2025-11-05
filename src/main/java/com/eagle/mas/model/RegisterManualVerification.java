@@ -45,6 +45,17 @@ public class RegisterManualVerification implements Serializable  {
 
     private String priority;
 
+    private String regType;
+
+    @Column(name = "reg_type")
+    public String getRegType() {
+        return regType;
+    }
+
+    public void setRegType(String regType) {
+        this.regType = regType;
+    }
+
     private int caseEvaluationComplete;
 
     @Column(name = "case_evaluation_complete")
@@ -252,6 +263,7 @@ public class RegisterManualVerification implements Serializable  {
     public void setSupervisorComment(String supervisorComment) {
         this.supervisorComment = supervisorComment;
     }
+
     @Column(name = "supervisor_verify_status")
     public String getSupervisorVerifyStatus() {
         return supervisorVerifyStatus;
@@ -260,7 +272,7 @@ public class RegisterManualVerification implements Serializable  {
     public void setSupervisorVerifyStatus(String supervisorVerifyStatus) {
         this.supervisorVerifyStatus = supervisorVerifyStatus;
     }
-@Column(name="req_id")
+    @Column(name="req_id")
     public String getReqid() {
         return reqid;
     }
@@ -268,7 +280,8 @@ public class RegisterManualVerification implements Serializable  {
     public void setReqid(String reqid) {
         this.reqid = reqid;
     }
-@Column(name="Fin_indi")
+
+    @Column(name="Fin_indi")
     public String getFinindi() {
         return finindi;
     }
@@ -279,7 +292,6 @@ public class RegisterManualVerification implements Serializable  {
 
 
     @Column(name = "priority")
-
     public String getPriority() {
         return priority;
     }

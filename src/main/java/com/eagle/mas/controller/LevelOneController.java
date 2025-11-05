@@ -224,14 +224,27 @@ public class LevelOneController {
             if (userCaseRequest == null) {
                 logger.info("No case assigned to user. Searching for new cases by priority...");
 
+                roles = mvs.listOfRidsHigherPriority1(user.getUserid(),"update");
 
-                String[] priorities = {"2", "1"};
+                /*String[] priorities = {"2", "1"};
                 for (String priority : priorities) {
                     logger.info("Checking for cases with priority: {}", priority);
                     roles = mvs.listOfRidsHigherPriority1(user.getUserid(), priority);
                     if (roles != null && !roles.isEmpty()) {
                         logger.info("Cases found for priority: {}", priority);
                         break;
+                    }
+                }*/
+
+                if (roles == null || roles.isEmpty()) {
+                    String[] priorities = {"2", "1"};
+                    for (String priority : priorities) {
+                        logger.info("Checking for cases with priority: {}", priority);
+                        roles = mvs.listOfRidsHigherPriority1(user.getUserid(), priority);
+                        if (roles != null && !roles.isEmpty()) {
+                            logger.info("Cases found for priority: {}", priority);
+                            break;
+                        }
                     }
                 }
 

@@ -164,14 +164,32 @@ public class LevelTwoController {
             }
             Userdetails user = (Userdetails) session.getAttribute("userdetails");
             logger.info("UserID: {}", user.getUserid());
-            ArrayList<RegisterManualVerification> roles = new ArrayList<>();
+            List<RegisterManualVerification> roles = new ArrayList<>();
             UserCaseAssignment supervisorCases = mvs.userCaseDetails(user.getUserid());
             if(supervisorCases ==null) {
-                logger.debug("No supervisor cases found, retrieving cluster for L2.");
-                roles = (ArrayList<RegisterManualVerification>) mvs.getClusterForL2(user.getUserid());
+
+                roles = mvs.listOfRidsHigherPriority2(user.getUserid(),"update");
+
+                if (roles == null || roles.isEmpty()) {
+                    String[] priorities = {"2", "1"};
+                    for (String priority : priorities) {
+                        logger.info("Checking for cases with priority: {}", priority);
+                        roles = mvs.listOfRidsHigherPriority2(user.getUserid(), priority);
+                        if (roles != null && !roles.isEmpty()) {
+                            logger.info("Cases found for priority: {}", priority);
+                            break;
+                        }
+                    }
+                }
+
+                if (roles == null || roles.isEmpty()) {
+                    logger.info("No cases found in priority list. Loading fallback list...");
+                    roles =  mvs.getClusterForL2(user.getUserid());
+                }
+
             }else{
                 logger.debug("Supervisor case found, retrieving cases for requestId: {}", supervisorCases.getRequestId());
-                roles = (ArrayList<RegisterManualVerification>) mvs.retreiveCaseForUser(supervisorCases.getRequestId());
+                roles =  mvs.retreiveCaseForUser(supervisorCases.getRequestId());
             }
 
             List<RegisterManualVerification> filteredItems = roles.stream()
