@@ -503,10 +503,8 @@ public class LevelOneController {
                         /*Reading Document from JSON PROBE  End*/
 
                         JSONObject jsonObj1 =(JSONObject) jsonObject1.get("identity");
-                        String data =  (String) jsonObj1.get("firstName");
-                        JSONArray jsonArray = (JSONArray) jsonParser.parse(data);
-                        JSONObject jsonObject2 = (JSONObject) jsonArray.get(0);
 
+//                        String data =  (String) jsonObj1.get("firstName");
 
 
                         /************Variables for Values taken from Response JSON *************/
@@ -514,8 +512,15 @@ public class LevelOneController {
                         JSONArray jsonArray1 = new JSONArray();
                         JSONObject jsonObject3 = new JSONObject();
                         String valueFrm= null;
-                        String firstName= (String) jsonObject2.get("value");
-                        beanProbe.setFirstName(firstName);
+
+                        if(jsonObj1.get("firstName") != null){
+                            data1 =  (String) jsonObj1.get("firstName");
+                            JSONArray jsonArray = (JSONArray) jsonParser.parse(data1);
+                            JSONObject jsonObject2 = (JSONObject) jsonArray.get(0);
+                            String firstName= (String) jsonObject2.get("value");
+                            beanProbe.setFirstName(firstName);
+                        }
+
                         if(jsonObj1.get("presentAddressLine1")!=null){
                             data1 =  (String) jsonObj1.get("presentAddressLine1");
                             jsonArray1 = (JSONArray) jsonParser.parse(data1);

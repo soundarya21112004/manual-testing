@@ -552,6 +552,7 @@ public class LevelTwoController {
                         valueFrm = (String) jsonObject2.get("value");
                         beanProbe.setFirstName(valueFrm);
                     }
+
                     if(jsonObj1.get("presentAddressLine1")!=null){
                         data1 =  (String) jsonObj1.get("presentAddressLine1");
                         jsonArray1 = (JSONArray) jsonParser.parse(data1);

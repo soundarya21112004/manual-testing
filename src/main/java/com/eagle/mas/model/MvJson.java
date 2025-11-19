@@ -17,6 +17,8 @@ public class MvJson {
     private String url;
     private String reqTime;
     private Date currentTime;
+    private String regType;
+
    /* private boolean encryptionStatus;
 
     @Column(name = "encryption_status")
@@ -92,5 +94,14 @@ public class MvJson {
 
     public void setCurrentTime(Date currentTime) {
         this.currentTime = currentTime;
+    }
+
+    @Column(name = "reg_type")
+    public String getRegType() {
+        return regType;
+    }
+
+    public void setRegType(String regType) {
+        this.regType = regType;
     }
 }

@@ -159,7 +159,7 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
 
     @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 " +
             "where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null )" +
-            " and (t1.regId <> t1.matchedRefId) and t1.regType= 'UPDATE')")
+            " and (t1.regId <> t1.matchedRefId) and t1.regType= 'Update')")
     String getRequestIdHigherPriorityUpdate(@Param("userid") String userid);
 
     @Query(value="select t1.reqid from RegisterManualVerification t1 where (t1.statusCode='1')" +
@@ -174,7 +174,7 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
 
     @Query(value="select t1.reqid from RegisterManualVerification t1 where (t1.statusCode='1')" +
             " and (t1.userId<>:userid or t1.userId is null ) and (t1.proStatus is null or t1.proStatus='0') and ((t1.op1verifyStatus='hit' AND t1.op2verifyStatus ='nohit') " +
-            "OR (t1.op1verifyStatus='nohit' AND t1.op2verifyStatus='hit')) and  t1.regType= 'UPDATE' order by t1.createdDate asc")
+            "OR (t1.op1verifyStatus='nohit' AND t1.op2verifyStatus='hit')) and  t1.regType= 'Update' order by t1.createdDate asc")
     List<String> getRequestIdHigherPriorityUpdate2(@Param("userid") String userid, Pageable size);
 
     //      -----------------------------------------------------------------------------------------------------------------------

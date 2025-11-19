@@ -132,7 +132,7 @@ public String getUtcTime(){
 
 		System.out.println("useri id"+session.getAttribute("userID"));
 		if(session.getAttribute("userID")==null){
-			return "redirect:redirectloginn";
+			return "redirect:redirectlogin";
 		}
 		String id= (String) session.getAttribute("userID");
 		System.out.println("testing login ----------for user id"+id);
