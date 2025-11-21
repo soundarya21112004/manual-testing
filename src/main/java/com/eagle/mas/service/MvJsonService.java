@@ -390,4 +390,7 @@ public class MvJsonService {
         return jsonObject1;
     }
 
+    public void saveMvJson(String mvJson, String probe) {
+        mvJsonRepository.saveMvJson(mvJson, probe);
+    }
 }

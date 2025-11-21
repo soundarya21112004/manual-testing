@@ -12,6 +12,7 @@ public class ConstantValue {
     public static  String DOCUMENTAPI;
     public static  String SEARCHFIELDAPI;
     public static  String AUDITAPI;
+    public static String IDREPOGETAPI;
     public static  String TokenAppId;
     public static  String TokenRequestSecretKey;
     public static  String TokenClientId;

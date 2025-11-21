@@ -101,6 +101,7 @@ public class DBConfiguration {
 			ConstantValue.DOCUMENTAPI=resource.getString("DOCUMENTAPI");
 			ConstantValue.SEARCHFIELDAPI=resource.getString("SEARCHFIELDAPI");
 			ConstantValue.AUDITAPI=resource.getString("AUDITAPI");
+			ConstantValue.IDREPOGETAPI=resource.getString("IDREPOGETAPI");
 			ConstantValue.TokenAppId=resource.getString("TokenAppId");
 			ConstantValue.TokenRequestSecretKey=resource.getString("TokenRequestSecretKey");
 			ConstantValue.TokenClientId=resource.getString("TokenClientId");

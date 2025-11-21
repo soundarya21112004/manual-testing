@@ -529,6 +529,39 @@ public class JsonUtility {
     }
 
 
+    public CompletableFuture<ResponseDto> getIdentityAsync1(String rid) {
+        return CompletableFuture.supplyAsync(() -> {
+            IdentityRequestDto searchFieldRequestDto = new IdentityRequestDto();
+            searchFieldRequestDto.setId(rid);
+            searchFieldRequestDto.setFields(List.of("UIN"));
+            searchFieldRequestDto.setSource("REGISTRATION_CLIENT");
+            searchFieldRequestDto.setProcess("UPDATE");
+            searchFieldRequestDto.setBypassCache(true);
+            return makePostRequest(createRequestDto(searchFieldRequestDto), ConstantValue.SEARCHFIELDAPI);
+//        }, executor);
+        }, executor).orTimeout(ConstantValue.executorShutdown, TimeUnit.SECONDS);
+    }
+
+
+    public <T> ResponseDto makeGetRequest(String rid, String url) {
+        try {
+            logger.info("External api calling url: "+ url);
+            HttpHeaders headers = new HttpHeaders();
+            tokenGenerator.getToken();
+            headers.set("Cookie", TokenGenerator.validToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<T> entity = new HttpEntity<>(headers);
+            ResponseEntity<ResponseDto> response = restTemplate.exchange(url + rid, HttpMethod.GET, entity, ResponseDto.class);
+            return response.getBody();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error calling API: " + url, e);
+        }
+    }
+
+
+
+
 
 }
 

@@ -27,6 +27,7 @@ public class GalleryBean implements Serializable {
 	private String permanentAddressLine1;
 	private String subDivision;
 
+
 	public String getSubDivision() {
 		return subDivision;
 	}
