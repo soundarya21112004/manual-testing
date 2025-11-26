@@ -1,6 +1,7 @@
 package com.eagle.mas.controller;
 
 import com.eagle.mas.bean.GalleryBean;
+import com.eagle.mas.common.HitUsers;
 import com.eagle.mas.common.ReadImage;
 import com.eagle.mas.config.ConstantValue;
 import com.eagle.mas.dto.FieldResponseDto;
@@ -60,6 +61,8 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -103,6 +106,8 @@ public class LevelOneController {
     @Autowired
     AbisRequestRepo abisRequestRepo;
 
+    @Autowired
+    HitUsers hitUsers;
 
 
     private static final Logger logger = LoggerFactory.getLogger(LevelOneController.class);
@@ -162,7 +167,28 @@ public class LevelOneController {
 
                 if (result.size() == list.size()) {
                     logger.info("All cases processed. Submitting...");
-                    list.stream().filter(e -> "DUP".equals(e.getFinindi())).forEach(e -> e.setCaseEvaluationComplete(1));
+
+                         long dupCount = list.stream().filter(e -> "DUP".equals(e.getFinindi())).count();
+
+                            if(dupCount > 0 && dupCount == list.size()) {
+                                try {
+                                    hitUsers.createCase(list.get(0).getRegId(),user.getOrganisation());
+                                } catch (NoSuchAlgorithmException ex) {
+                                    throw new RuntimeException(ex);
+                                } catch (KeyManagementException ex) {
+                                    throw new RuntimeException(ex);
+                                }
+                            }
+
+                                list.stream().filter(e -> "DUP".equals(e.getFinindi())).forEach(
+
+                                        e -> e.setCaseEvaluationComplete(1)
+
+                                );
+
+
+
+
 
                     list.stream().filter(e -> (e.getOp1userId() != null && !e.getOp1userId().isEmpty()) && (e.getOp2userId() != null) && !e.getOp2userId().isEmpty()).forEach(e -> e.setStatusCode("1"));
                     regManualVerificationRepository.saveAll(list);
@@ -274,6 +300,7 @@ public class LevelOneController {
         return "levelOneSearch";
     }
 
+
     @RequestMapping(value = "/leveloneSearchByName", method = RequestMethod.GET)
     public String leveloneSearchByName(ModelMap model, RedirectAttributes redirectAttributes,HttpServletRequest request,
                                        @RequestParam("id") String id,
@@ -283,12 +310,19 @@ public class LevelOneController {
                                        @RequestParam("caseListNo") String caseListNo,
                                        @RequestParam("regType") String regType
 
-    ) throws URISyntaxException {
+    ) throws URISyntaxException, NoSuchAlgorithmException, KeyManagementException {
         logger.info("Entering leveloneSearchByName method with params: id={}, probe={}, candidate={}, requestId={}, caseListNo={}",
                 id, probe, candidate, requestId, caseListNo);
 
         boolean psnGenerated =false;
         logger.debug("Session attributes set: regId={}, matchRegId={}", probe, candidate);
+
+        System.out.println("Hello Name");
+
+     //   hitUsers.AuthenticateLogin();
+
+
+
 
         HttpSession session = request.getSession();
         session.setAttribute("regId",probe);

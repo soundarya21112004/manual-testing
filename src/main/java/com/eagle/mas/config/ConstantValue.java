@@ -24,4 +24,11 @@ public class ConstantValue {
     public static int connectTimeout;
     public static int socketTimeout;
     public static int executorShutdown;
+
+    public static String loginAppId;
+    public static String loginURL;
+    public static String loginUsername;
+    public static String loginPassword;
+    public static String caseAuthURL;
+
 }
