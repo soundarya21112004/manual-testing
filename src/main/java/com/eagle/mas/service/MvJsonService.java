@@ -393,4 +393,8 @@ public class MvJsonService {
     public void saveMvJson(String mvJson, String probe) {
         mvJsonRepository.saveMvJson(mvJson, probe);
     }
+
+    public MvJson getUpdateStatus(String rid) {
+    return mvJsonRepository.getUpdateStatus(rid, PageRequest.of(0, 1));
+    }
 }

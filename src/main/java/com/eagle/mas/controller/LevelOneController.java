@@ -520,95 +520,97 @@ public class LevelOneController {
                         String valueFrm= null;
 
                         try {
-
                             if ("update".equalsIgnoreCase(regType)) {
-//                                System.out.println("Update packet");
-                                jsonUtility.initializeExecutor();
-                                tokenGenerator.getToken();
-                                CompletableFuture<ResponseDto> identityFuture = jsonUtility.getIdentityAsync1(probe)
-                                        .exceptionally(ex -> {
-                                            logger.error("Error fetching identity", ex);
-                                            return null;
-                                        });
+                               MvJson mvJson =  mvJsonService.getUpdateStatus(probe);
+                               if (mvJson != null && !"UPDATED".equalsIgnoreCase(mvJson.getUpdateStatus())){
+                                   jsonUtility.initializeExecutor();
+                                   tokenGenerator.getToken();
+                                   CompletableFuture<ResponseDto> identityFuture = jsonUtility.getIdentityAsync1(probe)
+                                           .exceptionally(ex -> {
+                                               logger.error("Error fetching identity", ex);
+                                               return null;
+                                           });
 
-                                ResponseDto identityResponse = identityFuture.get();
+                                   ResponseDto identityResponse = identityFuture.get();
 
-                                if (identityResponse != null && identityResponse.getResponse() != null) {
-                                    try {
-                                        FieldResponseDto fieldResponseDto = obj.readValue(
-                                                jsonUtility.javaObjectToJsonString(identityResponse.getResponse()),
-                                                FieldResponseDto.class);
-                                        String uin = fieldResponseDto.getFields().get("UIN");
+                                   if (identityResponse != null && identityResponse.getResponse() != null) {
+                                       try {
+                                           FieldResponseDto fieldResponseDto = obj.readValue(
+                                                   jsonUtility.javaObjectToJsonString(identityResponse.getResponse()),
+                                                   FieldResponseDto.class);
+                                           String uin = fieldResponseDto.getFields().get("UIN");
 
 //                                        System.out.println("UIN : " + uin);
 
 //                                        System.out.println("mvjson identity : " + jsonObj1);
 
-                                        ResponseDto<?> idRepoUinResponse = jsonUtility.makeGetRequest(uin, ConstantValue.IDREPOGETAPI);
-                                        if (idRepoUinResponse.getResponse() != null) {
-                                            Map<?, ?> responseMap = (Map<?, ?>) idRepoUinResponse.getResponse();
-                                            Map<?, ?> identityMap = (Map<?, ?>) responseMap.get("identity");
+                                           ResponseDto<?> idRepoUinResponse = jsonUtility.makeGetRequest(uin, ConstantValue.IDREPOGETAPI);
+                                           if (idRepoUinResponse.getResponse() != null) {
+                                               Map<?, ?> responseMap = (Map<?, ?>) idRepoUinResponse.getResponse();
+                                               Map<?, ?> identityMap = (Map<?, ?>) responseMap.get("identity");
 
 //                                            System.out.println("identityMap : " + identityMap);
 
-                                            obj.enable(SerializationFeature.INDENT_OUTPUT);
+                                               obj.enable(SerializationFeature.INDENT_OUTPUT);
 
-                                            Map<String, Object> localIdentity =
-                                                    obj.readValue(jsonObj1.toString(), Map.class);
-                                            Map<String, Object> apiIdentity =
-                                                    (Map<String, Object>) responseMap.get("identity");
+                                               Map<String, Object> localIdentity =
+                                                       obj.readValue(jsonObj1.toString(), Map.class);
+                                               Map<String, Object> apiIdentity =
+                                                       (Map<String, Object>) responseMap.get("identity");
 
-                                            for (String key : localIdentity.keySet()) {
+                                               for (String key : localIdentity.keySet()) {
 
-                                                if (!apiIdentity.containsKey(key)) {
-                                                    continue; // Only update existing DB fields
-                                                }
+                                                   if (!apiIdentity.containsKey(key)) {
+                                                       continue; // Only update existing DB fields
+                                                   }
 
-                                                Object apiValue = apiIdentity.get(key);
-                                                if (apiValue == null) {
-                                                    continue; // keep null
-                                                }
+                                                   Object apiValue = apiIdentity.get(key);
+                                                   if (apiValue == null) {
+                                                       continue; // keep null
+                                                   }
 
-                                                // Case 1: List value -> convert to JSON string
-                                                if (apiValue instanceof List) {
-                                                    String jsonString = obj.writeValueAsString(apiValue);
-                                                    localIdentity.put(key, jsonString);
-                                                }
+                                                   // Case 1: List value -> convert to JSON string
+                                                   if (apiValue instanceof List) {
+                                                       String jsonString = obj.writeValueAsString(apiValue);
+                                                       localIdentity.put(key, jsonString);
+                                                   }
 
-                                                // Case 2: Map value -> convert to JSON string
-                                                else if (apiValue instanceof Map) {
-                                                    String jsonString = obj.writeValueAsString(apiValue);
-                                                    localIdentity.put(key, jsonString);
-                                                }
+                                                   // Case 2: Map value -> convert to JSON string
+                                                   else if (apiValue instanceof Map) {
+                                                       String jsonString = obj.writeValueAsString(apiValue);
+                                                       localIdentity.put(key, jsonString);
+                                                   }
 
-                                                // Case 3: Primitive/string -> convert to string
-                                                else {
-                                                    localIdentity.put(key, apiValue.toString());
-                                                }
-                                            }
+                                                   // Case 3: Primitive/string -> convert to string
+                                                   else {
+                                                       localIdentity.put(key, apiValue.toString());
+                                                   }
+                                               }
 
 //                                            String updatedIdentityJsonString = obj.writeValueAsString(localIdentity);
-                                            JSONObject updatedIdentityJson = new JSONObject(localIdentity);
+                                               JSONObject updatedIdentityJson = new JSONObject(localIdentity);
 
 //                                            System.out.println("Updated identity json"+ updatedIdentityJson);
 
 // Step 4: Set into parent object ⬇️
-                                            jsonObject1.put("identity", updatedIdentityJson);
-                                            mvJsonService.saveMvJson(obj.writeValueAsString(jsonObject1), probe);
-                                            jsonObj1 = updatedIdentityJson;
+                                               jsonObject1.put("identity", updatedIdentityJson);
+                                               mvJsonService.saveMvJson(obj.writeValueAsString(jsonObject1), probe);
+                                               jsonObj1 = updatedIdentityJson;
 
 
 
-                                        } else {
-                                            logger.info("Id repo uin response is null for regid: {}", probe);
-                                        }
-                                        logger.info("Successfully fetched Identity");
-                                    } catch (Exception e) {
-                                        logger.error("Error processing identity response", e);
-                                    }
-                                } else {
-                                    logger.warn("Identity Response not available");
-                                }
+                                           } else {
+                                               logger.info("Id repo uin response is null for regid: {}", probe);
+                                           }
+                                           logger.info("Successfully fetched Identity");
+                                       } catch (Exception e) {
+                                           logger.error("Error processing identity response", e);
+                                       }
+                                   } else {
+                                       logger.warn("Identity Response not available");
+                                   }
+                               }
+//                                System.out.println("Update packet");
                             }
                         }catch (Exception e){
                             e.printStackTrace();

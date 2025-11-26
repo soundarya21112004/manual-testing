@@ -18,8 +18,18 @@ public class MvJson {
     private String reqTime;
     private Date currentTime;
     private String regType;
+    private String updateStatus;
 
-   /* private boolean encryptionStatus;
+    public String getUpdateStatus() {
+        return updateStatus;
+    }
+
+    @Column(name = "update_status")
+    public void setUpdateStatus(String updateStatus) {
+        this.updateStatus = updateStatus;
+    }
+
+    /* private boolean encryptionStatus;
 
     @Column(name = "encryption_status")
     public boolean isEncryptionStatus() {

@@ -36,5 +36,8 @@ public interface MvJsonRepository  extends CrudRepository<MvJson, BigInteger> {
     @Modifying
     @Query("UPDATE MvJson SET mvReqJson = :mvJson WHERE matchedRefId = :m_rid")
     void saveMvJson(String mvJson, String m_rid);
+
+    @Query(value = "select t1 from MvJson t1 where t1.matchedRefId=:rid ")
+    MvJson getUpdateStatus(@Param("rid") String rid, Pageable pageable);
 }
 
