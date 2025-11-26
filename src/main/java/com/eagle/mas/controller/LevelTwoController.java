@@ -1,6 +1,7 @@
 package com.eagle.mas.controller;
 
 import com.eagle.mas.bean.GalleryBean;
+import com.eagle.mas.common.HitUsers;
 import com.eagle.mas.common.ReadImage;
 import com.eagle.mas.config.ConstantValue;
 import com.eagle.mas.dto.SaveMvsResultRequestDto;
@@ -50,6 +51,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -87,6 +90,9 @@ public class LevelTwoController {
 
     @Autowired
     UserCaseAssignmentRepo userCaseAssignmentRepo;
+
+    @Autowired
+    HitUsers hitUsers;
 
     File catalinaBase = new File(System.getProperty("catalina.base")).getAbsoluteFile();
     File propertyFile = new File(catalinaBase, "bin/mvs/");
@@ -131,6 +137,17 @@ public class LevelTwoController {
 
                 if(reqCount == finalIndicateCount){
                     list.forEach(li -> li.setCaseEvaluationComplete(1));
+                    long dupCount = list.stream().filter(li -> li.getFinindi().equalsIgnoreCase("DUP")).count();
+                    if(dupCount > 0){
+                        try {
+                            hitUsers.createCase(list.get(0).getRegId(),user.getOrganisation());
+                        } catch (NoSuchAlgorithmException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (KeyManagementException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
+
                     regManualVerificationRepository.saveAll(list);
                     mvs.resetProcessStatus(userCaseRequest.getRequestId());
                     mvs.removeProcessedCaseForUser(user.getUserid());

@@ -118,6 +118,13 @@ public class DBConfiguration {
 			System.out.println("url ---> " + resource.getString("db.url"));
 			dataSource.setUsername(resource.getString("db.username"));
 			dataSource.setPassword(resource.getString("db.password"));
+
+			ConstantValue.loginAppId = resource.getString("loginAppId");
+			ConstantValue.loginURL = resource.getString("loginURL");
+			ConstantValue.loginUsername = resource.getString("loginUsername");
+			ConstantValue.loginPassword = resource.getString("loginPassword");
+			ConstantValue.caseAuthURL = resource.getString("caseAuthURL");
+
 		}
 		catch (Exception e){
 			e.printStackTrace();
@@ -153,4 +160,6 @@ public class DBConfiguration {
 	public void warDetials(){
 		log.info("Supervisor submit fix - 30.10.2025");
 	}
+
+
 }

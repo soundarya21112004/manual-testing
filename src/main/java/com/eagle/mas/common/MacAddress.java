@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class MacAddress {
 	
 	
-	  public String MacAddressWindows() throws IOException {
+	  public static String MacAddressWindows() throws IOException {
 	        String macAddress = null;
 	        String command = "ipconfig /all";
 	        Process pid = Runtime.getRuntime().exec(command);
@@ -34,7 +34,7 @@ public class MacAddress {
 	                }
 	            }
 	        }
-	        //System.out.println("Mac id :" + macAddress);
+	        System.out.println("Mac id :" + macAddress);
 	        in.close();
 	        return macAddress;
 	    }
