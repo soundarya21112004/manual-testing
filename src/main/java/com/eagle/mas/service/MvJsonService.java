@@ -394,7 +394,7 @@ public class MvJsonService {
         mvJsonRepository.saveMvJson(mvJson, probe);
     }
 
-    public MvJson getUpdateStatus(String rid) {
+    public List<MvJson> getUpdateStatus(String rid) {
     return mvJsonRepository.getUpdateStatus(rid, PageRequest.of(0, 1));
     }
 }

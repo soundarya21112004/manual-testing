@@ -40,7 +40,7 @@ public class MacAddress {
 	    }
 
 
-	  public String MacAddressLinux() {
+	  public static String MacAddressLinux() {
 	        String line = null;
 	     
 	        try {
@@ -70,7 +70,7 @@ public class MacAddress {
 	    }
 	  
 	  
-	  public String MacAddress() throws IOException {
+	  public static String MacAddress() throws IOException {
 	        String line = null;
 	        String command = "/sbin/ifconfig";
 	        try {

@@ -200,7 +200,7 @@ public class HitUsers {
             requestBody.put("idType","MVS");
             requestBody.put("riskScore","0");
             requestBody.put("location",location);
-            requestBody.put("macAddress",MacAddress.MacAddressWindows());
+            requestBody.put("macAddress",MacAddress.MacAddress());
             requestBody.put("transactionId","");
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
@@ -221,19 +221,13 @@ public class HitUsers {
                 result.put("message", response.getStatusCodeValue());
             }
 
-
-
         } else {
             result.put("status", "error");
             result.put("message", "Authentication failed");
 
         }
-
-
 return result;
     }
-
-
 
 
 

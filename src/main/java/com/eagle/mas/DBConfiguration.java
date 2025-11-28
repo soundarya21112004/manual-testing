@@ -85,6 +85,8 @@ public class DBConfiguration {
 	public DataSource dataSource() throws IOException {
 		OSCheck();
 		System.out.println("Data Source");
+		System.out.println("Loading MVS.conf from: " + propertyFile.getAbsolutePath());
+		System.out.println("Exists? " + propertyFile.exists());
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		InputStream in = null;
 		try{

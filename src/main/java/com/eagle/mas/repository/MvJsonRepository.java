@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MvJsonRepository  extends CrudRepository<MvJson, BigInteger> {
@@ -34,10 +35,10 @@ public interface MvJsonRepository  extends CrudRepository<MvJson, BigInteger> {
 
     @Transactional
     @Modifying
-    @Query("UPDATE MvJson SET mvReqJson = :mvJson WHERE matchedRefId = :m_rid")
+    @Query("UPDATE MvJson SET mvReqJson = :mvJson, updateStatus = 'UPDATED' WHERE matchedRefId = :m_rid")
     void saveMvJson(String mvJson, String m_rid);
 
     @Query(value = "select t1 from MvJson t1 where t1.matchedRefId=:rid ")
-    MvJson getUpdateStatus(@Param("rid") String rid, Pageable pageable);
+    List<MvJson> getUpdateStatus(@Param("rid") String rid, Pageable pageable);
 }
 

@@ -20,11 +20,12 @@ public class MvJson {
     private String regType;
     private String updateStatus;
 
+    @Column(name = "update_status")
     public String getUpdateStatus() {
         return updateStatus;
     }
 
-    @Column(name = "update_status")
+
     public void setUpdateStatus(String updateStatus) {
         this.updateStatus = updateStatus;
     }
