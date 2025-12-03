@@ -250,6 +250,7 @@
                                                               <c:param name="requestId" value="${emp.reqid}"></c:param>
                                                               <c:param name="caseListNo" value="${counter.count} of ${galleryList.size()}"></c:param>
                                                               <c:param name="regType" value="${emp.regType}"></c:param>
+                                                              <c:param name="candidateRegType" value="${emp.candidateRegType}"></c:param>
                                                                 </c:url>">
                                                                       <i class="nav-icon fas fa-edit fa-2x" aria-hidden="true"></i>
                                                                   </a>

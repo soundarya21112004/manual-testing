@@ -19,6 +19,16 @@ public class MvJson {
     private Date currentTime;
     private String regType;
     private String updateStatus;
+    private String candidateRegType;
+
+    @Column(name = "candidate_reg_type")
+    public String getCandidateRegType() {
+        return candidateRegType;
+    }
+
+    public void setCandidateRegType(String candidateRegType) {
+        this.candidateRegType = candidateRegType;
+    }
 
     @Column(name = "update_status")
     public String getUpdateStatus() {

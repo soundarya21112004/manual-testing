@@ -308,7 +308,8 @@ public class LevelOneController {
                                        @RequestParam("candidate") String candidate,
                                        @RequestParam("requestId") String requestId,
                                        @RequestParam("caseListNo") String caseListNo,
-                                       @RequestParam("regType") String regType
+                                       @RequestParam("regType") String regType,
+                                       @RequestParam("candidateRegType") String candidateRegType
 
     ) throws URISyntaxException, NoSuchAlgorithmException, KeyManagementException {
         logger.info("Entering leveloneSearchByName method with params: id={}, probe={}, candidate={}, requestId={}, caseListNo={}",
@@ -1034,7 +1035,7 @@ public class LevelOneController {
 
 
                     try {
-                        if ("update".equalsIgnoreCase(regType)) {
+                        if ("update".equalsIgnoreCase(candidateRegType)) {
                             List<MvJson> mvJson =  mvJsonService.getUpdateStatus(candidate);
                             if (mvJson.size()>0 && !"UPDATED".equalsIgnoreCase(mvJson.get(0).getUpdateStatus())){
                                 jsonUtility.initializeExecutor();
