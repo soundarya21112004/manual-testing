@@ -67,6 +67,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Controller
@@ -318,7 +319,6 @@ public class LevelOneController {
         boolean psnGenerated =false;
         logger.debug("Session attributes set: regId={}, matchRegId={}", probe, candidate);
 
-        System.out.println("Hello Name");
 
      //   hitUsers.AuthenticateLogin();
 
@@ -564,12 +564,17 @@ public class LevelOneController {
                                                return null;
                                            });
 
-                                   ResponseDto identityResponse = identityFuture.get();
+                                   ResponseDto ProbeIdentityResponse = identityFuture.get();
 
-                                   if (identityResponse != null && identityResponse.getResponse() != null) {
+//                                   CompletableFuture<ResponseDto> finalIdentityFuture =
+//                                           identityFuture.thenApply(identityResponse -> identityResponse);
+//
+//                                   ResponseDto identityResponse = finalIdentityFuture.join();
+
+                                   if (ProbeIdentityResponse != null && ProbeIdentityResponse.getResponse() != null) {
                                        try {
                                            FieldResponseDto fieldResponseDto = obj.readValue(
-                                                   jsonUtility.javaObjectToJsonString(identityResponse.getResponse()),
+                                                   jsonUtility.javaObjectToJsonString(ProbeIdentityResponse.getResponse()),
                                                    FieldResponseDto.class);
                                            String uin = fieldResponseDto.getFields().get("UIN");
 
@@ -627,7 +632,7 @@ public class LevelOneController {
 
 // Step 4: Set into parent object ⬇️
                                                jsonObject1.put("identity", updatedIdentityJson);
-                                               mvJsonService.saveMvJson(obj.writeValueAsString(jsonObject1), probe);
+//                                               mvJsonService.saveMvJson(obj.writeValueAsString(jsonObject1), probe);
                                                jsonObj1 = updatedIdentityJson;
 
                                            } else {
@@ -1036,22 +1041,23 @@ public class LevelOneController {
 
                     try {
                         if ("update".equalsIgnoreCase(candidateRegType)) {
+
                             List<MvJson> mvJson =  mvJsonService.getUpdateStatus(candidate);
                             if (mvJson.size()>0 && !"UPDATED".equalsIgnoreCase(mvJson.get(0).getUpdateStatus())){
                                 jsonUtility.initializeExecutor();
                                 tokenGenerator.getToken();
-                                CompletableFuture<ResponseDto> identityFuture = jsonUtility.getIdentityAsync1(probe)
+                                CompletableFuture<ResponseDto> identityFuture = jsonUtility.getIdentityAsync1(candidate)
                                         .exceptionally(ex -> {
                                             logger.error("Error fetching identity", ex);
                                             return null;
                                         });
 
-                                ResponseDto identityResponse = identityFuture.get();
+                                ResponseDto candidateIdentityResponse = identityFuture.get();
 
-                                if (identityResponse != null && identityResponse.getResponse() != null) {
+                                if (candidateIdentityResponse != null && candidateIdentityResponse.getResponse() != null) {
                                     try {
                                         FieldResponseDto fieldResponseDto = obj.readValue(
-                                                jsonUtility.javaObjectToJsonString(identityResponse.getResponse()),
+                                                jsonUtility.javaObjectToJsonString(candidateIdentityResponse.getResponse()),
                                                 FieldResponseDto.class);
                                         String uin = fieldResponseDto.getFields().get("UIN");
 
@@ -1107,13 +1113,12 @@ public class LevelOneController {
 
 //                                            System.out.println("Updated identity json"+ updatedIdentityJson);
 
-// Step 4: Set into parent object ⬇️
                                             jsonObject1.put("identity", updatedIdentityJson);
-                                            mvJsonService.saveMvJson(obj.writeValueAsString(jsonObject1), probe);
+//                                            mvJsonService.saveMvJson(obj.writeValueAsString(jsonObject1), candidate);
                                             jsonObj1 = updatedIdentityJson;
 
                                         } else {
-                                            logger.info("Id repo uin response is null for regid: {}", probe);
+                                            logger.info("Id repo uin response is null for regid: {}", candidate);
                                         }
                                         logger.info("Successfully fetched Identity");
                                     } catch (Exception e) {

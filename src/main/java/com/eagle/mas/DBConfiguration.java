@@ -160,7 +160,7 @@ public class DBConfiguration {
 
 	@PostConstruct
 	public void warDetials(){
-		log.info("Supervisor submit fix - 30.10.2025");
+		log.info("Demo from IDRepo - 30.10.2025");
 	}
 
 
