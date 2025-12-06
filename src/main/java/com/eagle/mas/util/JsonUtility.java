@@ -552,7 +552,7 @@ public class JsonUtility {
             headers.set("Cookie", TokenGenerator.validToken);
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<T> entity = new HttpEntity<>(headers);
-            ResponseEntity<ResponseDto> response = restTemplate.exchange(url + rid, HttpMethod.GET, entity, ResponseDto.class);
+            ResponseEntity<ResponseDto> response = restTemplate.exchange(url + rid + "?type=ALL", HttpMethod.GET, entity, ResponseDto.class);
             return response.getBody();
         } catch (Exception e) {
             e.printStackTrace();

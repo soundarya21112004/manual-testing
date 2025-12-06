@@ -24,6 +24,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.aspectj.weaver.bcel.ExceptionRange;
 import org.jose4j.base64url.Base64Url;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -169,7 +170,7 @@ public class LevelOneController {
                 if (result.size() == list.size()) {
                     logger.info("All cases processed. Submitting...");
 
-                         long dupCount = list.stream().filter(e -> "DUP".equals(e.getFinindi())).count();
+                         /*long dupCount = list.stream().filter(e -> "DUP".equals(e.getFinindi())).count();
 
                             if(dupCount > 0 && dupCount == list.size()) {
                                 try {
@@ -179,12 +180,10 @@ public class LevelOneController {
                                 } catch (KeyManagementException ex) {
                                     throw new RuntimeException(ex);
                                 }
-                            }
+                            }*/
 
                                 list.stream().filter(e -> "DUP".equals(e.getFinindi())).forEach(
-
                                         e -> e.setCaseEvaluationComplete(1)
-
                                 );
 
 
@@ -255,7 +254,7 @@ public class LevelOneController {
             if (userCaseRequest == null) {
                 logger.info("No case assigned to user. Searching for new cases by priority...");
 
-                roles = mvs.listOfRidsHigherPriority1(user.getUserid(),"update");
+//                roles = mvs.listOfRidsHigherPriority1(user.getUserid(),"update");
 
                 /*String[] priorities = {"2", "1"};
                 for (String priority : priorities) {
@@ -308,9 +307,7 @@ public class LevelOneController {
                                        @RequestParam("probe") String probe,
                                        @RequestParam("candidate") String candidate,
                                        @RequestParam("requestId") String requestId,
-                                       @RequestParam("caseListNo") String caseListNo,
-                                       @RequestParam("regType") String regType,
-                                       @RequestParam("candidateRegType") String candidateRegType
+                                       @RequestParam("caseListNo") String caseListNo
 
     ) throws URISyntaxException, NoSuchAlgorithmException, KeyManagementException {
         logger.info("Entering leveloneSearchByName method with params: id={}, probe={}, candidate={}, requestId={}, caseListNo={}",
@@ -355,6 +352,7 @@ public class LevelOneController {
 //            return "redirect:errorPage";
 //        }
 //        if(processStatusExist==null || processStatusExist.equalsIgnoreCase("0"))
+
 //        {
         try{
             int string_id = Integer.parseInt(id);
@@ -370,7 +368,11 @@ public class LevelOneController {
             logger.debug("Processing documents for probe: {}", probe);
 
             String pathname = new FileSystemResource("").getFile().getAbsolutePath();
+
+
             if (probe != null) {
+                String probeRegType = mvJsonService.getRegTypeFromRegistration(probe);
+
 //                int count = mvs.countAllByRegId(probe);
 //                int count = Integer.parseInt(caseListNo);
                 model.addAttribute("count",caseListNo);
@@ -499,11 +501,19 @@ public class LevelOneController {
                 try {
                     try{
                         JSONObject jsonObject1 =mvJsonService.getJson(probe);
-                        /*
-                         * Getting dcouments from mvs Response JSON
-                         * Start
-                         * */
-                        /*Reading Document from JSON PROBE Start*/
+                        try {
+                            if ("update".equalsIgnoreCase(probeRegType)) {
+                                JSONObject updatedJsonObject = mvJsonService.getDemoFromIdRepo(probe, jsonObject1, probeRegType);
+                                if (updatedJsonObject != null){
+                                    jsonObject1 = updatedJsonObject;
+                                }
+                                else {
+                                    logger.info("Identity not found in id repo");
+                                }
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
                         try{
                             if(jsonObject1.get("documents")!=null) {
                                 JSONObject jsonObjectResponse = (JSONObject) jsonObject1.get("documents");
@@ -541,240 +551,145 @@ public class LevelOneController {
                          * */
                         /*Reading Document from JSON PROBE  End*/
 
-                        JSONObject jsonObj1 =(JSONObject) jsonObject1.get("identity");
+                        try{
+                            JSONObject jsonObj1 =(JSONObject) jsonObject1.get("identity");
+                            String data1 =  null;
+                            JSONArray jsonArray1 = new JSONArray();
+                            JSONObject jsonObject3 = new JSONObject();
+                            String valueFrm= null;
 
-//                        String data =  (String) jsonObj1.get("firstName");
 
-
-                        /************Variables for Values taken from Response JSON *************/
-                        String data1 =  null;
-                        JSONArray jsonArray1 = new JSONArray();
-                        JSONObject jsonObject3 = new JSONObject();
-                        String valueFrm= null;
-
-                        try {
-                            if ("update".equalsIgnoreCase(regType)) {
-                                List<MvJson> mvJson =  mvJsonService.getUpdateStatus(probe);
-                               if (mvJson.size()>0 && !"UPDATED".equalsIgnoreCase(mvJson.get(0).getUpdateStatus())){
-                                   jsonUtility.initializeExecutor();
-                                   tokenGenerator.getToken();
-                                   CompletableFuture<ResponseDto> identityFuture = jsonUtility.getIdentityAsync1(probe)
-                                           .exceptionally(ex -> {
-                                               logger.error("Error fetching identity", ex);
-                                               return null;
-                                           });
-
-                                   ResponseDto ProbeIdentityResponse = identityFuture.get();
-
-//                                   CompletableFuture<ResponseDto> finalIdentityFuture =
-//                                           identityFuture.thenApply(identityResponse -> identityResponse);
-//
-//                                   ResponseDto identityResponse = finalIdentityFuture.join();
-
-                                   if (ProbeIdentityResponse != null && ProbeIdentityResponse.getResponse() != null) {
-                                       try {
-                                           FieldResponseDto fieldResponseDto = obj.readValue(
-                                                   jsonUtility.javaObjectToJsonString(ProbeIdentityResponse.getResponse()),
-                                                   FieldResponseDto.class);
-                                           String uin = fieldResponseDto.getFields().get("UIN");
-
-//                                        System.out.println("UIN : " + uin);
-
-//                                        System.out.println("mvjson identity : " + jsonObj1);
-
-                                           ResponseDto<?> idRepoUinResponse = jsonUtility.makeGetRequest(uin, ConstantValue.IDREPOGETAPI);
-                                           if (idRepoUinResponse.getResponse() != null) {
-                                               Map<?, ?> responseMap = (Map<?, ?>) idRepoUinResponse.getResponse();
-                                               Map<?, ?> identityMap = (Map<?, ?>) responseMap.get("identity");
-
-//                                            System.out.println("identityMap : " + identityMap);
-
-                                               obj.enable(SerializationFeature.INDENT_OUTPUT);
-
-                                               Map<String, Object> localIdentity =
-                                                       obj.readValue(jsonObj1.toString(), Map.class);
-                                               Map<String, Object> apiIdentity =
-                                                       (Map<String, Object>) responseMap.get("identity");
-
-                                               for (String key : localIdentity.keySet()) {
-
-                                                   if (!apiIdentity.containsKey(key)) {
-                                                       continue; // Only update existing DB fields
-                                                   }
-
-                                                   Object apiValue = apiIdentity.get(key);
-                                                   if (apiValue == null) {
-                                                       continue; // keep null
-                                                   }
-
-                                                   // Case 1: List value -> convert to JSON string
-                                                   if (apiValue instanceof List) {
-                                                       String jsonString = obj.writeValueAsString(apiValue);
-                                                       localIdentity.put(key, jsonString);
-                                                   }
-
-                                                   // Case 2: Map value -> convert to JSON string
-                                                   else if (apiValue instanceof Map) {
-                                                       String jsonString = obj.writeValueAsString(apiValue);
-                                                       localIdentity.put(key, jsonString);
-                                                   }
-
-                                                   // Case 3: Primitive/string -> convert to string
-                                                   else {
-                                                       localIdentity.put(key, apiValue.toString());
-                                                   }
-                                               }
-
-//                                            String updatedIdentityJsonString = obj.writeValueAsString(localIdentity);
-                                               JSONObject updatedIdentityJson = new JSONObject(localIdentity);
-
-//                                            System.out.println("Updated identity json"+ updatedIdentityJson);
-
-// Step 4: Set into parent object ⬇️
-                                               jsonObject1.put("identity", updatedIdentityJson);
-//                                               mvJsonService.saveMvJson(obj.writeValueAsString(jsonObject1), probe);
-                                               jsonObj1 = updatedIdentityJson;
-
-                                           } else {
-                                               logger.info("Id repo uin response is null for regid: {}", probe);
-                                           }
-                                           logger.info("Successfully fetched Identity");
-                                       } catch (Exception e) {
-                                           logger.error("Error processing identity response", e);
-                                       }
-                                   } else {
-                                       logger.warn("Identity Response not available");
-                                   }
-                               }
-//                                System.out.println("Update packet");
+                            if(jsonObj1.get("firstName") != null){
+                                data1 =  (String) jsonObj1.get("firstName");
+                                JSONArray jsonArray = (JSONArray) jsonParser.parse(data1);
+                                JSONObject jsonObject2 = (JSONObject) jsonArray.get(0);
+                                String firstName= (String) jsonObject2.get("value");
+                                beanProbe.setFirstName(firstName);
                             }
-                        }catch (Exception e){
+
+                            if(jsonObj1.get("presentAddressLine1")!=null){
+                                data1 =  (String) jsonObj1.get("presentAddressLine1");
+                                jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                                jsonObject3 = (JSONObject) jsonArray1.get(0);
+                                valueFrm= (String) jsonObject3.get("value");
+                                beanProbe.setPresentAddressLine1(valueFrm);
+                            }
+
+                            if(jsonObj1.get("presentBarangay")!=null){
+                                data1 =  (String) jsonObj1.get("presentBarangay");
+                                jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                                JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                                valueFrm= (String) jsonObject4.get("value");
+                                beanProbe.setPresentBarangay(valueFrm);}
+
+                            if(jsonObj1.get("presentProvince")!=null){
+                                data1 =  (String) jsonObj1.get("presentProvince");
+                                jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                                JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                                valueFrm= (String) jsonObject4.get("value");
+
+                                beanProbe.setPresentProvince(valueFrm);}
+                            String pobCity_Country = "";
+
+                            if(jsonObj1.get("pobCity")!=null){
+                                data1 =  (String) jsonObj1.get("pobCity");
+                                jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                                JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                                valueFrm= (String) jsonObject4.get("value");
+                                pobCity_Country = valueFrm+", ";
+
+//                            beanProbe.setPobCountry(valueFrm);
+                            }
+
+                            if(jsonObj1.get("pobCountry")!=null){
+                                data1 =  (String) jsonObj1.get("pobCountry");
+                                jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                                JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                                valueFrm= (String) jsonObject4.get("value");
+
+                                pobCity_Country = pobCity_Country + valueFrm;
+                                beanProbe.setPobCountry(pobCity_Country);}
+
+                            if(jsonObj1.get("gender")!=null){
+                                data1 =  (String) jsonObj1.get("gender");
+                                jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                                JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                                valueFrm= (String) jsonObject4.get("value");
+
+                                beanProbe.setGender(valueFrm);}
+
+                            if(jsonObj1.get("presentCity")!=null){
+                                data1 =  (String) jsonObj1.get("presentCity");
+                                jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                                JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                                valueFrm= (String) jsonObject4.get("value");
+
+                                beanProbe.setPresentCity(valueFrm);}
+
+                            if(jsonObj1.get("middleName")!=null){
+                                data1 =  (String) jsonObj1.get("middleName");
+                                jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                                JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                                valueFrm= (String) jsonObject4.get("value");
+
+                                beanProbe.setMiddleName(valueFrm);}
+
+                            if(jsonObj1.get("lastName")!=null){
+                                data1 =  (String) jsonObj1.get("lastName");
+                                jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                                JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                                valueFrm= (String) jsonObject4.get("value");
+
+                                beanProbe.setLastName(valueFrm);}
+
+                            if(jsonObj1.get("presentZipcode")!=null){
+                                data1 =  (String) jsonObj1.get("presentZipcode");
+                                jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                                JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                                valueFrm= (String) jsonObject4.get("value");
+
+                                beanProbe.setPresentZipcode(valueFrm);}
+
+                            if(jsonObj1.get("presentCountry")!=null){
+                                data1 =  (String) jsonObj1.get("presentCountry");
+                                jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                                JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                                valueFrm= (String) jsonObject4.get("value");
+
+                                beanProbe.setPresentCountry(valueFrm);}
+
+                            if(jsonObj1.get("suffix")!=null){
+                                data1 =  (String) jsonObj1.get("suffix");
+                                jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                                JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                                valueFrm= (String) jsonObject4.get("value");
+
+                                beanProbe.setSuffix(valueFrm);}
+
+                            if(jsonObj1.get("dateOfBirth")!=null){
+                                String data7 = (String) jsonObj1.get("dateOfBirth");
+
+                                String[] split = data7.split("/");
+                                String monthOfBirth = split[1].toString();
+
+                                String dayOfBirth = split[2].substring(0, 2).toString();
+
+                                String yearOfBirth = split[0].toString();
+
+                                beanProbe.setMonthOfBirth(monthOfBirth);
+                                beanProbe.setDayOfBirth(dayOfBirth);
+                                beanProbe.setYearOfBirth(yearOfBirth);}
+                            model.addAttribute("probeDemoFields", beanProbe);
+
+                        }
+                        catch (Exception e){
                             e.printStackTrace();
                         }
 
-                        if(jsonObj1.get("firstName") != null){
-                            data1 =  (String) jsonObj1.get("firstName");
-                            JSONArray jsonArray = (JSONArray) jsonParser.parse(data1);
-                            JSONObject jsonObject2 = (JSONObject) jsonArray.get(0);
-                            String firstName= (String) jsonObject2.get("value");
-                            beanProbe.setFirstName(firstName);
-                        }
 
-                        if(jsonObj1.get("presentAddressLine1")!=null){
-                            data1 =  (String) jsonObj1.get("presentAddressLine1");
-                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                            jsonObject3 = (JSONObject) jsonArray1.get(0);
-                            valueFrm= (String) jsonObject3.get("value");
-                            beanProbe.setPresentAddressLine1(valueFrm);
-                        }
-
-                        if(jsonObj1.get("presentBarangay")!=null){
-                            data1 =  (String) jsonObj1.get("presentBarangay");
-                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                            valueFrm= (String) jsonObject4.get("value");
-                            beanProbe.setPresentBarangay(valueFrm);}
-
-                        if(jsonObj1.get("presentProvince")!=null){
-                            data1 =  (String) jsonObj1.get("presentProvince");
-                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                            valueFrm= (String) jsonObject4.get("value");
-
-                            beanProbe.setPresentProvince(valueFrm);}
-                        String pobCity_Country = "";
-
-                        if(jsonObj1.get("pobCity")!=null){
-                            data1 =  (String) jsonObj1.get("pobCity");
-                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                            valueFrm= (String) jsonObject4.get("value");
-                            pobCity_Country = valueFrm+", ";
-
-//                            beanProbe.setPobCountry(valueFrm);
-                        }
-
-                        if(jsonObj1.get("pobCountry")!=null){
-                            data1 =  (String) jsonObj1.get("pobCountry");
-                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                            valueFrm= (String) jsonObject4.get("value");
-
-                            pobCity_Country = pobCity_Country + valueFrm;
-                            beanProbe.setPobCountry(pobCity_Country);}
-
-                        if(jsonObj1.get("gender")!=null){
-                            data1 =  (String) jsonObj1.get("gender");
-                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                            valueFrm= (String) jsonObject4.get("value");
-
-                            beanProbe.setGender(valueFrm);}
-
-                        if(jsonObj1.get("presentCity")!=null){
-                            data1 =  (String) jsonObj1.get("presentCity");
-                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                            valueFrm= (String) jsonObject4.get("value");
-
-                            beanProbe.setPresentCity(valueFrm);}
-
-                        if(jsonObj1.get("middleName")!=null){
-                            data1 =  (String) jsonObj1.get("middleName");
-                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                            valueFrm= (String) jsonObject4.get("value");
-
-                            beanProbe.setMiddleName(valueFrm);}
-
-                        if(jsonObj1.get("lastName")!=null){
-                            data1 =  (String) jsonObj1.get("lastName");
-                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                            valueFrm= (String) jsonObject4.get("value");
-
-                            beanProbe.setLastName(valueFrm);}
-
-                        if(jsonObj1.get("presentZipcode")!=null){
-                            data1 =  (String) jsonObj1.get("presentZipcode");
-                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                            valueFrm= (String) jsonObject4.get("value");
-
-                            beanProbe.setPresentZipcode(valueFrm);}
-
-                        if(jsonObj1.get("presentCountry")!=null){
-                            data1 =  (String) jsonObj1.get("presentCountry");
-                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                            valueFrm= (String) jsonObject4.get("value");
-
-                            beanProbe.setPresentCountry(valueFrm);}
-
-                        if(jsonObj1.get("suffix")!=null){
-                            data1 =  (String) jsonObj1.get("suffix");
-                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                            valueFrm= (String) jsonObject4.get("value");
-
-                            beanProbe.setSuffix(valueFrm);}
-
-                        if(jsonObj1.get("dateOfBirth")!=null){
-                            String data7 = (String) jsonObj1.get("dateOfBirth");
-
-                            String[] split = data7.split("/");
-                            String monthOfBirth = split[1].toString();
-
-                            String dayOfBirth = split[2].substring(0, 2).toString();
-
-                            String yearOfBirth = split[0].toString();
-
-                            beanProbe.setMonthOfBirth(monthOfBirth);
-                            beanProbe.setDayOfBirth(dayOfBirth);
-                            beanProbe.setYearOfBirth(yearOfBirth);}
-                        model.addAttribute("probeDemoFields", beanProbe);
-                        byte[] decodedBytes = Base64.getUrlDecoder().decode((String) jsonObject1.get("biometrics"));
-                        String decodedBioXml = new String(decodedBytes);
+                        try{
+                            byte[] decodedBytes = Base64.getUrlDecoder().decode((String) jsonObject1.get("biometrics"));
+                            String decodedBioXml = new String(decodedBytes);
 //                        try{
 //                            //jsonObject = (JSONObject) jsonParser.parse(reader2);
 //
@@ -787,26 +702,26 @@ public class LevelOneController {
 //                            logger.error(logger("LevelOneController","leveloneSearchByName",getUtcTime(), e.toString()));
 //                        }
 //                        File file = new File(pathname+"/mvs/datajsonProgram.xml");
-                        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
 
-                        DocumentBuilder db = dbf.newDocumentBuilder();
-                        Document document = (Document) db.parse(new InputSource(new StringReader(decodedBioXml)));
-                        NodeList nodeList = document.getElementsByTagName("BIR");
+                            DocumentBuilder db = dbf.newDocumentBuilder();
+                            Document document = (Document) db.parse(new InputSource(new StringReader(decodedBioXml)));
+                            NodeList nodeList = document.getElementsByTagName("BIR");
 
-                        for (int i = 0; i < nodeList.getLength(); ++i) {
-                            Node node = nodeList.item(i);
+                            for (int i = 0; i < nodeList.getLength(); ++i) {
+                                Node node = nodeList.item(i);
 //                        System.out.println("\nNode Name :"
 //                                + node.getNodeName());
-                            //  if (node.getNodeType()== Node.ELEMENT_NODE) {
-                            Element tElement = (Element)node;
-                            String type=tElement.getElementsByTagName("Type").item(1).getTextContent();
+                                //  if (node.getNodeType()== Node.ELEMENT_NODE) {
+                                Element tElement = (Element)node;
+                                String type=tElement.getElementsByTagName("Type").item(1).getTextContent();
 
-                            if (type.equalsIgnoreCase("IRIS")) {
-                                String Subtypeiris=tElement.getElementsByTagName("Subtype").item(0).getTextContent();
+                                if (type.equalsIgnoreCase("IRIS")) {
+                                    String Subtypeiris=tElement.getElementsByTagName("Subtype").item(0).getTextContent();
 
-                                imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
-                                imag = new ReadImage().covertasImage(imageData,146);
+                                    imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
+                                    imag = new ReadImage().covertasImage(imageData,146);
 //                                  imageData = IrisDecoder.convertFaceISO19794_6_2011ToImage(Base64.getDecoder().decode(tElement.getElementsByTagName("BDB").item(0).getTextContent()));
 //                                  BufferedImage image = JDeli.read(imageData);
 //                                String pathname = new FileSystemResource("").getFile().getAbsolutePath();
@@ -826,30 +741,30 @@ public class LevelOneController {
 //                                  enCodeFile = Base64.getEncoder().encodeToString(viewImage);
 //                                  imag = "data:image/jpg;base64," + enCodeFile;
 //                                   tmpInputStream.close();
-                                GalleryBean irscoresProb = new GalleryBean();
-                                if(Subtypeiris.equalsIgnoreCase("Left")){
-                                    String leftiris = irscoresProb.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
-                                    beanBioProbe.setLeftiris(leftiris); }
-                                if(Subtypeiris.equalsIgnoreCase("Right")){
-                                    String rightiris = irscoresProb.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                    GalleryBean irscoresProb = new GalleryBean();
+                                    if(Subtypeiris.equalsIgnoreCase("Left")){
+                                        String leftiris = irscoresProb.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                        beanBioProbe.setLeftiris(leftiris); }
+                                    if(Subtypeiris.equalsIgnoreCase("Right")){
+                                        String rightiris = irscoresProb.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                    beanBioProbe.setRightiris(rightiris); }
+                                        beanBioProbe.setRightiris(rightiris); }
 //                             irscoresProb.setScore(tElement.getElementsByTagName("Subtype").item(0).getTextContent());
 
 //                            beanProbe.setIrscoresProb(irscoresProb.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent()));
 
-                                // JSONObject qualityJson = (JSONObject) jsonObjValue.get("Quality");
-                                // irscores.setScore(qualityJson.get("Score").toString());
-                                // irscores.setUrl(jsonObjValue.get("Subtype").toString());
-                                irscoresProb.setProbeIrisImage(imag);
-                                if(irisProbScore.size()<2)
-                                    irisProbScore.add(irscoresProb);
-                            }else if (type.equalsIgnoreCase("Finger")) {
-                                String Subtype=tElement.getElementsByTagName("Subtype").item(0).getTextContent();
+                                    // JSONObject qualityJson = (JSONObject) jsonObjValue.get("Quality");
+                                    // irscores.setScore(qualityJson.get("Score").toString());
+                                    // irscores.setUrl(jsonObjValue.get("Subtype").toString());
+                                    irscoresProb.setProbeIrisImage(imag);
+                                    if(irisProbScore.size()<2)
+                                        irisProbScore.add(irscoresProb);
+                                }else if (type.equalsIgnoreCase("Finger")) {
+                                    String Subtype=tElement.getElementsByTagName("Subtype").item(0).getTextContent();
 
 
-                                imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
-                                imag = new ReadImage().covertasImage(imageData,138);
+                                    imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
+                                    imag = new ReadImage().covertasImage(imageData,138);
 //                                imageData = FingerDecoder.convertFingerISO19794_4_2011ToImage(Base64.getDecoder().decode(tElement.getElementsByTagName("BDB").item(0).getTextContent()));
 //                                BufferedImage image = JDeli.read(imageData);
 //                                // String pathname = new FileSystemResource("").getFile().getAbsolutePath();
@@ -863,62 +778,62 @@ public class LevelOneController {
 //                                enCodeFile = Base64.getEncoder().encodeToString(viewImage);
 //                                imag = "data:image/jpg;base64," + enCodeFile;
 //                                tmpInputStream.close();
-                                GalleryBean score = new GalleryBean();
-                                if(Subtype.equalsIgnoreCase("Left MiddleFinger")){
-                                    String leftmiddlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                    GalleryBean score = new GalleryBean();
+                                    if(Subtype.equalsIgnoreCase("Left MiddleFinger")){
+                                        String leftmiddlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                    beanBioProbe.setLeftmiddlefinger(leftmiddlefinger); }
-                                if(Subtype.equalsIgnoreCase("Left IndexFinger")){
-                                    String leftindexfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                        beanBioProbe.setLeftmiddlefinger(leftmiddlefinger); }
+                                    if(Subtype.equalsIgnoreCase("Left IndexFinger")){
+                                        String leftindexfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                    beanBioProbe.setLeftindexfinger(leftindexfinger);}
-                                if(Subtype.equalsIgnoreCase("Left LittleFinger")){
-                                    String leftlittlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                        beanBioProbe.setLeftindexfinger(leftindexfinger);}
+                                    if(Subtype.equalsIgnoreCase("Left LittleFinger")){
+                                        String leftlittlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                    beanBioProbe.setLeftlittlefinger(leftlittlefinger);}
-                                if(Subtype.equalsIgnoreCase("Left RingFinger")){
-                                    String leftringfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                        beanBioProbe.setLeftlittlefinger(leftlittlefinger);}
+                                    if(Subtype.equalsIgnoreCase("Left RingFinger")){
+                                        String leftringfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                    beanBioProbe.setLeftringfinger(leftringfinger);}
-                                if(Subtype.equalsIgnoreCase("Left Thumb")){
-                                    String leftthumb = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                        beanBioProbe.setLeftringfinger(leftringfinger);}
+                                    if(Subtype.equalsIgnoreCase("Left Thumb")){
+                                        String leftthumb = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                    beanBioProbe.setLeftthumb(leftthumb);}
-                                if(Subtype.equalsIgnoreCase("Right MiddleFinger")){
-                                    String rightmiddlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                        beanBioProbe.setLeftthumb(leftthumb);}
+                                    if(Subtype.equalsIgnoreCase("Right MiddleFinger")){
+                                        String rightmiddlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                    beanBioProbe.setRightmiddlefinger(rightmiddlefinger);}
-                                if(Subtype.equalsIgnoreCase("Right IndexFinger")){
-                                    String rightindexfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                        beanBioProbe.setRightmiddlefinger(rightmiddlefinger);}
+                                    if(Subtype.equalsIgnoreCase("Right IndexFinger")){
+                                        String rightindexfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                    beanBioProbe.setRightindexfinger(rightindexfinger);}
-                                if(Subtype.equalsIgnoreCase("Right LittleFinger")){
-                                    String rightlittlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                        beanBioProbe.setRightindexfinger(rightindexfinger);}
+                                    if(Subtype.equalsIgnoreCase("Right LittleFinger")){
+                                        String rightlittlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                    beanBioProbe.setRightlittlefinger(rightlittlefinger);}
-                                if(Subtype.equalsIgnoreCase("Right RingFinger")){
-                                    String rightringfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                        beanBioProbe.setRightlittlefinger(rightlittlefinger);}
+                                    if(Subtype.equalsIgnoreCase("Right RingFinger")){
+                                        String rightringfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                    beanBioProbe.setRightringfinger(rightringfinger);}
-                                if(Subtype.equalsIgnoreCase("Right Thumb")){
-                                    String rightthumb = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                        beanBioProbe.setRightringfinger(rightringfinger);}
+                                    if(Subtype.equalsIgnoreCase("Right Thumb")){
+                                        String rightthumb = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                    beanBioProbe.setRightthumb(rightthumb);}
+                                        beanBioProbe.setRightthumb(rightthumb);}
 
-                                //  JSONObject qualityJson = (JSONObject) jsonObjValue.get("Quality");
-                                //score.setScore(qualityJson.get("Score").toString());
-                                //  score.setUrl(jsonObjValue.get("Subtype").toString());
-                                score.setFingerImage(imag);
+                                    //  JSONObject qualityJson = (JSONObject) jsonObjValue.get("Quality");
+                                    //score.setScore(qualityJson.get("Score").toString());
+                                    //  score.setUrl(jsonObjValue.get("Subtype").toString());
+                                    score.setFingerImage(imag);
 //                                if (jsonObjValue.get("Subtype").toString().contains("Left")) {
-                                leftfingerProb.add(score);
+                                    leftfingerProb.add(score);
 //                                } else {
-                                rightfingerProb.add(score);
+                                    rightfingerProb.add(score);
 //                                }
-                            } else
-                            if (type.equalsIgnoreCase("FACE")) {
-                                //imageData = FaceDecoder.convertFaceISO19794_5_2011ToImage(Base64.getDecoder().decode(jsonvalue.toString()));
-                                imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
-                                probFaceImage = new ReadImage().covertasImage(imageData,136);
+                                } else
+                                if (type.equalsIgnoreCase("FACE")) {
+                                    //imageData = FaceDecoder.convertFaceISO19794_5_2011ToImage(Base64.getDecoder().decode(jsonvalue.toString()));
+                                    imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
+                                    probFaceImage = new ReadImage().covertasImage(imageData,136);
 //                                imageData = FaceDecoder.convertFaceISO19794_5_2011ToImage(Base64.getDecoder().decode(tElement.getElementsByTagName("BDB").item(0).getTextContent()));
 //                                System.out.println(imageData);
 //                                BufferedImage image = JDeli.read(imageData);
@@ -932,9 +847,15 @@ public class LevelOneController {
 //                                probFaceImage = "data:image/jpg;base64," + enCodeFile;
 //                                  model.addAttribute("mosipimage", imag);
 //                                tmpInputStream.close();
+                                }
+                                // }
                             }
-                            // }
                         }
+                        catch (Exception e){
+                            e.printStackTrace();
+                        }
+
+
 
                         model.addAttribute("probeBioFields", beanBioProbe);
                         model.addAttribute("probeDemoFields", beanProbe);
@@ -962,6 +883,8 @@ public class LevelOneController {
 
 
         if (candidate != null) {
+            String candidateRegType = mvJsonService.getRegTypeFromRegistration(candidate);
+
 
             List<GalleryBean> leftfingerCan = new ArrayList<GalleryBean>();
             List<GalleryBean> rightfingerCan = new ArrayList<GalleryBean>();
@@ -993,19 +916,48 @@ public class LevelOneController {
 
                 psnGenerated = mvs.getIdentityDetails(candidate);
                 JSONParser jsonParser1 = new JSONParser();
-//                jsonObject = (JSONObject) jsonParser.parse(mvs.fileDataProb(filename, probe));
-                // jsonObject = (JSONObject) jsonParser.parse(reader2);
-//                jsonIdentityvalue = (JSONObject) jsonObject.get("identity");
-//                jsonBiovalue = (JSONObject) jsonObject.get("biometrics");
-//                jsonBIRArray = (JSONArray) jsonBiovalue.get("BIR");
                 String pathname1 = new FileSystemResource("").getFile().getAbsolutePath();
 
                 try  {
                     JSONObject jsonObject1 = mvJsonService.getJson(candidate);
+
+                        try {
+                            if ("update".equalsIgnoreCase(candidateRegType)) {
+                                JSONObject updatedJsonObject = mvJsonService.getDemoFromIdRepo(candidate, jsonObject1, candidateRegType);
+                                if (updatedJsonObject != null){
+                                    jsonObject1 = updatedJsonObject;
+                                }
+                                else {
+                                    logger.info("Identity not found in id repo");
+                                }
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+
+                        try{
+                            if ( jsonObject1.get("identity") == null) {
+                                if(psnGenerated){
+                                    JSONObject updatedJsonObject = mvJsonService.getDemoFromIdRepo(candidate, jsonObject1, candidateRegType);
+                                    if (updatedJsonObject != null){
+                                        jsonObject1 = updatedJsonObject;
+                                    }
+                                    else {
+                                        logger.info("Identity not found in id repo");
+                                    }
+                                }
+
+                            }
+                        }
+                        catch(Exception e){
+                            e.printStackTrace();
+                        }
+
+
                     /*Reading Document from JSON CANDIDATE Start*/
                     try{
                         if(jsonObject1.get("documents")!=null) {
-                            JSONObject jsonObjectResponse = (JSONObject) ((JSONObject) jsonObject1).get("documents");
+                            JSONObject jsonObjectResponse = (JSONObject) (jsonObject1.get("documents")) ;
                             if (jsonObjectResponse.get("proofOfIdentity") != null) {
                                 base64StringCPOI = (String) jsonObjectResponse.get("proofOfIdentity");
 //                                pdfFileCPOI = "data:application/pdf;base64," + base64StringCPOI;
@@ -1030,237 +982,148 @@ public class LevelOneController {
                         logger.error(logger("LevelOneController","leveloneSearchByName",getUtcTime(), e.toString()));
                     }
                     /*Reading Document from JSON CANDIDATE  End*/
-                    JSONObject jsonObj1 =(JSONObject) jsonObject1.get("identity");
 
-                    /************Variables for Valuaes taken from JSON*************/
-                    String data1 =  null;
-                    JSONArray jsonArray1 = new JSONArray();
-                    JSONObject jsonObject3 = new JSONObject();
-                    String valueFrm= null;
+                    try{
+                        JSONObject jsonObj1 =(JSONObject) jsonObject1.get("identity");
+                        String data1 =  null;
+                        JSONArray jsonArray1 = new JSONArray();
+                        JSONObject jsonObject3 = new JSONObject();
+                        String valueFrm= null;
 
 
-                    try {
-                        if ("update".equalsIgnoreCase(candidateRegType)) {
+                        if(jsonObj1.get("firstName")!=null) {
+                            data1 = (String) jsonObj1.get("firstName");
+                            JSONArray jsonArray = (JSONArray) jsonParser.parse(data1);
+                            JSONObject jsonObject2 = (JSONObject) jsonArray.get(0);
+                            valueFrm = (String) jsonObject2.get("value");
 
-                            List<MvJson> mvJson =  mvJsonService.getUpdateStatus(candidate);
-                            if (mvJson.size()>0 && !"UPDATED".equalsIgnoreCase(mvJson.get(0).getUpdateStatus())){
-                                jsonUtility.initializeExecutor();
-                                tokenGenerator.getToken();
-                                CompletableFuture<ResponseDto> identityFuture = jsonUtility.getIdentityAsync1(candidate)
-                                        .exceptionally(ex -> {
-                                            logger.error("Error fetching identity", ex);
-                                            return null;
-                                        });
-
-                                ResponseDto candidateIdentityResponse = identityFuture.get();
-
-                                if (candidateIdentityResponse != null && candidateIdentityResponse.getResponse() != null) {
-                                    try {
-                                        FieldResponseDto fieldResponseDto = obj.readValue(
-                                                jsonUtility.javaObjectToJsonString(candidateIdentityResponse.getResponse()),
-                                                FieldResponseDto.class);
-                                        String uin = fieldResponseDto.getFields().get("UIN");
-
-//                                        System.out.println("UIN : " + uin);
-
-//                                        System.out.println("mvjson identity : " + jsonObj1);
-
-                                        ResponseDto<?> idRepoUinResponse = jsonUtility.makeGetRequest(uin, ConstantValue.IDREPOGETAPI);
-                                        if (idRepoUinResponse.getResponse() != null) {
-                                            Map<?, ?> responseMap = (Map<?, ?>) idRepoUinResponse.getResponse();
-                                            Map<?, ?> identityMap = (Map<?, ?>) responseMap.get("identity");
-
-//                                            System.out.println("identityMap : " + identityMap);
-
-                                            obj.enable(SerializationFeature.INDENT_OUTPUT);
-
-                                            Map<String, Object> localIdentity =
-                                                    obj.readValue(jsonObj1.toString(), Map.class);
-                                            Map<String, Object> apiIdentity =
-                                                    (Map<String, Object>) responseMap.get("identity");
-
-                                            for (String key : localIdentity.keySet()) {
-
-                                                if (!apiIdentity.containsKey(key)) {
-                                                    continue; // Only update existing DB fields
-                                                }
-
-                                                Object apiValue = apiIdentity.get(key);
-                                                if (apiValue == null) {
-                                                    continue; // keep null
-                                                }
-
-                                                // Case 1: List value -> convert to JSON string
-                                                if (apiValue instanceof List) {
-                                                    String jsonString = obj.writeValueAsString(apiValue);
-                                                    localIdentity.put(key, jsonString);
-                                                }
-
-                                                // Case 2: Map value -> convert to JSON string
-                                                else if (apiValue instanceof Map) {
-                                                    String jsonString = obj.writeValueAsString(apiValue);
-                                                    localIdentity.put(key, jsonString);
-                                                }
-
-                                                // Case 3: Primitive/string -> convert to string
-                                                else {
-                                                    localIdentity.put(key, apiValue.toString());
-                                                }
-                                            }
-
-//                                            String updatedIdentityJsonString = obj.writeValueAsString(localIdentity);
-                                            JSONObject updatedIdentityJson = new JSONObject(localIdentity);
-
-//                                            System.out.println("Updated identity json"+ updatedIdentityJson);
-
-                                            jsonObject1.put("identity", updatedIdentityJson);
-//                                            mvJsonService.saveMvJson(obj.writeValueAsString(jsonObject1), candidate);
-                                            jsonObj1 = updatedIdentityJson;
-
-                                        } else {
-                                            logger.info("Id repo uin response is null for regid: {}", candidate);
-                                        }
-                                        logger.info("Successfully fetched Identity");
-                                    } catch (Exception e) {
-                                        logger.error("Error processing identity response", e);
-                                    }
-                                } else {
-                                    logger.warn("Identity Response not available");
-                                }
-                            }
-//                                System.out.println("Update packet");
+                            beanCan.setFirstName(valueFrm);
                         }
-                    }catch (Exception e){
+                        if(jsonObj1.get("presentAddressLine1")!=null){
+                            data1 =  (String) jsonObj1.get("presentAddressLine1");
+                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                            jsonObject3 = (JSONObject) jsonArray1.get(0);
+                            valueFrm= (String) jsonObject3.get("value");
+
+                            beanCan.setPresentAddressLine1(valueFrm);
+                        }
+                        String can_poa = "";
+                        if(jsonObj1.get("pobCity")!=null){
+                            data1 =  (String) jsonObj1.get("pobCity");
+                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                            valueFrm= (String) jsonObject4.get("value");
+                            can_poa = valueFrm +", ";
+
+//                            beanCan.setPobCountry(valueFrm);
+                        }
+
+                        if(jsonObj1.get("pobCountry")!=null){
+                            data1 =  (String) jsonObj1.get("pobCountry");
+                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                            valueFrm= (String) jsonObject4.get("value");
+
+                            can_poa = can_poa + valueFrm;
+                            beanCan.setPobCountry(can_poa);}
+
+                        if(jsonObj1.get("presentBarangay")!=null){
+                            data1 =  (String) jsonObj1.get("presentBarangay");
+                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                            jsonObject3 = (JSONObject) jsonArray1.get(0);
+                            valueFrm= (String) jsonObject3.get("value");
+
+                            beanCan.setPresentBarangay(valueFrm);}
+
+                        if(jsonObj1.get("presentProvince")!=null){
+                            data1 =  (String) jsonObj1.get("presentProvince");
+                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                            valueFrm= (String) jsonObject4.get("value");
+
+                            beanCan.setPresentProvince(valueFrm);}
+
+                        if(jsonObj1.get("presentZipcode")!=null){
+                            data1 =  (String) jsonObj1.get("presentZipcode");
+                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                            valueFrm= (String) jsonObject4.get("value");
+
+                            beanCan.setPresentZipcode(valueFrm);}
+
+                        if(jsonObj1.get("presentCountry")!=null){
+                            data1 =  (String) jsonObj1.get("presentCountry");
+                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                            valueFrm= (String) jsonObject4.get("value");
+                            beanCan.setPresentCountry(valueFrm);
+
+                        }
+
+                        if(jsonObj1.get("gender")!=null){
+                            data1 =  (String) jsonObj1.get("gender");
+                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                            valueFrm= (String) jsonObject4.get("value");
+
+                            beanCan.setGender(valueFrm);}
+
+                        if(jsonObj1.get("presentCity")!=null){
+                            data1 =  (String) jsonObj1.get("presentCity");
+                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                            valueFrm= (String) jsonObject4.get("value");
+
+                            beanCan.setPresentCity(valueFrm);}
+
+                        if(jsonObj1.get("middleName")!=null){
+                            data1 =  (String) jsonObj1.get("middleName");
+                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                            valueFrm= (String) jsonObject4.get("value");
+
+                            beanCan.setMiddleName(valueFrm);}
+
+                        if(jsonObj1.get("lastName")!=null){
+                            data1 =  (String) jsonObj1.get("lastName");
+                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                            valueFrm= (String) jsonObject4.get("value");
+
+                            beanCan.setLastName(valueFrm);}
+
+                        if(jsonObj1.get("suffix")!=null){
+                            data1 =  (String) jsonObj1.get("suffix");
+                            jsonArray1 = (JSONArray) jsonParser.parse(data1);
+                            JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
+                            valueFrm= (String) jsonObject4.get("value");
+
+                            beanCan.setSuffix(valueFrm);}
+
+                        if(jsonObj1.get("dateOfBirth")!=null){
+                            String data7 = (String) jsonObj1.get("dateOfBirth");
+
+                            String[] split = data7.split("/");
+                            String monthOfBirth = split[1].toString();
+
+                            String dayOfBirth = split[2].substring(0, 2).toString();
+
+                            String yearOfBirth = split[0].toString();
+
+                            beanCan.setMonthOfBirth(monthOfBirth);
+                            beanCan.setDayOfBirth(dayOfBirth);
+                            beanCan.setYearOfBirth(yearOfBirth);}
+                        model.addAttribute("CanDemoFields", beanCan);
+
+                    }
+                    catch (Exception e){
                         e.printStackTrace();
                     }
 
-
-                    if(jsonObj1.get("firstName")!=null) {
-                        data1 = (String) jsonObj1.get("firstName");
-                        JSONArray jsonArray = (JSONArray) jsonParser.parse(data1);
-                        JSONObject jsonObject2 = (JSONObject) jsonArray.get(0);
-                        valueFrm = (String) jsonObject2.get("value");
-
-                        beanCan.setFirstName(valueFrm);
-                    }
-                    if(jsonObj1.get("presentAddressLine1")!=null){
-                        data1 =  (String) jsonObj1.get("presentAddressLine1");
-                        jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                        jsonObject3 = (JSONObject) jsonArray1.get(0);
-                        valueFrm= (String) jsonObject3.get("value");
-
-                        beanCan.setPresentAddressLine1(valueFrm);
-                    }
-                    String can_poa = "";
-                    if(jsonObj1.get("pobCity")!=null){
-                        data1 =  (String) jsonObj1.get("pobCity");
-                        jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                        JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                        valueFrm= (String) jsonObject4.get("value");
-                        can_poa = valueFrm +", ";
-
-//                            beanCan.setPobCountry(valueFrm);
-                    }
-
-                    if(jsonObj1.get("pobCountry")!=null){
-                        data1 =  (String) jsonObj1.get("pobCountry");
-                        jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                        JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                        valueFrm= (String) jsonObject4.get("value");
-
-                        can_poa = can_poa + valueFrm;
-                        beanCan.setPobCountry(can_poa);}
-
-                    if(jsonObj1.get("presentBarangay")!=null){
-                        data1 =  (String) jsonObj1.get("presentBarangay");
-                        jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                        jsonObject3 = (JSONObject) jsonArray1.get(0);
-                        valueFrm= (String) jsonObject3.get("value");
-
-                        beanCan.setPresentBarangay(valueFrm);}
-
-                    if(jsonObj1.get("presentProvince")!=null){
-                        data1 =  (String) jsonObj1.get("presentProvince");
-                        jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                        JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                        valueFrm= (String) jsonObject4.get("value");
-
-                        beanCan.setPresentProvince(valueFrm);}
-
-                    if(jsonObj1.get("presentZipcode")!=null){
-                        data1 =  (String) jsonObj1.get("presentZipcode");
-                        jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                        JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                        valueFrm= (String) jsonObject4.get("value");
-
-                        beanCan.setPresentZipcode(valueFrm);}
-
-                    if(jsonObj1.get("presentCountry")!=null){
-                        data1 =  (String) jsonObj1.get("presentCountry");
-                        jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                        JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                        valueFrm= (String) jsonObject4.get("value");
-                        beanCan.setPresentCountry(valueFrm);
-
-                    }
-
-                    if(jsonObj1.get("gender")!=null){
-                        data1 =  (String) jsonObj1.get("gender");
-                        jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                        JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                        valueFrm= (String) jsonObject4.get("value");
-
-                        beanCan.setGender(valueFrm);}
-
-                    if(jsonObj1.get("presentCity")!=null){
-                        data1 =  (String) jsonObj1.get("presentCity");
-                        jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                        JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                        valueFrm= (String) jsonObject4.get("value");
-
-                        beanCan.setPresentCity(valueFrm);}
-
-                    if(jsonObj1.get("middleName")!=null){
-                        data1 =  (String) jsonObj1.get("middleName");
-                        jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                        JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                        valueFrm= (String) jsonObject4.get("value");
-
-                        beanCan.setMiddleName(valueFrm);}
-
-                    if(jsonObj1.get("lastName")!=null){
-                        data1 =  (String) jsonObj1.get("lastName");
-                        jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                        JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                        valueFrm= (String) jsonObject4.get("value");
-
-                        beanCan.setLastName(valueFrm);}
-
-                    if(jsonObj1.get("suffix")!=null){
-                        data1 =  (String) jsonObj1.get("suffix");
-                        jsonArray1 = (JSONArray) jsonParser.parse(data1);
-                        JSONObject jsonObject4 = (JSONObject) jsonArray1.get(0);
-                        valueFrm= (String) jsonObject4.get("value");
-
-                        beanCan.setSuffix(valueFrm);}
-
-                    if(jsonObj1.get("dateOfBirth")!=null){
-                        String data7 = (String) jsonObj1.get("dateOfBirth");
-
-                        String[] split = data7.split("/");
-                        String monthOfBirth = split[1].toString();
-
-                        String dayOfBirth = split[2].substring(0, 2).toString();
-
-                        String yearOfBirth = split[0].toString();
-
-                        beanCan.setMonthOfBirth(monthOfBirth);
-                        beanCan.setDayOfBirth(dayOfBirth);
-                        beanCan.setYearOfBirth(yearOfBirth);}
-                    model.addAttribute("CanDemoFields", beanCan);
-
-                    byte[] decodedBytes = Base64.getUrlDecoder().decode((String) jsonObject1.get("biometrics"));
-                    String decodedBioXml = new String(decodedBytes);
+                    /************Variables for Valuaes taken from JSON*************/
+                    try {
+                        byte[] decodedBytes = Base64.getUrlDecoder().decode((String) jsonObject1.get("biometrics"));
+                        String decodedBioXml = new String(decodedBytes);
 
 //                        try{
 //                            //jsonObject = (JSONObject) jsonParser.parse(reader2);
@@ -1273,27 +1136,27 @@ public class LevelOneController {
 //                            logger.error(logger("LevelOneController","leveloneSearchByName",getUtcTime(), e.toString()));
 //                        }
 //                        File file = new File(pathname+"/mvs/canjsonProgram.xml");
-                    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
 
-                    DocumentBuilder db = dbf.newDocumentBuilder();
-                    Document document = (Document) db.parse(new InputSource(new StringReader(decodedBioXml)));
+                        DocumentBuilder db = dbf.newDocumentBuilder();
+                        Document document = (Document) db.parse(new InputSource(new StringReader(decodedBioXml)));
 
-                    NodeList nodeList = document.getElementsByTagName("BIR");
+                        NodeList nodeList = document.getElementsByTagName("BIR");
 
-                    for (int i = 0; i < nodeList.getLength(); ++i) {
-                        Node node = nodeList.item(i);
+                        for (int i = 0; i < nodeList.getLength(); ++i) {
+                            Node node = nodeList.item(i);
 //                        System.out.println("\nNode Name :"
 //                       + node.getNodeName());
-                        //  if (node.getNodeType()== Node.ELEMENT_NODE) {
-                        Element tElement = (Element)node;
-                        String type=tElement.getElementsByTagName("Type").item(1).getTextContent();
+                            //  if (node.getNodeType()== Node.ELEMENT_NODE) {
+                            Element tElement = (Element)node;
+                            String type=tElement.getElementsByTagName("Type").item(1).getTextContent();
 
-                        if (type.equalsIgnoreCase("IRIS")) {
-                            String Subtypeiris=tElement.getElementsByTagName("Subtype").item(0).getTextContent();
+                            if (type.equalsIgnoreCase("IRIS")) {
+                                String Subtypeiris=tElement.getElementsByTagName("Subtype").item(0).getTextContent();
 
-                            imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
-                            CanFaceImage = new ReadImage().covertasImage(imageData,146);
+                                imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
+                                CanFaceImage = new ReadImage().covertasImage(imageData,146);
 //
 //                                imageData = IrisDecoder.convertFaceISO19794_6_2011ToImage(Base64.getDecoder().decode(tElement.getElementsByTagName("BDB").item(0).getTextContent()));
 //                                //imageData = IrisDecoder.convertFaceISO19794_6_2011ToImage(Base64.getDecoder().decode(jsonvalue.toString()));
@@ -1308,28 +1171,28 @@ public class LevelOneController {
 //                                enCodeFile = Base64.getEncoder().encodeToString(viewImage);
 //                                CanFaceImage = "data:image/jpg;base64," + enCodeFile;
 //                                tmpInputStream.close();
-                            GalleryBean irscores = new GalleryBean();
-                            if(Subtypeiris.equalsIgnoreCase("Left")){
-                                String leftiris = irscores.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                GalleryBean irscores = new GalleryBean();
+                                if(Subtypeiris.equalsIgnoreCase("Left")){
+                                    String leftiris = irscores.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                beanBioCan.setLeftiris(leftiris); }
-                            if(Subtypeiris.equalsIgnoreCase("Right")){
-                                String rightiris = irscores.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                    beanBioCan.setLeftiris(leftiris); }
+                                if(Subtypeiris.equalsIgnoreCase("Right")){
+                                    String rightiris = irscores.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                beanBioCan.setRightiris(rightiris); }
+                                    beanBioCan.setRightiris(rightiris); }
 //                            beanBioCan.setScore (tElement.getElementsByTagName("Subtype").item(0).getTextContent());
 //                            beanBioCan.setIrscoresProb(irscores.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent()));
-                            // JSONObject qualityJson = (JSONObject) jsonObjValue.get("Quality");
-                            // irscores.setScore(qualityJson.get("Score").toString());
-                            // irscores.setUrl(jsonObjValue.get("Subtype").toString());
-                            irscores.setProbeIrisImage(CanFaceImage);
-                            if(irisCanScore.size()<2)
-                                irisCanScore.add(irscores);
-                        }else if (type.equalsIgnoreCase("Finger")) {
-                            String Subtype=tElement.getElementsByTagName("Subtype").item(0).getTextContent();
+                                // JSONObject qualityJson = (JSONObject) jsonObjValue.get("Quality");
+                                // irscores.setScore(qualityJson.get("Score").toString());
+                                // irscores.setUrl(jsonObjValue.get("Subtype").toString());
+                                irscores.setProbeIrisImage(CanFaceImage);
+                                if(irisCanScore.size()<2)
+                                    irisCanScore.add(irscores);
+                            }else if (type.equalsIgnoreCase("Finger")) {
+                                String Subtype=tElement.getElementsByTagName("Subtype").item(0).getTextContent();
 
-                            imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
-                            CanFaceImage = new ReadImage().covertasImage(imageData,138);
+                                imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
+                                CanFaceImage = new ReadImage().covertasImage(imageData,138);
 //                                imageData = FingerDecoder.convertFingerISO19794_4_2011ToImage(Base64.getDecoder().decode(tElement.getElementsByTagName("BDB").item(0).getTextContent()));
 //                                BufferedImage image = JDeli.read(imageData);
 //                                //  String pathname = new FileSystemResource("").getFile().getAbsolutePath();
@@ -1342,79 +1205,62 @@ public class LevelOneController {
 //                                enCodeFile = Base64.getEncoder().encodeToString(viewImage);
 //                                CanFaceImage = "data:image/jpg;base64," + enCodeFile;
 //                                tmpInputStream.close();
-                            GalleryBean score = new GalleryBean();
-                            if(Subtype.equalsIgnoreCase("Left MiddleFinger")){
-                                String leftmiddlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                GalleryBean score = new GalleryBean();
+                                if(Subtype.equalsIgnoreCase("Left MiddleFinger")){
+                                    String leftmiddlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                beanBioCan.setLeftmiddlefinger(leftmiddlefinger); }
-                            if(Subtype.equalsIgnoreCase("Left IndexFinger")){
-                                String leftindexfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                    beanBioCan.setLeftmiddlefinger(leftmiddlefinger); }
+                                if(Subtype.equalsIgnoreCase("Left IndexFinger")){
+                                    String leftindexfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                beanBioCan.setLeftindexfinger(leftindexfinger);}
-                            if(Subtype.equalsIgnoreCase("Left LittleFinger")){
-                                String leftlittlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                    beanBioCan.setLeftindexfinger(leftindexfinger);}
+                                if(Subtype.equalsIgnoreCase("Left LittleFinger")){
+                                    String leftlittlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                beanBioCan.setLeftlittlefinger(leftlittlefinger);}
-                            if(Subtype.equalsIgnoreCase("Left RingFinger")){
-                                String leftringfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                    beanBioCan.setLeftlittlefinger(leftlittlefinger);}
+                                if(Subtype.equalsIgnoreCase("Left RingFinger")){
+                                    String leftringfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                beanBioCan.setLeftringfinger(leftringfinger);}
-                            if(Subtype.equalsIgnoreCase("Left Thumb")){
-                                String leftthumb = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                    beanBioCan.setLeftringfinger(leftringfinger);}
+                                if(Subtype.equalsIgnoreCase("Left Thumb")){
+                                    String leftthumb = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                beanBioCan.setLeftthumb(leftthumb);}
-                            if(Subtype.equalsIgnoreCase("Right MiddleFinger")){
-                                String rightmiddlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                    beanBioCan.setLeftthumb(leftthumb);}
+                                if(Subtype.equalsIgnoreCase("Right MiddleFinger")){
+                                    String rightmiddlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                beanBioCan.setRightmiddlefinger(rightmiddlefinger);}
-                            if(Subtype.equalsIgnoreCase("Right IndexFinger")){
-                                String rightindexfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                    beanBioCan.setRightmiddlefinger(rightmiddlefinger);}
+                                if(Subtype.equalsIgnoreCase("Right IndexFinger")){
+                                    String rightindexfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                beanBioCan.setRightindexfinger(rightindexfinger);}
-                            if(Subtype.equalsIgnoreCase("Right LittleFinger")){
-                                String rightlittlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                    beanBioCan.setRightindexfinger(rightindexfinger);}
+                                if(Subtype.equalsIgnoreCase("Right LittleFinger")){
+                                    String rightlittlefinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                beanBioCan.setRightlittlefinger(rightlittlefinger);}
-                            if(Subtype.equalsIgnoreCase("Right RingFinger")){
-                                String rightringfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                    beanBioCan.setRightlittlefinger(rightlittlefinger);}
+                                if(Subtype.equalsIgnoreCase("Right RingFinger")){
+                                    String rightringfinger = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                beanBioCan.setRightringfinger(rightringfinger);}
-                            if(Subtype.equalsIgnoreCase("Right Thumb")){
-                                String rightthumb = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
+                                    beanBioCan.setRightringfinger(rightringfinger);}
+                                if(Subtype.equalsIgnoreCase("Right Thumb")){
+                                    String rightthumb = score.setScore(tElement.getElementsByTagName("Score").item(0).getTextContent());
 
-                                beanBioCan.setRightthumb(rightthumb);}
-                            //  JSONObject qualityJson = (JSONObject) jsonObjValue.get("Quality");
-                            //score.setScore(qualityJson.get("Score").toString());
-                            //  score.setUrl(jsonObjValue.get("Subtype").toString());
-                            //  score.setFingerImage(CanFaceImage);
-//                                if (jsonObjValue.get("Subtype").toString().contains("Left")) {
-                            //  leftfingerCan.add(score);
-//                                } else {
-                            //  rightfingerCan.add(score);
-//                                }
-                        } else
+                                    beanBioCan.setRightthumb(rightthumb);}
+                            } else
 
-                        if (type.equalsIgnoreCase("FACE")) {
-                            imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
-                            CanFaceImage = new ReadImage().covertasImage(imageData,136);
-//                                imageData = FaceDecoder.convertFaceISO19794_5_2011ToImage(Base64.getDecoder().decode(jsonvalue.toString()));
-//                                imageData = FaceDecoder.convertFaceISO19794_5_2011ToImage(Base64.getDecoder().decode(tElement.getElementsByTagName("BDB").item(0).getTextContent()));
-//                                BufferedImage image = JDeli.read(imageData);
-//                                //String pathname = new FileSystemResource("").getFile().getAbsolutePath();
-//                                File opFile = new File(pathname+"/mvs/"   + probe + ".jpg");
-//                                JDeli.write(image, "jpg", opFile);
-//
-//                                String enCodeFile = null;
-//                                FileInputStream  tmpInputStream = new FileInputStream(opFile);
-//                                byte[] viewImage = new byte[(int) opFile.length()];
-//                                tmpInputStream.read(viewImage);
-//                                enCodeFile = Base64.getEncoder().encodeToString(viewImage);
-//                                CanFaceImage = "data:image/jpg;base64," + enCodeFile;
-//                                  model.addAttribute("mosipimage", imag);
-//                                tmpInputStream.close();
+                            if (type.equalsIgnoreCase("FACE")) {
+                                imageData = Base64Url.decode(tElement.getElementsByTagName("BDB").item(0).getTextContent());
+                                CanFaceImage = new ReadImage().covertasImage(imageData,136);
+                            }
+                            // }
                         }
-                        // }
+
                     }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+
 
                     model.addAttribute("CanBioFields", beanBioCan);
                     model.addAttribute("CanDemoFields", beanCan);

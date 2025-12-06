@@ -81,7 +81,7 @@
     function submitCase() {
 
             // document.getElementById('submitcase').action = "/MVS/refreshNewCase";
-            document.getElementById('submitcase').action = "<c:url value='refreshNewCase'/>";
+        document.getElementById('submitcase').action = "<c:url value='/refreshNewCase'/>";
             document.getElementById('submitcase').submit();
 
     }
@@ -222,7 +222,7 @@
                                             <th>Registration Id</th>
                                             <th>Candidate Reference Id</th>
                                             <th>Reason</th>
-                                            <th>Registration Type</th>
+<%--                                            <th>Registration Type</th>--%>
                                             <th>Created Date</th>
                                             <th>Action</th>
                                          </tr>
@@ -235,7 +235,7 @@
                                                 <td>${emp.regId}</td>
                                                 <td>${emp.matchedRefId} </td>
                                                 <td>Biometric Potential Match</td>
-                                                <td>${emp.regType eq 'Update' ? 'Update' : 'New'}</td>
+<%--                                                <td>${emp.regType eq 'Update' ? 'Update' : 'New'}</td>--%>
                                                 <td>
                                                     <fmt:formatDate value="${emp.createdDate}" type="date"
                                                                     pattern="dd-MMM-yyyy"/></td>
@@ -243,14 +243,14 @@
 
                                                     <c:choose>
                                                        <c:when test="${emp.op1userId != userid && emp.op2userId != userid && (emp.op1userId == null || emp.op2userId == null)}">
-                                                                   <a href="<c:url value="leveloneSearchByName">
+                                                           <a href="<c:url value="/leveloneSearchByName">
                                                                <c:param name="id" value="${emp.sno}"></c:param>
                                                                <c:param name="probe" value="${emp.regId}"></c:param>
                                                                <c:param name="candidate" value="${emp.matchedRefId}"></c:param>
                                                               <c:param name="requestId" value="${emp.reqid}"></c:param>
                                                               <c:param name="caseListNo" value="${counter.count} of ${galleryList.size()}"></c:param>
-                                                              <c:param name="regType" value="${emp.regType}"></c:param>
-                                                              <c:param name="candidateRegType" value="${emp.candidateRegType}"></c:param>
+<%--                                                              <c:param name="regType" value="${emp.regType}"></c:param>--%>
+<%--                                                              <c:param name="candidateRegType" value="${emp.candidateRegType}"></c:param>--%>
                                                                 </c:url>">
                                                                       <i class="nav-icon fas fa-edit fa-2x" aria-hidden="true"></i>
                                                                   </a>

@@ -45,9 +45,9 @@ public class RegisterManualVerification implements Serializable  {
 
     private String priority;
 
-    private String regType;
+//    private String regType;
 
-    private String candidateRegType;
+    /*private String candidateRegType;
 
     @Column(name = "candidate_reg_type")
     public String getCandidateRegType() {
@@ -57,15 +57,15 @@ public class RegisterManualVerification implements Serializable  {
     public void setCandidateRegType(String candidateRegType) {
         this.candidateRegType = candidateRegType;
     }
-
-    @Column(name = "reg_type")
+*/
+    /*@Column(name = "reg_type")
     public String getRegType() {
         return regType;
     }
 
     public void setRegType(String regType) {
         this.regType = regType;
-    }
+    }*/
 
     private int caseEvaluationComplete;
 

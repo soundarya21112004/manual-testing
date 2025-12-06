@@ -17,11 +17,11 @@ public class MvJson {
     private String url;
     private String reqTime;
     private Date currentTime;
-    private String regType;
-    private String updateStatus;
-    private String candidateRegType;
+//    private String regType;
+//    private String updateStatus;
+//    private String candidateRegType;
 
-    @Column(name = "candidate_reg_type")
+   /* @Column(name = "candidate_reg_type")
     public String getCandidateRegType() {
         return candidateRegType;
     }
@@ -38,7 +38,7 @@ public class MvJson {
 
     public void setUpdateStatus(String updateStatus) {
         this.updateStatus = updateStatus;
-    }
+    }*/
 
     /* private boolean encryptionStatus;
 
@@ -116,7 +116,7 @@ public class MvJson {
     public void setCurrentTime(Date currentTime) {
         this.currentTime = currentTime;
     }
-
+/*
     @Column(name = "reg_type")
     public String getRegType() {
         return regType;
@@ -124,5 +124,5 @@ public class MvJson {
 
     public void setRegType(String regType) {
         this.regType = regType;
-    }
+    }*/
 }
