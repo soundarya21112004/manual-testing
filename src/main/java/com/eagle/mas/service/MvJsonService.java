@@ -336,16 +336,18 @@ public class MvJsonService {
                         updatedIdentityJson = new JSONObject(localIdentity);
                         jsonObject.put("identity",updatedIdentityJson);
 
-                        List<Map<String, String>> documentMap = (List<Map<String, String>>) responseMap.get("documents");
-                        for ( Map<String, String> entry : documentMap){
-                            if(entry.get("category").equals("individualBiometrics")){
-                                jsonObject.put("biometrics",entry.get("value"));
+                        if(!regType.equalsIgnoreCase("update")) {
+                            List<Map<String, String>> documentMap = (List<Map<String, String>>) responseMap.get("documents");
+
+                            for (Map<String, String> entry : documentMap) {
+                                if (entry.get("category").equals("individualBiometrics")) {
+                                    jsonObject.put("biometrics", entry.get("value"));
+                                } else {
+                                    docMap.put(entry.get("category"), entry.get("value"));
+                                }
                             }
-                            else{
-                                docMap.put(entry.get("category"), entry.get("value"));
-                            }
+                            jsonObject.put("documents", new JSONObject(docMap));
                         }
-                        jsonObject.put("documents", new JSONObject(docMap));
                         return jsonObject;
                     } else {
                         logger.info("Id repo uin response is null for regid: {}", rid);

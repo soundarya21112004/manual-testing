@@ -160,7 +160,7 @@ public class DBConfiguration {
 
 	@PostConstruct
 	public void warDetials(){
-		log.info("Demo from IDRepo - 30.10.2025");
+		log.info("Biometrics, documents and identity only fetched for probe update and candidate new. ------------>  06.12.2025");
 	}
 
 
