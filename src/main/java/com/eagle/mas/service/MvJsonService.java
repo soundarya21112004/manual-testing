@@ -279,6 +279,10 @@ public class MvJsonService {
                                     continue; // Only update existing DB fields
                                 }
 
+                                if(localIdentity.get(key) != null){
+                                    continue;
+                                }
+
                                 Object apiValue = apiIdentity.get(key);
                                 if (apiValue == null) {
                                     continue; // keep null
