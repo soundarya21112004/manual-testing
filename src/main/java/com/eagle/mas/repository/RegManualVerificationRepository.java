@@ -208,7 +208,7 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
                     "UPDATE register_manual_verification " +
                     "SET process_code = '1' " +
                     "WHERE req_id = (SELECT req_id FROM picked) AND (reg_id <> matched_ref_id)" +
-                    "RETURNING req_id",
+                    "RETURNING *",
             nativeQuery = true)
     List<RegisterManualVerification> getReqIdForL2(@Param("userid") String userid);
 
@@ -229,7 +229,7 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
                     "UPDATE register_manual_verification " +
                     "SET process_code = '1' " +
                     "WHERE req_id = (SELECT req_id FROM picked) AND (reg_id <> matched_ref_id)" +
-                    "RETURNING req_id",
+                    "RETURNING *",
             nativeQuery = true)
     List<RegisterManualVerification> getRequestIdHigherPriority2(@Param("userid") String userid, @Param("priority") String priority);
 
@@ -251,7 +251,7 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
                     "UPDATE register_manual_verification " +
                     "SET process_code = '1' " +
                     "WHERE req_id = (SELECT req_id FROM picked) AND (reg_id <> matched_ref_id)" +
-                    "RETURNING req_id",
+                    "RETURNING *",
             nativeQuery = true)
     List<RegisterManualVerification> getRequestIdHigherPriorityUpdate2(@Param("userid") String userid, @Param("priority") String priority);
 

@@ -415,6 +415,7 @@ public class ManualVerificationService {
 	}
 
 	@Scheduled(initialDelay = 10000, fixedDelay = 60000)
+	@Transactional
 	public void checkTimelpseAndUnassign(){
 		List<UserCaseAssignment> userCaseAssignment = caseRepo.findAll();
 		List<UserCaseAssignment> result = userCaseAssignment.stream().filter(e->
