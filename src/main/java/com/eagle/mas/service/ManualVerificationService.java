@@ -308,21 +308,15 @@ public class ManualVerificationService {
 		return repo.getCountforResponse(reqid);
 	}
 
-
+	@Transactional
 	public synchronized List<RegisterManualVerification> listOfRids(String userid) {
 		List<RegisterManualVerification> list = new ArrayList<>();
-		List<String> reqId = repo.getRequestIdOperator(userid,PageRequest.of(0,1));
-		if(!reqId.isEmpty()) {
-			list = repo.clusterOfRids(reqId.get(0));
-		}
+		list = repo.getRequestIdOperator(userid);
+
 		if(!list.isEmpty()){
-			list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
-			repo.saveAll(list);
-			repo.flush();
 			setCaseForUser(list.get(0).getReqid(),userid);
 		}
 		return list;
-//		return repo.listOfRids(userid);
 	}
 
 	public void resetProcessStatus(String reqId){
@@ -394,20 +388,16 @@ public class ManualVerificationService {
 		return list;
 	}*/
 
+	@Transactional
 	public synchronized List<RegisterManualVerification> listOfRidsHigherPriority1(String userid, String priority) {
 		List<RegisterManualVerification> list = new ArrayList<>();
 		if(priority.equalsIgnoreCase("update")){
-			list = repo.clusterOfRids(repo.getRequestIdHigherPriorityUpdate(userid));
+			list = repo.getRequestIdHigherPriorityUpdate(userid);
 		}
 		else{
-			list = repo.clusterOfRids(repo.getRequestIdHigherPriority1(userid, priority));
+			list = repo.getRequestIdHigherPriority1(userid, priority);
 		}
-		System.out.println("outoflist------------>"+list);
 		if(!list.isEmpty()){
-			System.out.println("list------------>"+list);
-			list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
-			repo.saveAll(list);
-			repo.flush();
 			setCaseForUser(list.get(0).getReqid(),userid);
 		}
 		return list;
@@ -627,14 +617,11 @@ public class ManualVerificationService {
 
 
 	public synchronized List getClusterForL2(String userid) {
-		List<String> reqId = repo.getReqIdForL2(userid, PageRequest.of(0,1));
-		System.out.println("Request id : "+reqId );
 		List<RegisterManualVerification> list = new ArrayList<>();
+		list = repo.getReqIdForL2(userid);
+
 		List<RegisterManualVerification> pendinglist = new ArrayList<>();
 
-		if(!reqId.isEmpty()) {
-			list = repo.clusterOfRids(reqId.get(0));
-		}
 		if(!list.isEmpty()){
 			pendinglist = list.stream().filter(e -> {
 				return e.getOp1userId() == null || e.getOp2userId() == null;
@@ -648,34 +635,26 @@ public class ManualVerificationService {
 				});
 				repo.saveAll(list);
 				repo.flush();
-//				list.clear();
 				return getClusterForL2(userid);
 			}
 			else{
-				list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
-				repo.saveAll(list);
-				repo.flush();
 				setCaseForUser(list.get(0).getReqid(),userid);
 			}
 		}
 		return list;
 	}
 
+	@Transactional
 	public synchronized List listOfRidsHigherPriority2(String userid, String priority) {
-		List<String> reqId = new ArrayList<>();
+		List<RegisterManualVerification> list = new ArrayList<>();
 		if(priority.equalsIgnoreCase("update")){
-			reqId = repo.getRequestIdHigherPriorityUpdate2(userid, PageRequest.of(0,1));
+			list = repo.getRequestIdHigherPriorityUpdate2(userid, priority);
 		}
 		else{
-			reqId = repo.getRequestIdHigherPriority2(userid, priority, PageRequest.of(0,1));
+			list = repo.getRequestIdHigherPriority2(userid, priority);
 		}
-		System.out.println("Request id : "+reqId );
-		List<RegisterManualVerification> list = new ArrayList<>();
 		List<RegisterManualVerification> pendinglist = new ArrayList<>();
 
-		if(!reqId.isEmpty()) {
-			list = repo.clusterOfRids(reqId.get(0));
-		}
 		if(!list.isEmpty()){
 			pendinglist = list.stream().filter(e -> {
 				return e.getOp1userId() == null || e.getOp2userId() == null;
@@ -689,13 +668,9 @@ public class ManualVerificationService {
 				});
 				repo.saveAll(list);
 				repo.flush();
-//				list.clear();
 				return listOfRidsHigherPriority2(userid, priority);
 			}
 			else{
-				list.replaceAll(ad-> {ad.setProStatus("1"); return ad;});
-				repo.saveAll(list);
-				repo.flush();
 				setCaseForUser(list.get(0).getReqid(),userid);
 			}
 		}

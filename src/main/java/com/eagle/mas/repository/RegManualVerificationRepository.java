@@ -97,26 +97,28 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
     @Query(value = "SELECT t1 FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null ) and (t1.regId <> t1.matchedRefId)  )")
     List listOfRids(@Param("userid") String userid);
 
-    /*@Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null ) and (t1.regId <> t1.matchedRefId) ) order by t1.createdDate asc ")
-    List<String> getRequestIdOperator(@Param("userid") String userid, Pageable size);*/
 
-    @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId is null or t1.op2userId is null) and (t1.op1userId<>:userid or t1.op1userId is null) and (t1.op2userId<>:userid or t1.op2userId is null) and (t1.regId <> t1.matchedRefId)) order by t1.createdDate asc ")
-    List<String> getRequestIdOperator(@Param("userid") String userid, Pageable size);
+    @Query(value =
+            "WITH picked AS ( " +
+                    "   SELECT req_id " +
+                    "   FROM register_manual_verification " +
+                    "   WHERE (status_code IS NULL OR status_code = '0') " +
+                    "     AND (process_code IS NULL OR process_code = '0') " +
+                    "     AND (operator1_user_id IS NULL OR operator2_user_id IS NULL) " +
+                    "     AND (operator1_user_id <> :userid OR operator1_user_id IS NULL) " +
+                    "     AND (operator2_user_id <> :userid OR operator2_user_id IS NULL) " +
+                    "     AND (reg_id <> matched_ref_id) " +
+                    "   ORDER BY sno " +
+                    "   LIMIT 1 " +
+                    "   FOR UPDATE SKIP LOCKED " +
+                    ") " +
+                    "UPDATE register_manual_verification " +
+                    "SET process_code = '1' " +
+                    "WHERE req_id = (SELECT req_id FROM picked) AND (reg_id <> matched_ref_id) " +
+                    "RETURNING *",
+            nativeQuery = true)
+    List<RegisterManualVerification> getRequestIdOperator(@Param("userid") String userid);
 
- /*   @Modifying
-    @Query(value = "update public.register_manual_verification set operator1_verify_status=null,operator1_upd_date=null,\n" +
-            "operator1_upd_by=null,operator1_comment=null,operator1_user_id=null, process_code ='0' where req_id =:reqId and sno =:sno",nativeQuery = true)
-    void resetOp1CaseDecisions(@Param("reqId") String reqId,@Param("sno") int sno);
-
-    @Modifying
-    @Query(value = "update public.register_manual_verification set operator2_verify_status=null,operator2_upd_date=null,\n" +
-            "operator2_upd_by=null,operator2_comment=null,operator2_user_id=null, process_code ='0', status_code ='0' where req_id =:reqId and sno =:sno",nativeQuery = true)
-    void resetOp2CaseDecisions(@Param("reqId") String reqId,@Param("sno") int sno);
-
-    @Modifying
-    @Query(value = "update public.register_manual_verification set supervisor_verify_status=null,supervisor_upd_date=null,\n" +
-            "supervisor_upd_by=null,supervisor_comment=null,user_id=null, process_code = '0', status_code='1' where req_id =:reqId and sno =:sno" ,nativeQuery = true)
-    void resetSupervisorCaseDecisions(@Param("reqId") String reqId,@Param("sno") int sno);*/
 
 
     @Modifying @Query("UPDATE RegisterManualVerification r SET r.op1verifyStatus = null, r.op1updDate = null, r.op1UpdBy = null, r.op1Comment = null, r.op1userId = null, r.proStatus = '0' WHERE r.reqid = :reqId AND r.sno = :sno")
@@ -147,45 +149,111 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
             " and (t1.regId <> t1.matchedRefId) and t1.priority='2')")
     String getRequestIdHigherPriority(@Param("userid") String userid);
 
- /*   @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 " +
-            "where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null )" +
-            " and (t1.regId <> t1.matchedRefId) and t1.priority=:priority)")
-    String getRequestIdHigherPriority1(@Param("userid") String userid, @Param("priority") String priority);*/
 
-    @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0'))" +
-            " and (t1.op1userId is null or t1.op2userId is null) and (t1.op1userId<>:userid or t1.op1userId is null) and (t1.op2userId<>:userid or t1.op2userId is null) and (t1.regId <> t1.matchedRefId) and t1.priority=:priority) " +
-            " order by t1.createdDate asc ")
-    String getRequestIdHigherPriority1(@Param("userid") String userid, @Param("priority") String priority);
+    @Query(value =
+            "WITH picked AS ( " +
+                    "   SELECT req_id " +
+                    "   FROM register_manual_verification " +
+                    "   WHERE (status_code IS NULL OR status_code = '0') " +
+                    "     AND (process_code IS NULL OR process_code = '0') " +
+                    "     AND (operator1_user_id IS NULL OR operator2_user_id IS NULL) " +
+                    "     AND (operator1_user_id <> :userid OR operator1_user_id IS NULL) " +
+                    "     AND (operator2_user_id <> :userid OR operator2_user_id IS NULL) " +
+                    "     AND (reg_id <> matched_ref_id) " +
+                    "     AND priority = :priority " +
+                    "   ORDER BY cr_date " +
+                    "   LIMIT 1 " +
+                    "   FOR UPDATE SKIP LOCKED " +
+                    ") " +
+                    "UPDATE register_manual_verification " +
+                    "SET process_code = '1' " +
+                    "WHERE req_id = (SELECT req_id FROM picked) AND (reg_id <> matched_ref_id)" +
+                    "RETURNING *",
+            nativeQuery = true)
+    List<RegisterManualVerification> getRequestIdHigherPriority1(@Param("userid") String userid, @Param("priority") String priority);
 
-    /*@Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 " +
-            "where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null )" +
-            " and (t1.regId <> t1.matchedRefId) and t1.regType= 'Update')")
-    String getRequestIdHigherPriorityUpdate(@Param("userid") String userid);*/
 
-    @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.sno=(SELECT min(t1.sno) FROM RegisterManualVerification t1 " +
-            "where ((t1.statusCode is null or t1.statusCode='0') and (t1.proStatus is null or t1.proStatus='0')) and (t1.op1userId<>:userid or t1.op1userId is null )" +
-            " and (t1.regId <> t1.matchedRefId))")
-    String getRequestIdHigherPriorityUpdate(@Param("userid") String userid);
+    @Query(value =
+            "WITH picked AS ( " +
+                    "   SELECT req_id " +
+                    "   FROM register_manual_verification " +
+                    "   WHERE (status_code IS NULL OR status_code = '0') " +
+                    "     AND (process_code IS NULL OR process_code = '0') " +
+                    "     AND (operator1_user_id <> :userid OR operator1_user_id IS NULL) " +
+                    "     AND (reg_id <> matched_ref_id) " +
+                    "   ORDER BY cr_date " +
+                    "   LIMIT 1 " +
+                    "   FOR UPDATE SKIP LOCKED " +
+                    ") " +
+                    "UPDATE register_manual_verification " +
+                    "SET process_code = '1' " +
+                    "WHERE req_id = (SELECT req_id FROM picked) AND (reg_id <> matched_ref_id)" +
+                    "RETURNING *",
+            nativeQuery = true)
+    List<RegisterManualVerification> getRequestIdHigherPriorityUpdate(@Param("userid") String userid);
 
-    @Query(value="select t1.reqid from RegisterManualVerification t1 where (t1.statusCode='1')" +
-            " and (t1.userId<>:userid or t1.userId is null ) and (t1.proStatus is null or t1.proStatus='0') and ((t1.op1verifyStatus='hit' AND t1.op2verifyStatus ='nohit') " +
-            "OR (t1.op1verifyStatus='nohit' AND t1.op2verifyStatus='hit')) order by t1.createdDate asc")
-    List<String> getReqIdForL2(@Param("userid") String userid,Pageable size);
+    @Query(value =
+            "WITH picked AS ( " +
+                    "   SELECT req_id " +
+                    "   FROM register_manual_verification " +
+                    "   WHERE status_code = '1' " +
+                    "     AND (user_id <> :userid OR user_id IS NULL) " +
+                    "     AND (process_code IS NULL OR process_code = '0') " +
+                    "     AND ( (operator1_verify_status = 'hit'  AND operator2_verify_status = 'nohit') " +
+                    "        OR (operator1_verify_status = 'nohit' AND operator2_verify_status = 'hit') ) " +
+                    "   ORDER BY cr_date " +
+                    "   LIMIT 1 " +
+                    "   FOR UPDATE SKIP LOCKED " +
+                    ") " +
+                    "UPDATE register_manual_verification " +
+                    "SET process_code = '1' " +
+                    "WHERE req_id = (SELECT req_id FROM picked) AND (reg_id <> matched_ref_id)" +
+                    "RETURNING req_id",
+            nativeQuery = true)
+    List<RegisterManualVerification> getReqIdForL2(@Param("userid") String userid);
 
-    @Query(value="select t1.reqid from RegisterManualVerification t1 where (t1.statusCode='1')" +
-            " and (t1.userId<>:userid or t1.userId is null ) and (t1.proStatus is null or t1.proStatus='0') and ((t1.op1verifyStatus='hit' AND t1.op2verifyStatus ='nohit') " +
-            "OR (t1.op1verifyStatus='nohit' AND t1.op2verifyStatus='hit')) and t1.priority=:priority order by t1.createdDate asc")
-    List<String> getRequestIdHigherPriority2(@Param("userid") String userid, @Param("priority") String priority,Pageable size);
+    @Query(value =
+            "WITH picked AS ( " +
+                    "   SELECT req_id " +
+                    "   FROM register_manual_verification " +
+                    "   WHERE status_code = '1' " +
+                    "     AND (user_id <> :userid OR user_id IS NULL) " +
+                    "     AND (process_code IS NULL OR process_code = '0') " +
+                    "     AND ( (operator1_verify_status = 'hit'  AND operator2_verify_status = 'nohit') " +
+                    "        OR (operator1_verify_status = 'nohit' AND operator2_verify_status = 'hit') ) " +
+                    "     AND priority = :priority " +
+                    "   ORDER BY cr_date " +
+                    "   LIMIT 1 " +
+                    "   FOR UPDATE SKIP LOCKED " +
+                    ") " +
+                    "UPDATE register_manual_verification " +
+                    "SET process_code = '1' " +
+                    "WHERE req_id = (SELECT req_id FROM picked) AND (reg_id <> matched_ref_id)" +
+                    "RETURNING req_id",
+            nativeQuery = true)
+    List<RegisterManualVerification> getRequestIdHigherPriority2(@Param("userid") String userid, @Param("priority") String priority);
 
-    /*@Query(value="select t1.reqid from RegisterManualVerification t1 where (t1.statusCode='1')" +
-            " and (t1.userId<>:userid or t1.userId is null ) and (t1.proStatus is null or t1.proStatus='0') and ((t1.op1verifyStatus='hit' AND t1.op2verifyStatus ='nohit') " +
-            "OR (t1.op1verifyStatus='nohit' AND t1.op2verifyStatus='hit')) and  t1.regType= 'Update' order by t1.createdDate asc")
-    List<String> getRequestIdHigherPriorityUpdate2(@Param("userid") String userid, Pageable size);*/
 
-    @Query(value="select t1.reqid from RegisterManualVerification t1 where (t1.statusCode='1')" +
-            " and (t1.userId<>:userid or t1.userId is null ) and (t1.proStatus is null or t1.proStatus='0') and ((t1.op1verifyStatus='hit' AND t1.op2verifyStatus ='nohit') " +
-            "OR (t1.op1verifyStatus='nohit' AND t1.op2verifyStatus='hit')) order by t1.createdDate asc")
-    List<String> getRequestIdHigherPriorityUpdate2(@Param("userid") String userid, Pageable size);
+    @Query(value =
+            "WITH picked AS ( " +
+                    "   SELECT req_id " +
+                    "   FROM register_manual_verification " +
+                    "   WHERE status_code = '1' " +
+                    "     AND (user_id <> :userid OR user_id IS NULL) " +
+                    "     AND (process_code IS NULL OR process_code = '0') " +
+                    "     AND ( (operator1_verify_status = 'hit'  AND operator2_verify_status = 'nohit') " +
+                    "        OR (operator1_verify_status = 'nohit' AND operator2_verify_status = 'hit') ) " +
+                    "     AND priority = :priority " +
+                    "   ORDER BY cr_date " +
+                    "   LIMIT 1 " +
+                    "   FOR UPDATE SKIP LOCKED " +
+                    ") " +
+                    "UPDATE register_manual_verification " +
+                    "SET process_code = '1' " +
+                    "WHERE req_id = (SELECT req_id FROM picked) AND (reg_id <> matched_ref_id)" +
+                    "RETURNING req_id",
+            nativeQuery = true)
+    List<RegisterManualVerification> getRequestIdHigherPriorityUpdate2(@Param("userid") String userid, @Param("priority") String priority);
 
     //      -----------------------------------------------------------------------------------------------------------------------
 
@@ -295,28 +363,10 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
     @Query(value = "SELECT t1.regId FROM RegisterManualVerification t1 where t1.sno=:id and t1.reqid=:requestId")
     String getRegId(@Param("id") int id, @Param("requestId") String requestId);
 
-/*    @Query(value = "SELECT t1.reqid FROM RegisterManualVerification t1 where t1.createdDate < '2022-07-23T03:13:00.665Z' order by t1.createdDate  desc")
-    RegisterManualVerification findFirst1ByCreatedByBefore(@Param("createdDate") String createdDate);
-
-    List<RegisterManualVerification> findAllByCreatedByLessThan(String createdDate);*/
-
     RegisterManualVerification findFirst1BySnoLessThan(int sno);
 
     int deleteAllByReqid(String requestId);
 
-
-     /*   @Query(value="update reg_manual_verification  set status_code=?1,status_comment_three=?2,verify_status_three=?3,upd_by_three=?4,upd_dt_three=now() where sno=?5",nativeQuery = true)
-
-    @Transactional
-    @Modifying
-    @Query(value = "update RegManualVerification t1 set t1.statusCode=:level,t1.statusCommentThree=:comment,t1.verifyStatusThree=:status,t1.updatedByThree=:userid," +"t1.updatedDateThree=now() where t1.sno=:id")
-    public int  updateRIDThree(@Param("id") int id,@Param("status") String status, @Param("comment") String comment,@Param("userid") String userid,@Param("level") String level);
-
-    @Query(value = "SELECT c.fileDatas FROM RegManualVerification c  where c.regId=:regid and c.matchedRefId=:mid")
-    public String fileDataCandidate(@Param("regid") String regid,@Param("mid") String mid);
-
-    @Query(value = "SELECT c.probeString FROM RegManualVerification c  where c.regId=:regid and c.matchedRefId=:mid")
-    public String fileDataProb(@Param("regid") String regid,@Param("mid") String mid);*/
 
     RegisterManualVerification findBySno(int sno);
 
