@@ -252,9 +252,9 @@ public class LevelOneController {
             }*/
 
             if (userCaseRequest == null) {
-                logger.info("No case assigned to user. Searching for new cases by priority...");
-
-//                roles = mvs.listOfRidsHigherPriority1(user.getUserid(),"update");
+                logger.info("No case assigned to user. Searching for new cases by priority");
+                logger.info("Checking for cases with priority: {}", "Update");
+                roles = mvs.listOfRidsHigherPriority1(user.getUserid(),"Update");
 
                 /*String[] priorities = {"2", "1"};
                 for (String priority : priorities) {

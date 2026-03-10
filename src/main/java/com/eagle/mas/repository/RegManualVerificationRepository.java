@@ -181,6 +181,7 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
                     "     AND (process_code IS NULL OR process_code = '0') " +
                     "     AND (operator1_user_id <> :userid OR operator1_user_id IS NULL) " +
                     "     AND (reg_id <> matched_ref_id) " +
+                    "     AND reg_type = :priority " +
                     "   ORDER BY cr_date " +
                     "   LIMIT 1 " +
                     "   FOR UPDATE SKIP LOCKED " +
@@ -190,7 +191,7 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
                     "WHERE req_id = (SELECT req_id FROM picked) AND (reg_id <> matched_ref_id)" +
                     "RETURNING *",
             nativeQuery = true)
-    List<RegisterManualVerification> getRequestIdHigherPriorityUpdate(@Param("userid") String userid);
+    List<RegisterManualVerification> getRequestIdHigherPriorityUpdate(@Param("userid") String userid, @Param("priority") String priority);
 
     @Query(value =
             "WITH picked AS ( " +
@@ -243,7 +244,7 @@ public interface RegManualVerificationRepository extends JpaRepository<RegisterM
                     "     AND (process_code IS NULL OR process_code = '0') " +
                     "     AND ( (operator1_verify_status = 'hit'  AND operator2_verify_status = 'nohit') " +
                     "        OR (operator1_verify_status = 'nohit' AND operator2_verify_status = 'hit') ) " +
-                    "     AND priority = :priority " +
+                    "     AND reg_type = :priority " +
                     "   ORDER BY cr_date " +
                     "   LIMIT 1 " +
                     "   FOR UPDATE SKIP LOCKED " +

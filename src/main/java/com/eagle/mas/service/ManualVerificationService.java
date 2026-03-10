@@ -392,7 +392,7 @@ public class ManualVerificationService {
 	public synchronized List<RegisterManualVerification> listOfRidsHigherPriority1(String userid, String priority) {
 		List<RegisterManualVerification> list = new ArrayList<>();
 		if(priority.equalsIgnoreCase("update")){
-			list = repo.getRequestIdHigherPriorityUpdate(userid);
+			list = repo.getRequestIdHigherPriorityUpdate(userid, priority);
 		}
 		else{
 			list = repo.getRequestIdHigherPriority1(userid, priority);

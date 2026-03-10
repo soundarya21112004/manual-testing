@@ -103,6 +103,12 @@
                 {"data": "regId"},
                 {"data": "matchedRefId"},
                 {"data": "reason", "defaultContent": "Biometric Potential Match"},
+                {
+                    "data": "regType",
+                    "render": function (data, type, row) {
+                        return (data && data.toLowerCase() === "update") ? "Update" : "New";
+                    }
+                },
                 {"data": "op1UpdBy"},
                 {"data": "op2UpdBy"},
                 {"data": "supervisorUpdBy"},
@@ -485,6 +491,7 @@
                                     <th>Registration Id</th>
                                     <th>Candidate Reference Id</th>
                                     <th>Reason</th>
+                                    <th>Registration Type</th>
                                     <th>Verified By Operator 1</th>
                                     <th>Verified By Operator 2</th>
                                     <th>Verified By Supervisor</th>
