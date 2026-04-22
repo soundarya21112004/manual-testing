@@ -267,7 +267,7 @@ public class LevelOneController {
                 }*/
 
                 if (roles == null || roles.isEmpty()) {
-                    String[] priorities = {"2", "1"};
+                    String[] priorities = {"3","2", "1"};
                     for (String priority : priorities) {
                         logger.info("Checking for cases with priority: {}", priority);
                         roles = mvs.listOfRidsHigherPriority1(user.getUserid(), priority);

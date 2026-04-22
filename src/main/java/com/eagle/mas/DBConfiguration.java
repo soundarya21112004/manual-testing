@@ -160,7 +160,7 @@ public class DBConfiguration {
 
 	@PostConstruct
 	public void warDetials(){
-		log.info("Biometrics, documents and identity only fetched for probe update and candidate new. ------------>  06.12.2025");
+		log.info("Priority 3 added --> 22.04.2026");
 	}
 
 

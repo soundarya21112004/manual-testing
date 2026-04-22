@@ -188,7 +188,7 @@ public class LevelTwoController {
                 roles = mvs.listOfRidsHigherPriority2(user.getUserid(),"Update");
 
                 if (roles == null || roles.isEmpty()) {
-                    String[] priorities = {"2", "1"};
+                    String[] priorities = {"3","2", "1"};
                     for (String priority : priorities) {
                         logger.info("Checking for cases with priority: {}", priority);
                         roles = mvs.listOfRidsHigherPriority2(user.getUserid(), priority);
