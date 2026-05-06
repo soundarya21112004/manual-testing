@@ -185,7 +185,7 @@ public class LevelTwoController {
             UserCaseAssignment supervisorCases = mvs.userCaseDetails(user.getUserid());
             if(supervisorCases ==null) {
 
-//                roles = mvs.listOfRidsHigherPriority2(user.getUserid(),"Update");
+                roles = mvs.listOfRidsHigherPriority2(user.getUserid(),"Update");
 
                 if (roles == null || roles.isEmpty()) {
                     String[] priorities = ConstantValue.priorities;

@@ -223,48 +223,12 @@ public class LevelOneController {
             Pageable page = PageRequest.of(0, 1);
             UserCaseAssignment userCaseRequest = mvs.userCaseDetails(user.getUserid());
             List<RegisterManualVerification> roles = new ArrayList<>();
-           /*     String[] priorites = {"2","1","0"};
-        if(userCaseRequest == null){
-                for (String priority : priorites ){
-                    System.out.println("priority : "+ priority);
-                    roles = (ArrayList<RegisterManualVerification>) mvs.listOfRidsHigherPriority1(user.getUserid(), priority);
-                    if (!roles.isEmpty() && roles !=null){
-                        break;
-                    }
-                }
-            }
-            else {
-                roles = (ArrayList<RegisterManualVerification>) mvs.retreiveCaseForUser(userCaseRequest.getRequestId());
-            }*/
-
-           /* if(userCaseRequest == null) {
-                roles = (ArrayList<RegisterManualVerification>) mvs.listOfRidsHigherPriority(user.getUserid());
-                if (roles.isEmpty() || roles == null){
-                    roles= (ArrayList<RegisterManualVerification>) mvs.listOfRidsPriority(user.getUserid());
-                }
-                if (roles == null || roles.isEmpty()) {
-                    // in this step first load operator 2 list, for this we need new query . if it is null then run this below query
-                    roles = (ArrayList<RegisterManualVerification>) mvs.listOfRids(user.getUserid());
-                }
-
-            }else{
-                roles = (ArrayList<RegisterManualVerification>) mvs.retreiveCaseForUser(userCaseRequest.getRequestId());
-            }*/
 
             if (userCaseRequest == null) {
                 logger.info("No case assigned to user. Searching for new cases by priority");
-//                logger.info("Checking for cases with priority: {}", "Update");
-//                roles = mvs.listOfRidsHigherPriority1(user.getUserid(),"Update");
+                logger.info("Checking for cases with priority: {}", "Update");
+                roles = mvs.listOfRidsHigherPriority1(user.getUserid(),"Update");
 
-                /*String[] priorities = {"2", "1"};
-                for (String priority : priorities) {
-                    logger.info("Checking for cases with priority: {}", priority);
-                    roles = mvs.listOfRidsHigherPriority1(user.getUserid(), priority);
-                    if (roles != null && !roles.isEmpty()) {
-                        logger.info("Cases found for priority: {}", priority);
-                        break;
-                    }
-                }*/
 
                 if (roles == null || roles.isEmpty()) {
                     String[] priorities = ConstantValue.priorities;

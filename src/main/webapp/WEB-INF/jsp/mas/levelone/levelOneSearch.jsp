@@ -222,7 +222,7 @@
                                             <th>Registration Id</th>
                                             <th>Candidate Reference Id</th>
                                             <th>Reason</th>
-<%--                                            <th>Registration Type</th>--%>
+                                            <th>Registration Type</th>
                                             <th>Created Date</th>
                                             <th>Action</th>
                                          </tr>
@@ -235,7 +235,7 @@
                                                 <td>${emp.regId}</td>
                                                 <td>${emp.matchedRefId} </td>
                                                 <td>Biometric Potential Match</td>
-<%--                                                <td>${emp.regType eq 'Update' ? 'Update' : 'New'}</td>--%>
+                                                <td>${emp.regType eq 'Update' ? 'Update' : 'New'}</td>
                                                 <td>
                                                     <fmt:formatDate value="${emp.createdDate}" type="date"
                                                                     pattern="dd-MMM-yyyy"/></td>
@@ -249,8 +249,6 @@
                                                                <c:param name="candidate" value="${emp.matchedRefId}"></c:param>
                                                               <c:param name="requestId" value="${emp.reqid}"></c:param>
                                                               <c:param name="caseListNo" value="${counter.count} of ${galleryList.size()}"></c:param>
-<%--                                                              <c:param name="regType" value="${emp.regType}"></c:param>--%>
-<%--                                                              <c:param name="candidateRegType" value="${emp.candidateRegType}"></c:param>--%>
                                                                 </c:url>">
                                                                       <i class="nav-icon fas fa-edit fa-2x" aria-hidden="true"></i>
                                                                   </a>
