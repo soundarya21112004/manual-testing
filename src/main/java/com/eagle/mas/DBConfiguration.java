@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -43,6 +44,8 @@ public class DBConfiguration {
 //
 //	@Value("${spring.datasource.username}")
 //	private String USERNAME;
+
+
 
 	@Value("${hibernate.dialect}")
 	private String DIALECT;
@@ -126,6 +129,14 @@ public class DBConfiguration {
 			ConstantValue.loginUsername = resource.getString("loginUsername");
 			ConstantValue.loginPassword = resource.getString("loginPassword");
 			ConstantValue.caseAuthURL = resource.getString("caseAuthURL");
+
+			String prioritiesStr = resource.getString("priorities");
+
+			ConstantValue.priorities = Arrays.stream(prioritiesStr.split(","))
+					.map(String::trim)   // ✅ removes spaces
+					.toArray(String[]::new);
+
+			log.info("ConstantValue priorities = {}", Arrays.toString(ConstantValue.priorities));
 
 		}
 		catch (Exception e){

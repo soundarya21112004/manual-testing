@@ -185,10 +185,10 @@ public class LevelTwoController {
             UserCaseAssignment supervisorCases = mvs.userCaseDetails(user.getUserid());
             if(supervisorCases ==null) {
 
-                roles = mvs.listOfRidsHigherPriority2(user.getUserid(),"Update");
+//                roles = mvs.listOfRidsHigherPriority2(user.getUserid(),"Update");
 
                 if (roles == null || roles.isEmpty()) {
-                    String[] priorities = {"3","2", "1"};
+                    String[] priorities = ConstantValue.priorities;
                     for (String priority : priorities) {
                         logger.info("Checking for cases with priority: {}", priority);
                         roles = mvs.listOfRidsHigherPriority2(user.getUserid(), priority);

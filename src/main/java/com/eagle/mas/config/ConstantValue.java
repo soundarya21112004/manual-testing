@@ -1,5 +1,8 @@
 package com.eagle.mas.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ConstantValue {
     public static  String KERNELAUTHMANAGER;
     public static  String appId;
@@ -30,5 +33,7 @@ public class ConstantValue {
     public static String loginUsername;
     public static String loginPassword;
     public static String caseAuthURL;
+
+    public static String[] priorities;
 
 }
